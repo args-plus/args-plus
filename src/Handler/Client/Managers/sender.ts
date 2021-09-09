@@ -1,4 +1,4 @@
-import { Channel, MessageEmbed, PartialDMChannel } from "discord.js";
+import { Channel, MessageEmbed, PartialDMChannel, Util } from "discord.js";
 import { Client } from "../..";
 import { commandRan, Config } from "../../Interaces";
 
@@ -31,12 +31,18 @@ export class MessageSender {
 
             try {
                 if (messagesOrEmbeds === "messages") {
+                    let splitMessage: string[];
+
                     if (!messageHeader) {
-                        return message.channel.send(content);
+                        splitMessage = Util.splitMessage(content);
                     } else {
-                        return message.channel.send(
+                        splitMessage = Util.splitMessage(
                             `**${messageHeader}**\n${content}`
                         );
+                    }
+
+                    for (const messageContent of splitMessage) {
+                        return message.channel.send(messageContent);
                     }
                 } else {
                     const embed = new MessageEmbed()
@@ -56,13 +62,18 @@ export class MessageSender {
         } else if (slashCommand !== null) {
             try {
                 if (messagesOrEmbeds === "messages") {
+                    let splitMessage: string[];
+
                     if (!messageHeader) {
-                        return slashCommand.reply({ content: content });
-                        // return message.channel.send(content);
+                        splitMessage = Util.splitMessage(content);
                     } else {
-                        return slashCommand.reply({
-                            content: `**${messageHeader}**\n${content}`,
-                        });
+                        splitMessage = Util.splitMessage(
+                            `**${messageHeader}**\n${content}`
+                        );
+                    }
+
+                    for (const messageContent of splitMessage) {
+                        return slashCommand.reply(messageContent);
                     }
                 } else {
                     const embed = new MessageEmbed()
@@ -104,12 +115,20 @@ export class MessageSender {
         if (message !== null) {
             try {
                 if (messagesOrEmbeds === "messages") {
+                    let splitMessage: string[];
+
                     if (!errorHeader) {
-                        return message.channel.send(`**Error:**\n${content}`);
+                        splitMessage = Util.splitMessage(
+                            `**Error:**\n${content}`
+                        );
                     } else {
-                        return message.channel.send(
+                        splitMessage = Util.splitMessage(
                             `***Error:* ${errorHeader}**\n${content}`
                         );
+                    }
+
+                    for (const messageContent of splitMessage) {
+                        return message.channel.send(messageContent);
                     }
                 } else {
                     const embed = new MessageEmbed()
@@ -129,12 +148,18 @@ export class MessageSender {
         } else if (slashCommand !== null) {
             try {
                 if (messagesOrEmbeds === "messages") {
+                    let splitMessage: string[];
+
                     if (!errorHeader) {
-                        return slashCommand.reply({ content: content });
+                        splitMessage = Util.splitMessage(content);
                     } else {
-                        return slashCommand.reply({
-                            content: `**${errorHeader}**\n${content}`,
-                        });
+                        splitMessage = Util.splitMessage(
+                            `**${errorHeader}**\n${content}`
+                        );
+                    }
+
+                    for (const messageContent of splitMessage) {
+                        return slashCommand.reply(messageContent);
                     }
                 } else {
                     const embed = new MessageEmbed()
