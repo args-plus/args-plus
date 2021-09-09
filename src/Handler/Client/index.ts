@@ -104,33 +104,6 @@ export class ExtendedClient extends Client {
     }
 
     public async init() {
-        if (this.config.botDevelopers !== "") {
-            let botDevelopers = [];
-
-            if (typeof this.config.botDevelopers === "string") {
-                botDevelopers = [this.config.botDevelopers];
-            } else {
-                botDevelopers = this.config.botDevelopers;
-            }
-
-            for (const userId of this.config.botDevelopers) {
-                const user = await this.users.fetch(userId).catch(() => {
-                    this.messageHandler.warn(
-                        `Unable to load developerUserId: "${userId}"`
-                    );
-                });
-                if (!user) {
-                    continue;
-                } else if (this.developers.indexOf(user) !== -1) {
-                    this.messageHandler.warn(
-                        `Developer ID "${userId}" is registered more than once!`
-                    );
-                    continue;
-                }
-                this.developers.push(user);
-            }
-        }
-
         for (const permission of this.config.defaultClientPermissions) {
             if (!this.utils.validPermissions.includes(permission)) {
                 return this.messageHandler.warn(
@@ -206,13 +179,40 @@ export class ExtendedClient extends Client {
         }
 
         const eventFiles = await this.utils.loadTSFiles(
-            path.join(__dirname, "..", "..", "Checks")
+            path.join(__dirname, "..", "..", "Events")
         );
         for (const file of eventFiles) {
             await this.loader.loadEvent(file);
         }
 
         await this.login(this.config.token);
+
+        if (this.config.botDevelopers !== "") {
+            let botDevelopers = [];
+
+            if (typeof this.config.botDevelopers === "string") {
+                botDevelopers = [this.config.botDevelopers];
+            } else {
+                botDevelopers = this.config.botDevelopers;
+            }
+
+            for (const userId of this.config.botDevelopers) {
+                const user = await this.users.fetch(userId).catch(() => {
+                    this.messageHandler.warn(
+                        `Unable to load developerUserId: "${userId}"`
+                    );
+                });
+                if (!user) {
+                    continue;
+                } else if (this.developers.indexOf(user) !== -1) {
+                    this.messageHandler.warn(
+                        `Developer ID "${userId}" is registered more than once!`
+                    );
+                    continue;
+                }
+                this.developers.push(user);
+            }
+        }
 
         await this.mongoHandler.connect();
         await this.configurationHandler.init();
