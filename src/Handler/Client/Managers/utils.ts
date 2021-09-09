@@ -1,12 +1,7 @@
 import path from "path";
 import fs from "fs";
 import ExtendedClient from "..";
-import {
-    ApplicationCommandData,
-    ApplicationCommandOptionData,
-    Message,
-} from "discord.js";
-import { Command } from "../Commands/command";
+import { Message, MessageEmbed, Util } from "discord.js";
 import { GuildPrefixModel } from "../../DefaultSchemas";
 
 export class Utils {
@@ -152,7 +147,46 @@ export class Utils {
     }
 
     public splitStringByNewLine(string: string) {
-        return string.split(/\r?\n/)
+        return string.split(/\r?\n/);
+    }
 
+    public splitMessageEmbedDescription(embed: MessageEmbed) {
+        if (embed.length < 6000 && embed.description.length < 4096) {
+            return [embed];
+        }
+
+        let returnEmbeds: MessageEmbed[] = [];
+
+        let embedFooter = embed.footer;
+
+        const splitEmbeds = Util.splitMessage(embed.description, {
+            maxLength: 4096,
+        });
+
+        let index = 0;
+        for (const embedDescription of splitEmbeds) {
+            if (index === 0) {
+                returnEmbeds.push(
+                    embed.setDescription(embedDescription).setFooter("")
+                );
+            } else if (index === splitEmbeds.length - 1) {
+                returnEmbeds.push(
+                    new MessageEmbed()
+                        .setColor(embed.color)
+                        .setDescription(embedDescription)
+                        .setFooter(embedFooter.text, embedFooter.iconURL)
+                );
+            } else {
+                returnEmbeds.push(
+                    new MessageEmbed()
+                        .setColor(embed.color)
+                        .setDescription(embedDescription)
+                );
+            }
+
+            index++;
+        }
+
+        return returnEmbeds;
     }
 }
