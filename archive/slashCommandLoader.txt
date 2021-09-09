@@ -1,0 +1,128 @@
+     let slashCommandsToRegister: ChatInputApplicationCommandData[] = [];
+
+        commandsToRegister.forEach((commandToRegister) => {
+            slashCommandsToRegister.push(commandToRegister);
+        });
+
+        for (const guildID of config.slashCommandGuilds) {
+            const findGuild = this.client.guilds.cache.get(guildID);
+            if (!findGuild) {
+                return false;
+            }
+            let registeredSlashCommandsArray: [number, ApplicationCommand][] =
+                [];
+            index = 0;
+            await (
+                await findGuild.commands.fetch()
+            ).forEach((registeredCommand) => {
+                registeredSlashCommandsArray.push([index, registeredCommand]);
+                index++;
+            });
+
+            let totalIndex = 0;
+            let zeros = 0;
+
+            for (const registeredSlashCommandKey of registeredSlashCommandsArray) {
+                const registeredSlashCommandIndex =
+                    registeredSlashCommandKey[0];
+                const registeredSlashCommand = registeredSlashCommandKey[1];
+                const slashCommandToRegisterKey = commandNamesArray.filter(
+                    (commandNameIndex) => {
+                        return (
+                            commandNameIndex[1] === registeredSlashCommand.name
+                        );
+                    }
+                );
+                if (!slashCommandToRegisterKey[0]) {
+                    await this.client.application.commands.delete(
+                        registeredSlashCommand,
+                        guildID
+                    );
+                    continue;
+                }
+
+                const slashCommandToRegisterIndex =
+                    slashCommandToRegisterKey[0][0];
+
+                let slashCommandToRegister: ChatInputApplicationCommandData;
+
+                if (slashCommandToRegisterIndex === 0) {
+                    zeros++;
+                }
+
+                if (zeros === 1) {
+                    slashCommandToRegister =
+                        commandsToRegister[slashCommandToRegisterIndex];
+                } else {
+                    slashCommandToRegister =
+                        commandsToRegister[
+                            slashCommandToRegisterIndex + totalIndex
+                        ];
+                }
+                totalIndex++;
+
+                let argsSame = true;
+                index = 0;
+
+                if (slashCommandToRegister.options.length !== 0) {
+                    for (const registeredArg of registeredSlashCommand.options) {
+                        const argToRegister =
+                            slashCommandToRegister.options[index];
+                        if (!argToRegister) {
+                            argsSame = false;
+                            break;
+                        }
+
+                        if (
+                            registeredArg.name !== argToRegister.name ||
+                            registeredArg.description !==
+                                argToRegister.description ||
+                            registeredArg.required !== argToRegister.required
+                        ) {
+                            argsSame = false;
+                        }
+                        index++;
+                    }
+                }
+
+                console.log({
+                    toRegisterName: slashCommandToRegister.name,
+                    registeredName: registeredSlashCommand.name,
+                    toRegisterDescription: slashCommandToRegister.description,
+                    registeredDescription: registeredSlashCommand.description,
+                    argsSame: argsSame,
+                });
+
+                if (
+                    slashCommandToRegister.name ===
+                        registeredSlashCommand.name &&
+                    slashCommandToRegister.description ===
+                        registeredSlashCommand.description &&
+                    argsSame
+                ) {
+                    console.log(slashCommandToRegister.name);
+                    if (zeros === 1) {
+                        console.log(
+                            slashCommandsToRegister[slashCommandToRegisterIndex]
+                                .name
+                        );
+                        slashCommandsToRegister.splice(
+                            slashCommandToRegisterIndex,
+                            1
+                        );
+                    } else if (zeros === 2) {
+                        slashCommandsToRegister.splice(
+                            slashCommandToRegisterIndex + totalIndex,
+                            1
+                        );
+                    }
+                    // commandsToRegister.splice(slashCommandToRegisterIndex, 1);
+                }
+            }
+            // console.log(slashCommandsToRegister);
+            // console.log(commandsToRegister);
+
+            // for (const command of commandsToRegister) {
+            //     this.client.application.commands.create(command, guildID);
+            // }
+        }
