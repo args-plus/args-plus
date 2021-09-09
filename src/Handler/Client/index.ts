@@ -235,7 +235,6 @@ export class ExtendedClient extends Client {
             await this.loader.loadExtension(file);
         }
         this.eventEmitter.emit("fullyLoaded");
-        console.log("HELLO BIDFU");
     }
 }
 
