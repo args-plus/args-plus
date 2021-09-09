@@ -1,4 +1,4 @@
-import { Channel, MessageEmbed, PartialDMChannel, Util } from "discord.js";
+import { MessageEmbed, Util } from "discord.js";
 import { Client } from "../..";
 import { commandRan, Config } from "../../Interaces";
 
@@ -49,10 +49,14 @@ export class MessageSender {
                         .setColor(this.config.mainColor)
                         .setDescription(content);
 
-                    if (!messageHeader) {
-                        return message.channel.send({ embeds: [embed] });
-                    } else {
+                    if (messageHeader) {
                         embed.setAuthor(messageHeader);
+                    }
+
+                    const splitEmbed =
+                        this.client.utils.splitMessageEmbedDescription(embed);
+
+                    for (const embed of splitEmbed) {
                         return message.channel.send({ embeds: [embed] });
                     }
                 }
@@ -80,10 +84,14 @@ export class MessageSender {
                         .setColor(this.config.mainColor)
                         .setDescription(content);
 
-                    if (!messageHeader) {
-                        return slashCommand.reply({ embeds: [embed] });
-                    } else {
+                    if (messageHeader) {
                         embed.setAuthor(messageHeader);
+                    }
+
+                    const splitEmbed =
+                        this.client.utils.splitMessageEmbedDescription(embed);
+
+                    for (const embed of splitEmbed) {
                         return slashCommand.reply({ embeds: [embed] });
                     }
                 }
@@ -135,10 +143,14 @@ export class MessageSender {
                         .setColor(this.config.errorColor)
                         .setDescription(content);
 
-                    if (!errorHeader) {
-                        return message.channel.send({ embeds: [embed] });
-                    } else {
+                    if (errorHeader) {
                         embed.setAuthor(errorHeader);
+                    }
+
+                    const splitEmbed =
+                        this.client.utils.splitMessageEmbedDescription(embed);
+
+                    for (const embed of splitEmbed) {
                         return message.channel.send({ embeds: [embed] });
                     }
                 }
@@ -166,10 +178,14 @@ export class MessageSender {
                         .setColor(this.config.errorColor)
                         .setDescription(content);
 
-                    if (!errorHeader) {
-                        return slashCommand.reply({ embeds: [embed] });
-                    } else {
+                    if (errorHeader) {
                         embed.setAuthor(errorHeader);
+                    }
+
+                    const splitEmbed =
+                        this.client.utils.splitMessageEmbedDescription(embed);
+
+                    for (const embed of splitEmbed) {
                         return slashCommand.reply({ embeds: [embed] });
                     }
                 }
