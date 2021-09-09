@@ -1,12 +1,10 @@
 import { GuildMember } from "discord.js";
-import { Client } from "../..";
 import { Command } from "../../Client/Commands/command";
-import { Permission } from "../../Interaces";
 
 export const command = new Command();
 command.name = "help";
-command.description = "Cool people onlasdy";
-command.overideLoadSlashCommand = false;
+command.description = "Displays the commands you can use";
+command.aliases = ["h"];
 command.run = async (args, commandRan, commandClass) => {
     const { message, slashCommand } = commandRan;
 
@@ -149,12 +147,13 @@ command.run = async (args, commandRan, commandClass) => {
                 prefixes.push("/");
             }
 
+            console.debug(command.aliases);
             currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
             }** ${
                 command.aliases.length !== 0
-                    ? `(${command.aliases}) - ${command.description}`
-                    : ""
+                    ? `(${command.aliases.join(", ")}) - ${command.description}`
+                    : `- ${command.description}`
             }\n`;
         }
         currentCategoryText += `\n`;
