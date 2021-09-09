@@ -1,7 +1,5 @@
 import { GuildMember } from "discord.js";
-import { Client } from "../..";
 import { Command } from "../../Client/Commands/command";
-import { Permission } from "../../Interaces";
 
 export const command = new Command();
 command.name = "help";
