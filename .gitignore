@@ -2,3 +2,4 @@ node_modules
 logs/client.log
 logs/developer.log
 archive
+.env
