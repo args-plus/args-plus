@@ -12,7 +12,6 @@
     "defaultUserPermissions:": [],
     "indentMessageContent": true,
     "botDevelopers": "",
-    "customConfigurationsDir": "",
     "defaultCommands": true,
     "defaultPingCommand": true,
     "defaultHelpCommand": true,
