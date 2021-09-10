@@ -9,7 +9,7 @@ command.aliases = ["latency"];
 command.run = async (args, commandRan, commandClass) => {
     const message = await commandClass.client.messageHandler.sendMessage(
         commandRan,
-        `**Checking...**`
+        `**Checking latency...**`
     );
 
     if (message) {
