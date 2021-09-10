@@ -198,12 +198,12 @@ export class MessageSender {
     public warn(
         warning: string,
         faliedToLoadFile?: boolean,
-        failesToLoadType?: string
+        failedToLoadType?: string
     ) {
         if (this.config.logWarnings === true) {
             if (faliedToLoadFile) {
                 return console.warn(
-                    `Warning: ${failesToLoadType.toLowerCase()} failed to load: ${warning}`
+                    `Warning: ${failedToLoadType.toLowerCase()} failed to load: ${warning}`
                 );
             } else {
                 return console.warn(`Warning: ${warning}`);
