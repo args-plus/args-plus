@@ -19,10 +19,7 @@ export class MessageSender {
             const newLineMessageContent = this.client.utils
                 .splitStringByNewLine(messageContent)
                 .join(`\n> `);
-            content = `> ${newLineMessageContent.substring(
-                0,
-                newLineMessageContent.length - 5
-            )}`;
+            content = `> ${newLineMessageContent}`;
         }
         if (message !== null) {
             if (!message.channel.isText()) {
@@ -115,10 +112,7 @@ export class MessageSender {
             const newLineMessageContent = this.client.utils
                 .splitStringByNewLine(messageContent)
                 .join(`\n> `);
-            content = `> ${newLineMessageContent.substring(
-                0,
-                newLineMessageContent.length - 5
-            )}`;
+            content = `> ${newLineMessageContent}`;
         }
         if (message !== null) {
             try {
