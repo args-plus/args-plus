@@ -147,7 +147,6 @@ command.run = async (args, commandRan, commandClass) => {
                 prefixes.push("/");
             }
 
-            console.debug(command.aliases);
             currentCategoryText += `${prefixes.join(" or ")}**${
                 command.name
             }** ${
