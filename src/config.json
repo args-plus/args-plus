@@ -12,7 +12,7 @@
     "defaultClientPermissions": [],
     "defaultUserPermissions": [],
     "indentMessageContent": true,
-    "botDevelopers": "",
+    "botDevelopers": [""],
     "defaultCommands": true,
     "defaultPingCommand": true,
     "defaultHelpCommand": true,

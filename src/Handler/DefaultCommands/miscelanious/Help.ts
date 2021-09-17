@@ -148,7 +148,7 @@ command.run = async (args, commandRan, commandClass) => {
             }
 
             console.debug(command.aliases);
-            currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
+            currentCategoryText += `${prefixes.join(" or ")}**${
                 command.name
             }** ${
                 command.aliases.length !== 0
