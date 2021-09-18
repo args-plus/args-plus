@@ -1,8 +1,9 @@
 import path from "path";
 import fs from "fs";
 import ExtendedClient from "..";
-import { Message, MessageEmbed, Util } from "discord.js";
+import { GuildMember, Message, MessageEmbed, Util } from "discord.js";
 import { GuildPrefixModel } from "../../DefaultSchemas";
+import { commandRan } from "../../Interaces";
 
 export class Utils {
     public client: ExtendedClient;
@@ -188,5 +189,36 @@ export class Utils {
         }
 
         return returnEmbeds;
+    }
+
+    public getGuild(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+        return message !== null ? message.guild : slashCommand.guild;
+    }
+    public getAuthor(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+        return message !== null ? message.author : slashCommand.user;
+    }
+    public getChannel(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+
+        return message !== null ? message.channel : slashCommand.channel;
+    }
+    public getMember(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+        const member = message !== null ? message.member : slashCommand.member;
+
+        if (!(member instanceof GuildMember)) {
+            return false;
+        }
+        return member;
+    }
+    public getContent(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+        return message !== null ? message.content : null;
+    }
+    public getMentions(commandRan: commandRan) {
+        const { message, slashCommand } = commandRan;
+        return message !== null ? message.mentions : null;
     }
 }
