@@ -7,13 +7,21 @@ command.description = "Shows the latency of the bot and the discord API";
 command.aliases = ["latency"];
 
 command.run = async (args, commandRan, commandClass) => {
+    if (commandRan.slashCommand) {
+        return commandClass.client.messageHandler.sendMessage(
+            commandRan,
+            `The discord API latency is \`\`${Math.round(
+                commandClass.client.ws.ping
+            )}\`\`ms`
+        );
+    }
+
     const message = await commandClass.client.messageHandler.sendMessage(
         commandRan,
         `**Checking...**`
     );
 
     if (message) {
-        // console.log(message.embeds);
         if (message.embeds.length === 0) {
             if (commandClass.client.config.indentMessageContent) {
                 message.edit(
