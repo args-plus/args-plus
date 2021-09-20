@@ -452,6 +452,9 @@ export class Command {
                             index,
                             args.length - index
                         );
+                        if (requiredArg.required && wantedArgs.length === 0) {
+                            return incorrectUsage();
+                        }
                         returnArgs.push({
                             name: requiredArg.name,
                             id: requiredArg.id,
