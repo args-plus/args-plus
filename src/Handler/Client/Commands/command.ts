@@ -51,7 +51,7 @@ export class Command {
     public clientChecks: string | string[];
     public userChecks: string | string[];
     public usage: string[];
-    public category: string;
+    public category: string | string[];
     public run: CommandRun;
 
     public async runCommand(commandRan: commandRan) {
@@ -533,7 +533,7 @@ export class Command {
                         });
                     } else if (requiredArg.type === "interger") {
                         const argNumber = parseInt(providedArg);
-                        if (isNaN(argNumber)) {
+                        if (isNaN(argNumber) && requiredArg.required) {
                             return incorrectUsage();
                         }
                         returnArgs.push({
@@ -545,7 +545,7 @@ export class Command {
                         });
                     } else if (requiredArg.type === "number") {
                         const argNumber = parseFloat(providedArg);
-                        if (isNaN(argNumber)) {
+                        if (isNaN(argNumber) && requiredArg.required) {
                             return incorrectUsage();
                         }
                         returnArgs.push({
