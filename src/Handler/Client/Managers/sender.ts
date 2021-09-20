@@ -1,4 +1,4 @@
-import { MessageEmbed, Util } from "discord.js";
+import { MessageEmbed, Util, Constants } from "discord.js";
 import { Client } from "../..";
 import { commandRan, Config } from "../../Interaces";
 
@@ -74,7 +74,17 @@ export class MessageSender {
                     }
 
                     for (const messageContent of splitMessage) {
-                        return slashCommand.reply(messageContent);
+                        return slashCommand
+                            .reply(messageContent)
+                            .catch((error) => {
+                                if (
+                                    error.code === "INTERACTION_ALREADY_REPLIED"
+                                ) {
+                                    slashCommand.followUp(messageContent);
+                                } else {
+                                    console.error(error);
+                                }
+                            });
                     }
                 } else {
                     const embed = new MessageEmbed()
@@ -89,21 +99,31 @@ export class MessageSender {
                         this.client.utils.splitMessageEmbedDescription(embed);
 
                     for (const embed of splitEmbed) {
-                        return slashCommand.reply({ embeds: [embed] });
+                        return slashCommand
+                            .reply({ embeds: [embed] })
+                            .catch((error) => {
+                                if (
+                                    error.code === "INTERACTION_ALREADY_REPLIED"
+                                ) {
+                                    slashCommand.followUp({ embeds: [embed] });
+                                } else {
+                                    console.error(error);
+                                }
+                            });
                     }
                 }
             } catch (error) {
-                console.log(error);
-                return false;
+                console.log("ONE");
+                console.log(typeof error);
             }
         }
     };
 
-    public sendError(
+    public sendError = (
         commandRan: commandRan,
         messageContent: string,
         errorHeader?: string
-    ) {
+    ) => {
         const { message, slashCommand } = commandRan;
         const messagesOrEmbeds = this.config.messagesOrEmbeds;
 
@@ -112,7 +132,10 @@ export class MessageSender {
             const newLineMessageContent = this.client.utils
                 .splitStringByNewLine(messageContent)
                 .join(`\n> `);
-            content = `> ${newLineMessageContent}`;
+            content = `> ${newLineMessageContent.substring(
+                0,
+                newLineMessageContent.length
+            )}`;
         }
         if (message !== null) {
             try {
@@ -165,7 +188,17 @@ export class MessageSender {
                     }
 
                     for (const messageContent of splitMessage) {
-                        return slashCommand.reply(messageContent);
+                        return slashCommand
+                            .reply(messageContent)
+                            .catch((error) => {
+                                if (
+                                    error.code === "INTERACTION_ALREADY_REPLIED"
+                                ) {
+                                    slashCommand.followUp(messageContent);
+                                } else {
+                                    console.error(error);
+                                }
+                            });
                     }
                 } else {
                     const embed = new MessageEmbed()
@@ -180,14 +213,24 @@ export class MessageSender {
                         this.client.utils.splitMessageEmbedDescription(embed);
 
                     for (const embed of splitEmbed) {
-                        return slashCommand.reply({ embeds: [embed] });
+                        return slashCommand
+                            .reply({ embeds: [embed] })
+                            .catch((error) => {
+                                if (
+                                    error.code === "INTERACTION_ALREADY_REPLIED"
+                                ) {
+                                    slashCommand.followUp({ embeds: [embed] });
+                                } else {
+                                    console.error(error);
+                                }
+                            });
                     }
                 }
             } catch {
                 return false;
             }
         }
-    }
+    };
 
     public warn(
         warning: string,

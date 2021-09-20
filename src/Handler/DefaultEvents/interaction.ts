@@ -6,7 +6,10 @@ event.name = "interactionCreate";
 event.run = async (client, interaction: Interaction) => {
     if (interaction.isCommand()) {
         const { command: cmd } = interaction;
-
+        if (!cmd) {
+            client.messageHandler.log("Reloading slash commands");
+            client.loader.registerSlashCommands();
+        }
         const command =
             client.commands.get(cmd.name) || client.aliases.get(cmd.name);
 

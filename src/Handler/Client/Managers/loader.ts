@@ -71,15 +71,22 @@ export class Loader {
 
         return config;
     }
-    public loadCommand(dir: string) {
-        const { command } = require(dir);
+    public loadCommand(dir: string | Command) {
+        let command: CommandClass;
 
-        if (!(command instanceof CommandClass)) {
-            return this.client.messageHandler.warn(
-                `Command file: "${dir}" is not a valid command!`,
-                true,
-                "COMMAND"
-            );
+        if (typeof dir === "string") {
+            const { command: requireCommand } = require(dir);
+            if (!(requireCommand instanceof Command)) {
+                return this.client.messageHandler.warn(
+                    `Command file: "${dir}" is not a valid command!`,
+                    true,
+                    "COMMAND"
+                );
+            }
+
+            command = requireCommand;
+        } else {
+            command = dir;
         }
 
         if (!command.name || !command.run) {
@@ -341,50 +348,108 @@ export class Loader {
             ? command.userChecks
             : "";
 
-        const commandPathArray = dir.split("/");
-        const commandCategory =
-            commandPathArray[commandPathArray.length - 2].toLowerCase();
-        if (!this.client.categories.has(commandCategory)) {
-            const commandCategoryPath = commandPathArray
-                .splice(0, commandPathArray.length - 1)
-                .join("/");
-            if (fs.existsSync(`${commandCategoryPath}/desc.txt`)) {
-                const readFile = fs.readFileSync(
-                    `${commandCategoryPath}/desc.txt`,
-                    "utf8"
-                );
-
-                if (readFile.length === 0) {
-                    this.client.messageHandler.warn(
-                        `Category: "${commandCategory}"'s description file has no description`,
-                        true,
-                        "CATEGORY"
+        if (typeof dir === "string") {
+            const commandPathArray = dir.split("/");
+            const commandCategory =
+                commandPathArray[commandPathArray.length - 2].toLowerCase();
+            if (!this.client.categories.has(commandCategory)) {
+                const commandCategoryPath = commandPathArray
+                    .splice(0, commandPathArray.length - 1)
+                    .join("/");
+                if (fs.existsSync(`${commandCategoryPath}/desc.txt`)) {
+                    const readFile = fs.readFileSync(
+                        `${commandCategoryPath}/desc.txt`,
+                        "utf8"
                     );
-                } else if (readFile.length > 300) {
-                    this.client.messageHandler.warn(
-                        `Category: "${commandCategory}"'s description file is too long!`,
-                        true,
-                        "CATEGORY"
+
+                    if (readFile.length === 0) {
+                        this.client.messageHandler.warn(
+                            `Category: "${commandCategory}"'s description file has no description`,
+                            true,
+                            "CATEGORY"
+                        );
+                    } else if (readFile.length > 300) {
+                        this.client.messageHandler.warn(
+                            `Category: "${commandCategory}"'s description file is too long!`,
+                            true,
+                            "CATEGORY"
+                        );
+                    } else {
+                        this.client.categories.set(commandCategory, readFile);
+                        this.client.messageHandler.log(
+                            `Load category description for category: "${commandCategory}" as: "${readFile}"`
+                        );
+                    }
+                }
+                commandConstructor.category = commandCategory;
+            }
+
+            if (this.client.commandCategories.has(commandCategory)) {
+                const currentCommands =
+                    this.client.commandCategories.get(commandCategory);
+                currentCommands.push(commandConstructor);
+                this.client.commandCategories.set(
+                    commandCategory,
+                    currentCommands
+                );
+            } else {
+                this.client.commandCategories.set(commandCategory, [
+                    commandConstructor,
+                ]);
+            }
+        } else {
+            if (typeof command.category === "string") {
+                const categoryName = command.category.toLowerCase();
+
+                let categoryDescription =
+                    this.client.categories.get(categoryName);
+
+                if (!categoryDescription) {
+                    categoryDescription = "Category has no description";
+                }
+
+                this.client.categories.set(categoryName, categoryDescription);
+
+                if (this.client.commandCategories.has(categoryName)) {
+                    const currentCommands =
+                        this.client.commandCategories.get(categoryName);
+
+                    currentCommands.push(commandConstructor);
+                    this.client.commandCategories.set(
+                        categoryName,
+                        currentCommands
                     );
                 } else {
-                    this.client.categories.set(commandCategory, readFile);
-                    this.client.messageHandler.log(
-                        `Load category description for category: "${commandCategory}" as: "${readFile}"`
+                    this.client.commandCategories.set(categoryName, [
+                        commandConstructor,
+                    ]);
+                }
+            } else {
+                const categoryName = command.category[0].toLowerCase();
+                const categoryDescription = command.category[1];
+
+                if (categoryName && categoryDescription) {
+                    this.client.categories.set(
+                        categoryName,
+                        categoryDescription
                     );
                 }
-            }
-            commandConstructor.category = commandCategory;
-        }
 
-        if (this.client.commandCategories.has(commandCategory)) {
-            const currentCommands =
-                this.client.commandCategories.get(commandCategory);
-            currentCommands.push(commandConstructor);
-            this.client.commandCategories.set(commandCategory, currentCommands);
-        } else {
-            this.client.commandCategories.set(commandCategory, [
-                commandConstructor,
-            ]);
+                if (this.client.commandCategories.has(categoryName)) {
+                    const currentCommands =
+                        this.client.commandCategories.get(categoryName);
+
+                    currentCommands.push(commandConstructor);
+                    this.client.commandCategories.set(
+                        categoryName,
+                        currentCommands
+                    );
+                } else {
+                    this.client.commandCategories.set(categoryName, [
+                        commandConstructor,
+                    ]);
+                }
+            }
         }
 
         this.client.messageHandler.log(`Loaded command: "${command.name}"`);

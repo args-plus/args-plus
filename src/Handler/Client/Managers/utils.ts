@@ -120,25 +120,35 @@ export class Utils {
                 console.error(error);
             });
 
-            if (findGuildPrefix) {
+            if (
+                findGuildPrefix &&
+                message.content.startsWith(findGuildPrefix.guildPrefix)
+            ) {
                 this.client.guildPrefixes.set(
                     message.guild.id,
                     findGuildPrefix.guildPrefix
                 );
                 prefixUsed = findGuildPrefix.guildPrefix;
             } else {
-                prefixUsed = globalPrefix;
+                if (message.content.startsWith(globalPrefix)) {
+                    prefixUsed = globalPrefix;
+                }
             }
         } else if (
             message.guild &&
             this.client.guildPrefixes.has(message.guild.id)
         ) {
             const getPrefix = this.client.guildPrefixes.get(message.guild.id);
-            prefixUsed = getPrefix;
+            if (message.content.startsWith(getPrefix)) {
+                prefixUsed = getPrefix;
+            }
         } else if (message.content.startsWith(globalPrefix)) {
             prefixUsed = globalPrefix;
         }
 
+        if (!prefixUsed) {
+            return false;
+        }
         const args = message.content
             .slice(prefixUsed.length)
             .trim()
