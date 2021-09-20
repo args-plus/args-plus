@@ -219,8 +219,6 @@ export class ExtendedClient extends Client {
 
         await this.commandManager.init();
 
-        await this.loader.registerSlashCommands();
-
         const extensionFiles = await this.utils.loadTSFiles(
             path.join(__dirname, "..", "..", "Extensions")
         );
@@ -234,6 +232,8 @@ export class ExtendedClient extends Client {
         for (const file of defaultExtensionFiles) {
             await this.loader.loadExtension(file);
         }
+        await this.loader.registerSlashCommands();
+
         this.eventEmitter.emit("fullyLoaded");
     }
 }
