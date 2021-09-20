@@ -147,7 +147,7 @@ command.run = async (args, commandRan, commandClass) => {
                 prefixes.push("/");
             }
 
-            currentCategoryText += `${prefixes.join(" or ")}**${
+            currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
             }** ${
                 command.aliases.length !== 0
@@ -161,7 +161,7 @@ command.run = async (args, commandRan, commandClass) => {
 
     client.messageHandler.sendMessage(
         commandRan,
-        helpText,
+        helpText.substring(0, helpText.length - 2),
         `Showing commands you can use for ${client.user.tag}\n\n`
     );
 };
