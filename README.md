@@ -13,7 +13,7 @@ Args plus has the ability to do many things, such as:
 -   Intergrated discord.js V13 and typescript
 -   Intergrated MongoDB with mongoose
 -   wide settings of customisibility (for example you can get the bot to send embeds or regular text messages by default)
--   Reduces repeititie code with the argument or "args" system. This is because you can look for things like channel mentions (which will look for mention or channel ID) and things like that
+-   Reduces repetitive code with the argument or "args" system. This is because you can look for things like channel mentions (which will look for mention or channel ID) and things like that
 -   The abilitiy to load "configurations", which are settings stored on mongoDB, and cached on startup
 -   Great built in commands
 
