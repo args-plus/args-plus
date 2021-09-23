@@ -31,6 +31,9 @@ export class CheckManager {
         }
 
         const check = await findCheck.run(checkOptions, options);
+
+        this.client.eventEmitter.emit("checkRan", findCheck);
+
         return check;
     }
 }
