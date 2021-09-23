@@ -41,8 +41,7 @@ export class ExtendedClient extends Client {
     public connection: typeof mongoose;
     public eventEmitter = new events.EventEmitter();
 
-    constructor() {
-        super({ intents: 32767, partials: ["CHANNEL"] });
+    public async init() {
         this.loader.client = this;
 
         const config = this.loader.loadSettings();
@@ -101,9 +100,7 @@ export class ExtendedClient extends Client {
         this.utils.client = this;
 
         this.checkManager.client = this;
-    }
 
-    public async init() {
         for (const permission of this.config.defaultClientPermissions) {
             if (!this.utils.validPermissions.includes(permission)) {
                 return this.messageHandler.warn(
