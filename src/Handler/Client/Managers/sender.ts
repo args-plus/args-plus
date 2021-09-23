@@ -1,4 +1,4 @@
-import { MessageEmbed, Util, Constants } from "discord.js";
+import { MessageEmbed, Util, Constants, User } from "discord.js";
 import { Client } from "../..";
 import { commandRan, Config } from "../../Interaces";
 
@@ -229,6 +229,110 @@ export class MessageSender {
             } catch {
                 return false;
             }
+        }
+    };
+
+    public sendDm = (
+        user: User,
+        messageContent: string,
+        messageHeader?: string
+    ) => {
+        const messagesOrEmbeds = this.config.messagesOrEmbeds;
+
+        let content = messageContent;
+        if (this.config.indentMessageContent) {
+            const newLineMessageContent = this.client.utils
+                .splitStringByNewLine(messageContent)
+                .join(`\n> `);
+            content = `> ${newLineMessageContent}`;
+        }
+
+        try {
+            if (messagesOrEmbeds === "messages") {
+                let splitMessage: string[];
+
+                if (!messageHeader) {
+                    splitMessage = Util.splitMessage(content);
+                } else {
+                    splitMessage = Util.splitMessage(
+                        `**${messageHeader}**\n${content}`
+                    );
+                }
+
+                for (const messageContent of splitMessage) {
+                    return user.send(messageContent);
+                }
+            } else {
+                const embed = new MessageEmbed()
+                    .setColor(this.config.mainColor)
+                    .setDescription(content);
+
+                if (messageHeader) {
+                    embed.setAuthor(messageHeader);
+                }
+
+                const splitEmbed =
+                    this.client.utils.splitMessageEmbedDescription(embed);
+
+                for (const embed of splitEmbed) {
+                    return user.send({ embeds: [embed] });
+                }
+            }
+        } catch {
+            return false;
+        }
+    };
+
+    public sendErrorDm = (
+        user: User,
+        messageContent: string,
+        errorHeader?: string
+    ) => {
+        const messagesOrEmbeds = this.config.messagesOrEmbeds;
+
+        let content = messageContent;
+        if (this.config.indentMessageContent) {
+            const newLineMessageContent = this.client.utils
+                .splitStringByNewLine(messageContent)
+                .join(`\n> `);
+            content = `> ${newLineMessageContent.substring(
+                0,
+                newLineMessageContent.length
+            )}`;
+        }
+        try {
+            if (messagesOrEmbeds === "messages") {
+                let splitMessage: string[];
+
+                if (!errorHeader) {
+                    splitMessage = Util.splitMessage(`**Error:**\n${content}`);
+                } else {
+                    splitMessage = Util.splitMessage(
+                        `***Error:* ${errorHeader}**\n${content}`
+                    );
+                }
+
+                for (const messageContent of splitMessage) {
+                    return user.send(messageContent);
+                }
+            } else {
+                const embed = new MessageEmbed()
+                    .setColor(this.config.errorColor)
+                    .setDescription(content);
+
+                if (errorHeader) {
+                    embed.setAuthor(errorHeader);
+                }
+
+                const splitEmbed =
+                    this.client.utils.splitMessageEmbedDescription(embed);
+
+                for (const embed of splitEmbed) {
+                    return user.send({ embeds: [embed] });
+                }
+            }
+        } catch {
+            return false;
         }
     };
 
