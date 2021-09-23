@@ -7,17 +7,12 @@ command.description = "Displays the commands you can use";
 command.aliases = ["h"];
 command.run = async (args, commandRan, commandClass) => {
     const { message, slashCommand } = commandRan;
-
     let guild = message !== null ? message.guild : slashCommand.guild;
     let author = message !== null ? message.author : slashCommand.user;
     let channel = message !== null ? message.channel : slashCommand.channel;
-    let member = message !== null ? message.member : slashCommand.member;
+    let member = commandClass.client.utils.getMember(commandRan);
     let content = message !== null ? message.content : null;
     let mentions = message !== null ? message.mentions : null;
-
-    if (!(member instanceof GuildMember)) {
-        return false;
-    }
 
     const { client } = commandClass;
 
@@ -41,11 +36,9 @@ command.run = async (args, commandRan, commandClass) => {
             ) {
                 continue;
             }
-
             if (command.guildOnly && !guild) {
                 continue;
             }
-
             if (
                 commandClass.certainChannelsOnly.length !== 0 &&
                 !commandClass.certainChannelsOnly.includes(channel.id)
@@ -59,7 +52,7 @@ command.run = async (args, commandRan, commandClass) => {
             ) {
                 continue;
             }
-            if (commandClass.certainRolesOnly.length !== 0 && guild) {
+            if (commandClass.certainRolesOnly.length !== 0 && guild && member) {
                 const rolesArray = [...member.roles.cache].map(
                     ([name]) => name
                 );
@@ -77,6 +70,7 @@ command.run = async (args, commandRan, commandClass) => {
             }
 
             if (
+                guild &&
                 client.config.blacklistedGuilds[guild.id] &&
                 !command.overideGuildBlacklist
             ) {
@@ -122,7 +116,10 @@ command.run = async (args, commandRan, commandClass) => {
                     continue;
                 }
             }
-            if (currentCategoryText.length === 0) {
+            if (
+                currentCategoryText.length === 0 &&
+                client.config.helpCommandCategoryDescription
+            ) {
                 const categoryDescription = client.categories.get(categoryName);
                 if (categoryDescription) {
                     currentCategoryText = `__${categoryDescription}__\n`;
@@ -133,16 +130,17 @@ command.run = async (args, commandRan, commandClass) => {
 
             let prefixes = [];
 
-            if (client.guildPrefixes.has(guild.id)) {
+            if (guild && client.guildPrefixes.has(guild.id)) {
                 prefixes.push(client.guildPrefixes.get(guild.id));
             } else {
                 prefixes.push(client.globalPrefix);
             }
 
             if (
-                (!command.overideLoadSlashCommand &&
+                guild &&
+                ((!command.overideLoadSlashCommand &&
                     client.config.loadGuildSlashCommands) ||
-                client.config.loadGlobalSlashCommands
+                    client.config.loadGlobalSlashCommands)
             ) {
                 prefixes.push("/");
             }
@@ -150,7 +148,7 @@ command.run = async (args, commandRan, commandClass) => {
             currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
             }** ${
-                command.aliases.length !== 0
+                command.aliases.length !== 0 && client.config.helpCommandAliases
                     ? `(${command.aliases.join(", ")}) - ${command.description}`
                     : `- ${command.description}`
             }\n`;
