@@ -19,6 +19,7 @@ import {
     TimeEnding,
 } from "../../Interaces";
 import path from "path";
+import { Check } from "./checks";
 
 export class Command {
     public client: Client;
@@ -67,10 +68,9 @@ export class Command {
         let content = message !== null ? message.content : null;
         let mentions = message !== null ? message.mentions : null;
 
-        if (!(member instanceof GuildMember)) {
+        if (guild && !(member instanceof GuildMember)) {
             return false;
         }
-
         const {
             config,
             messageHandler: MessageHandler,
@@ -169,7 +169,10 @@ export class Command {
                 this.certainRolesOnly[this.certainRolesOnly];
             }
 
-            const rolesArray = [...member.roles.cache].map(([name]) => name);
+            let rolesArray: string[];
+            if (member instanceof GuildMember) {
+                rolesArray = [...member.roles.cache].map(([name]) => name);
+            }
 
             let hasValidRole = false;
             for (const role of rolesArray) {
@@ -221,7 +224,10 @@ export class Command {
             !this.overideDefaultUserPermissions
         ) {
             for (const permission of config.defaultUserPermissions) {
-                if (!member.permissions.has(permission)) {
+                if (
+                    member instanceof GuildMember &&
+                    !member.permissions.has(permission)
+                ) {
                     return MessageHandler.sendError(
                         commandRan,
                         `You are missing the \`\`${permission
@@ -268,7 +274,10 @@ export class Command {
             }
 
             for (const permission of this.userPermissions) {
-                if (!member.permissions.has(permission)) {
+                if (
+                    member instanceof GuildMember &&
+                    !member.permissions.has(permission)
+                ) {
                     return MessageHandler.sendError(
                         commandRan,
                         `You are missing the \`\`${permission
@@ -283,27 +292,26 @@ export class Command {
             }
         }
 
-        const runCheck = async (checkID: string) => {
-            const findCheck = clientChecks.get(checkID);
-
-            if (!findCheck) {
-                MessageHandler.warn(`Couldn't find check with ID: ${checkID}`);
-                return;
-            }
-
-            let doCheck = false;
+        const runCheck = async (checkID: string, type: "client" | "user") => {
+            let doCheck: boolean | void = false;
 
             if (member instanceof GuildMember) {
-                doCheck = findCheck.run({
-                    member: member,
-                    guild: guild,
-                    user: author,
-                    channel: channel,
-                });
+                doCheck = await this.client.checkManager.runCheck(
+                    checkID,
+                    {
+                        user: author,
+                        member: member,
+                        channel: channel,
+                        guild: guild,
+                    },
+                    type
+                );
             }
 
-            if (doCheck === false) {
+            if (!doCheck) {
                 return false;
+            } else {
+                return true;
             }
         };
 
@@ -312,7 +320,7 @@ export class Command {
             !this.overideDefaultClientChecks
         ) {
             for (const check of config.defaultClientChecks) {
-                const doCheck = await runCheck(check);
+                const doCheck = await runCheck(check, "client");
 
                 if (doCheck === false) {
                     return;
@@ -322,7 +330,7 @@ export class Command {
 
         if (config.defaultUserChecks !== [] && !this.overideDefaultUserChecks) {
             for (const check of config.defaultUserChecks) {
-                const doCheck = await runCheck(check);
+                const doCheck = await runCheck(check, "user");
                 if (doCheck === false) {
                     return;
                 }
@@ -335,7 +343,7 @@ export class Command {
             }
 
             for (const check of this.clientChecks) {
-                const doCheck = await runCheck(check);
+                const doCheck = await runCheck(check, "client");
                 if (doCheck === false) {
                     return;
                 }
@@ -348,7 +356,7 @@ export class Command {
             }
 
             for (const check of this.userChecks) {
-                const doCheck = await runCheck(check);
+                const doCheck = await runCheck(check, "user");
                 if (doCheck === false) {
                     return;
                 }
@@ -452,6 +460,9 @@ export class Command {
                             index,
                             args.length - index
                         );
+                        if (requiredArg.required && wantedArgs.length === 0) {
+                            return incorrectUsage();
+                        }
                         returnArgs.push({
                             name: requiredArg.name,
                             id: requiredArg.id,

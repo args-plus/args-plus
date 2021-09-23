@@ -108,51 +108,54 @@ export class Utils {
 
         if (message.author.bot) return false;
 
+        let args = message.content.trim().split(/ +/g);
+
         if (message.content.startsWith(`<@!${this.client.user.id}>`)) {
             prefixUsed = `<@!${this.client.user.id}>`;
-        } else if (
-            message.guild &&
-            !this.client.guildPrefixes.has(message.guild.id)
-        ) {
-            const findGuildPrefix = await GuildPrefixModel.findById(
-                message.guild.id
-            ).catch((error) => {
-                console.error(error);
-            });
-
-            if (
-                findGuildPrefix &&
-                message.content.startsWith(findGuildPrefix.guildPrefix)
-            ) {
-                this.client.guildPrefixes.set(
-                    message.guild.id,
-                    findGuildPrefix.guildPrefix
+        } else if (message.guild) {
+            if (this.client.guildPrefixes.has(message.guild.id)) {
+                const getPrefix = this.client.guildPrefixes.get(
+                    message.guild.id
                 );
-                prefixUsed = findGuildPrefix.guildPrefix;
+                if (message.content.startsWith(getPrefix)) {
+                    prefixUsed = getPrefix;
+                }
             } else {
-                if (message.content.startsWith(globalPrefix)) {
+                const findGuildPrefix = await GuildPrefixModel.findById(
+                    message.guild.id
+                ).catch((error) => {
+                    console.error(error);
+                });
+
+                if (
+                    findGuildPrefix &&
+                    message.content.startsWith(findGuildPrefix.guildPrefix)
+                ) {
+                    this.client.guildPrefixes.set(
+                        message.guild.id,
+                        findGuildPrefix.guildPrefix
+                    );
+                    prefixUsed = findGuildPrefix.guildPrefix;
+                } else if (message.content.startsWith(globalPrefix)) {
                     prefixUsed = globalPrefix;
                 }
             }
-        } else if (
-            message.guild &&
-            this.client.guildPrefixes.has(message.guild.id)
-        ) {
-            const getPrefix = this.client.guildPrefixes.get(message.guild.id);
-            if (message.content.startsWith(getPrefix)) {
-                prefixUsed = getPrefix;
-            }
         } else if (message.content.startsWith(globalPrefix)) {
             prefixUsed = globalPrefix;
+        } else if (!message.guild) {
+            if (
+                this.client.commands.has(args[0].toLowerCase()) ||
+                this.client.aliases.has(args[0].toLowerCase())
+            ) {
+                prefixUsed = "";
+            }
         }
 
-        if (!prefixUsed) {
+        if (!prefixUsed && prefixUsed !== "") {
             return false;
         }
-        const args = message.content
-            .slice(prefixUsed.length)
-            .trim()
-            .split(/ +/g);
+
+        args = message.content.slice(prefixUsed.length).trim().split(/ +/g);
 
         return args;
     }
