@@ -164,15 +164,17 @@ export class Command {
             }
         }
 
-        if (this.certainRolesOnly !== "" && guild) {
+        if (
+            this.certainRolesOnly !== "" &&
+            guild &&
+            member instanceof GuildMember
+        ) {
             if (typeof this.certainRolesOnly === "string") {
                 this.certainRolesOnly[this.certainRolesOnly];
             }
 
             let rolesArray: string[];
-            if (member instanceof GuildMember) {
-                rolesArray = [...member.roles.cache].map(([name]) => name);
-            }
+            rolesArray = [...member.roles.cache].map(([name]) => name);
 
             let hasValidRole = false;
             for (const role of rolesArray) {
@@ -181,7 +183,7 @@ export class Command {
                 }
             }
 
-            if (!hasValidRole) {
+            if (!hasValidRole && !member.permissions.has("ADMINISTRATOR")) {
                 return MessageHandler.sendError(
                     commandRan,
                     `You are missing the required roles`,
@@ -276,7 +278,8 @@ export class Command {
             for (const permission of this.userPermissions) {
                 if (
                     member instanceof GuildMember &&
-                    !member.permissions.has(permission)
+                    !member.permissions.has(permission) &&
+                    !member.permissions.has("ADMINISTRATOR")
                 ) {
                     return MessageHandler.sendError(
                         commandRan,

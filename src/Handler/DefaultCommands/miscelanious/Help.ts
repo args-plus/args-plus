@@ -1,4 +1,4 @@
-import { GuildMember } from "discord.js";
+import { Guild, GuildMember } from "discord.js";
 import { Command } from "../../Client/Commands/command";
 
 export const command = new Command();
@@ -7,14 +7,12 @@ command.description = "Displays the commands you can use";
 command.aliases = ["h"];
 command.run = async (args, commandRan, commandClass) => {
     const { message, slashCommand } = commandRan;
-    let guild = message !== null ? message.guild : slashCommand.guild;
-    let author = message !== null ? message.author : slashCommand.user;
-    let channel = message !== null ? message.channel : slashCommand.channel;
-    let member = commandClass.client.utils.getMember(commandRan);
-    let content = message !== null ? message.content : null;
-    let mentions = message !== null ? message.mentions : null;
-
     const { client } = commandClass;
+
+    let guild = client.utils.getGuild(commandRan);
+    let author = client.utils.getAuthor(commandRan);
+    let channel = client.utils.getChannel(commandRan);
+    let member = client.utils.getMember(commandRan);
 
     let helpText = "";
     let currentCategoryText = "";
@@ -64,7 +62,7 @@ command.run = async (args, commandRan, commandClass) => {
                     }
                 }
 
-                if (!hasValidRole) {
+                if (!hasValidRole && !member.permissions.has("ADMINISTRATOR")) {
                     continue;
                 }
             }
@@ -99,20 +97,23 @@ command.run = async (args, commandRan, commandClass) => {
                         }
                     }
                 }
-                if (commandClass.userPermissions.length !== 0) {
+                if (
+                    commandClass.userPermissions.length !== 0 &&
+                    member instanceof GuildMember
+                ) {
                     if (typeof commandClass.userPermissions !== "string") {
                         for (const permission of commandClass.userPermissions) {
-                            if (
-                                !channel
-                                    .permissionsFor(guild.me)
-                                    .has(permission)
-                            ) {
+                            if (!member.permissions.has(permission)) {
                                 hasPermisions = false;
                             }
                         }
                     }
                 }
-                if (!hasPermisions) {
+                if (
+                    !hasPermisions &&
+                    member instanceof GuildMember &&
+                    !member.permissions.has("ADMINISTRATOR")
+                ) {
                     continue;
                 }
             }
@@ -122,9 +123,9 @@ command.run = async (args, commandRan, commandClass) => {
             ) {
                 const categoryDescription = client.categories.get(categoryName);
                 if (categoryDescription) {
-                    currentCategoryText = `__${categoryDescription}__\n`;
+                    currentCategoryText = `**${categoryName}:** __${categoryDescription}__\n`;
                 } else {
-                    currentCategoryText += `__Category has no description__\n`;
+                    currentCategoryText += `**${categoryName}:** __Category has no description__\n`;
                 }
             }
 
