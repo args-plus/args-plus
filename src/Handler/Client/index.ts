@@ -120,15 +120,13 @@ export class ExtendedClient extends Client {
         this.loader.client = this;
 
         const defaultChecksDir = path.join(__dirname, "..", "DefaultChecks");
-        const defaultChecksFiles = await this.utils.loadTSFiles(
-            defaultChecksDir
-        );
+        const defaultChecksFiles = await this.utils.loadFiles(defaultChecksDir);
 
         for (const checkDir of defaultChecksFiles) {
             await this.loader.loadCheck(checkDir);
         }
 
-        const checkFiles = await this.utils.loadTSFiles(
+        const checkFiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "..", "Checks")
         );
         for (const checkFile of checkFiles) {
@@ -143,7 +141,7 @@ export class ExtendedClient extends Client {
                 "..",
                 "DefaultCommands"
             );
-            const defaultCommandFiles = await this.utils.loadTSFiles(
+            const defaultCommandFiles = await this.utils.loadFiles(
                 defaultCommandsPath
             );
 
@@ -160,14 +158,14 @@ export class ExtendedClient extends Client {
             }
         }
 
-        const commandFiles = await this.utils.loadTSFiles(
+        const commandFiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "..", "Commands")
         );
         for (const file of commandFiles) {
             await this.loader.loadCommand(file);
         }
 
-        const defaultEventfiles = await this.utils.loadTSFiles(
+        const defaultEventfiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "DefaultEvents")
         );
 
@@ -175,7 +173,7 @@ export class ExtendedClient extends Client {
             await this.loader.loadEvent(eventDir);
         }
 
-        const eventFiles = await this.utils.loadTSFiles(
+        const eventFiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "..", "Events")
         );
         for (const file of eventFiles) {
@@ -216,14 +214,14 @@ export class ExtendedClient extends Client {
 
         await this.commandManager.init();
 
-        const extensionFiles = await this.utils.loadTSFiles(
+        const extensionFiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "..", "Extensions")
         );
         for (const file of extensionFiles) {
             await this.loader.loadExtension(file);
         }
 
-        const defaultExtensionFiles = await this.utils.loadTSFiles(
+        const defaultExtensionFiles = await this.utils.loadFiles(
             path.join(__dirname, "..", "DefaultExtensions")
         );
         for (const file of defaultExtensionFiles) {

@@ -2,7 +2,7 @@ import ExtendedClient from "..";
 
 export class CommandManager {
     public client: ExtendedClient;
-    private disabledCommandsDir = require("../../../disabledCommands.json");
+    private disabledCommandsDir = require("../../../../disabledCommands.json");
 
     public async init() {
         if (!this.client.cachedConfigurations.get("DISABLED_COMMANDS")) {

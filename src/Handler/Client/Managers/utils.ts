@@ -47,7 +47,18 @@ export class Utils {
         "USE_EXTERNAL_STICKERS",
     ];
 
-    public async loadTSFiles(parentDir: string) {
+    private isFile(name: string): boolean {
+        if (
+            (name.endsWith(".ts") && !name.endsWith(".d.ts")) ||
+            (name.endsWith(".js") && !name.endsWith(".map.js"))
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public async loadFiles(parentDir: string) {
         let filePaths: string[] = [];
         const readCommands = async (dir) => {
             let files = fs.readdirSync(dir);
@@ -56,8 +67,10 @@ export class Utils {
                 if (stat.isDirectory()) {
                     readCommands(path.join(dir, file));
                 } else {
-                    const commandDir = path.join(dir, file);
-                    await filePaths.push(commandDir);
+                    if (this.isFile(file)) {
+                        const commandDir = path.join(dir, file);
+                        await filePaths.push(commandDir);
+                    }
                 }
             }
         };
