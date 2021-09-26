@@ -4,7 +4,9 @@
     "description": "",
     "main": "src/index.ts",
     "scripts": {
-        "start": "ts-node-dev --respawn --transpile-only --poll ./src/index.ts"
+        "develop": "ts-node-dev --respawn --transpile-only --poll ./src/index.ts",
+        "build": "tsc",
+        "start": "node dist/index.js"
     },
     "keywords": [],
     "author": "",
@@ -18,7 +20,6 @@
     "dependencies": {
         "discord.js": "^13.1.0",
         "dotenv": "^10.0.0",
-        "inspirational-quotes": "^1.0.8",
         "log4js": "^6.3.0",
         "mongoose": "^5.13.8"
     }

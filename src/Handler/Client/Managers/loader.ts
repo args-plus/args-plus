@@ -19,7 +19,7 @@ export class Loader {
     public client: ExtendedClient;
 
     public loadSettings(): false | Config {
-        dotEnv.config({ path: path.join(__dirname, "..", "..", "..", ".env") });
+        dotEnv.config();
 
         if (
             !process.env.token ||

@@ -19,7 +19,6 @@
     "defaultGuildPrefixCommand": true,
     "defaultGlobalPrefixCommand": false,
     "defaultBotInfoCommand": true,
-    "defaultInspireCommand": true,
     "helpCommandCategoryDescription": true,
     "helpCommandAliases": true,
     "blacklistedGuilds": {
