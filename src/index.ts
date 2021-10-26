@@ -1,6 +1,8 @@
 import { Client } from "./Handler";
 
-// Feel free to customise intents
-const client = new Client({ intents: 32767, partials: ["CHANNEL"] });
+const client = new Client({
+    intents: ["GUILDS", "GUILD_MESSAGES", "GUILD_MEMBERS", "DIRECT_MESSAGES"],
+    partials: ["CHANNEL"],
+});
 
 client.init();

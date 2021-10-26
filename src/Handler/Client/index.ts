@@ -1,235 +1,137 @@
-import { Client, Collection, MessageActionRow, User } from "discord.js";
+import { Client, ClientOptions, Collection } from "discord.js";
+import { Utils } from "../Utils";
+import {
+    Command,
+    PostCommandFunction,
+    PreCommandFunction,
+    CommandManager
+} from "../Commands";
+import { Event } from "../Events";
+import { ItemLoader } from "./ClientLoader";
+import { Console } from "./Console";
+import { ClientConfig } from "./config";
+import { Check, CheckManger } from "../Checks";
+import { Configuration } from "../Defaults/Schemas";
+import { MongoManager } from "./MongoHandler";
+import { ConfigurationManager } from "./Configurations";
+import { Extension } from "../Extensions";
 import mongoose from "mongoose";
-import path from "path";
-import { Config, Cooldown } from "../Interaces";
-import { Loader } from "./Managers/loader";
-import { MessageSender } from "./Managers/sender";
-import { Command } from "./Commands/command";
-import { Check } from "./Commands/checks";
-import { Utils } from "./Managers/utils";
-import { Event } from "./Events/event";
-import log4js from "log4js";
-import { MongoHandler } from "./Managers/mongo";
-import { ConfigurationsHandler } from "./Managers/configurations";
-import { Configuration } from "../DefaultSchemas/configurations";
-import { CommandManager } from "./Managers/command";
-import { CheckManager } from "./Managers/checks";
-import events from "events";
+
+export { ClientConfig } from "./config";
 
 export class ExtendedClient extends Client {
-    public commands: Collection<string, Command> = new Collection();
-    public events: Collection<string, Event> = new Collection();
-    public CommandsCooldowns: Collection<string, Cooldown> = new Collection();
-    public aliases: Collection<string, Command> = new Collection();
+    public config: ClientConfig;
+
+    public utils = new Utils(this);
+    public items = new ItemLoader(this);
+    public console: Console = new Console(this);
+    public checks = new CheckManger(this);
+    public commandManager = new CommandManager(this);
+    public mongo = new MongoManager(this);
+    public configurations = new ConfigurationManager(this);
+
+    public connection: typeof mongoose = mongoose;
+    public connectedToMongo: boolean = false;
+
     public clientChecks: Collection<string, Check> = new Collection();
     public userChecks: Collection<string, Check> = new Collection();
-    public guildPrefixes: Collection<string, string> = new Collection();
+
+    public commands: Collection<string, Command> = new Collection();
+    public aliases: Collection<string, Command> = new Collection();
     public categories: Collection<string, string> = new Collection();
     public commandCategories: Collection<string, Command[]> = new Collection();
+    public emptyCategories: Command[] = [];
+    public events: Event[] = [];
     public cachedConfigurations: Collection<string, Configuration> =
         new Collection();
-    public config: Config;
-    public messageHandler = new MessageSender();
-    public mongoHandler = new MongoHandler();
-    public configurationHandler = new ConfigurationsHandler();
-    public commandManager = new CommandManager();
-    public checkManager = new CheckManager();
-    public utils = new Utils();
-    public loader = new Loader();
-    public developers: User[] = [];
-    public globalPrefix: string;
-    public connection: typeof mongoose;
-    public eventEmitter = new events.EventEmitter();
+    public cachedGuildPrefixes: Collection<string, string> = new Collection();
+    public preCommandFunctions: Collection<string, PreCommandFunction> =
+        new Collection();
+    public postCommandFunctions: Collection<string, PostCommandFunction> =
+        new Collection();
 
-    public async init() {
-        this.loader.client = this;
+    public blacklistedGuildIds: string[] = [];
+    public blacklistedUserIds: string[] = [];
 
-        const config = this.loader.loadSettings();
+    public extensions: Extension[] = [];
 
-        if (config === false) {
+    constructor(options: ClientOptions) {
+        super(options);
+
+        const config = this.items.loadSettings();
+
+        if (config == null) {
             throw new Error(
-                'config.json is missing properties "prefix", or .env is missing properties "token" or "mongoURI"'
+                'Missing environment variables: "token" or "mongoURI" or missing settings'
             );
-        }
-
-        if (config.writeToLogFile) {
-            log4js.configure({
-                appenders: {
-                    client: {
-                        type: "multiFile",
-                        base: "logs/",
-                        property: "categoryName",
-                        extension: ".log",
-                    },
-                    console: { type: "console" },
-                    developer: {
-                        type: "multiFile",
-                        property: "categoryName",
-                        extension: ".log",
-                    },
-                },
-                categories: {
-                    default: { appenders: ["client", "console"], level: "all" },
-                    dev: { appenders: ["developer"], level: "debug" },
-                },
-            });
-            const logger = log4js.getLogger("client");
-            const developerLogger = log4js.getLogger("developer");
-
-            console.debug = developerLogger.debug.bind(developerLogger);
-            console.log = logger.info.bind(logger);
-            console.info = developerLogger.info.bind(developerLogger);
-            console.warn = developerLogger.warn.bind(developerLogger);
-            console.error = developerLogger.error.bind(developerLogger);
-            console.trace = developerLogger.trace.bind(developerLogger);
         }
 
         this.config = config;
 
-        this.mongoHandler.client = this;
+        for (const blacklistedGuild of config.blacklistedGuilds) {
+            this.blacklistedGuildIds.push(blacklistedGuild.id);
+        }
+        for (const blacklistedUser of config.blacklistedUsers) {
+            this.blacklistedUserIds.push(blacklistedUser.id);
+        }
+    }
 
-        this.configurationHandler.client = this;
+    public async init() {
+        const { items, console, utils } = this;
 
-        this.messageHandler.client = this;
-        this.messageHandler.config = this.config;
-
+        console.client = this;
+        console.config = this.config;
+        items.client = this;
+        utils.client = this;
+        this.checks.client = this;
         this.commandManager.client = this;
+        this.mongo.client = this;
 
-        this.globalPrefix = this.config.prefix;
+        this.login(this.config.token);
 
-        this.utils.client = this;
+        await items.loadItems(this.clientChecks, Check, [
+            "/Handler/Defaults/ClientChecks"
+        ]);
 
-        this.checkManager.client = this;
+        await items.loadItems(this.userChecks, Check, [
+            "/Handler/Defaults/UserChecks"
+        ]);
 
-        for (const permission of this.config.defaultClientPermissions) {
-            if (!this.utils.validPermissions.includes(permission)) {
-                return this.messageHandler.warn(
-                    `Default client permission: ${permission} is an invalid permission flag!`
-                );
-            }
-        }
+        items.loadChecks();
 
-        for (const permission of this.config.defaultUserPermissions) {
-            if (!this.utils.validPermissions.includes(permission)) {
-                return this.messageHandler.warn(
-                    `Default user permission: ${permission} is an invalid permission flag!`
-                );
-            }
-        }
-        new Collection();
-        this.loader.client = this;
+        await items.loadItems(this.events, Event, [
+            "/Handler/Defaults/Events",
+            "/Events"
+        ]);
 
-        const defaultChecksDir = path.join(__dirname, "..", "DefaultChecks");
-        const defaultChecksFiles = await this.utils.loadFiles(defaultChecksDir);
+        items.loadEvents();
 
-        for (const checkDir of defaultChecksFiles) {
-            await this.loader.loadCheck(checkDir);
-        }
+        await items.loadItems(this.commands, Command, [
+            "/Handler/Defaults/Commands"
+        ]);
 
-        const checkFiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "..", "Checks")
-        );
-        for (const checkFile of checkFiles) {
-            await this.loader.loadCheck(checkFile);
-        }
+        items.loadCommands();
 
-        this.emit("");
+        items.loadCateogires();
 
-        if (this.config.defaultCommands === true) {
-            const defaultCommandsPath = path.join(
-                __dirname,
-                "..",
-                "DefaultCommands"
-            );
-            const defaultCommandFiles = await this.utils.loadFiles(
-                defaultCommandsPath
-            );
+        await items.loadItems(this.preCommandFunctions, PreCommandFunction, [
+            "/CommandUtils/PreCommand"
+        ]);
 
-            for (const commandDir of defaultCommandFiles) {
-                let commandDirArray = commandDir.split("/");
-                const commandFile = commandDirArray[commandDirArray.length - 1];
-                const settingInConfig = `default${commandFile.slice(
-                    0,
-                    -3
-                )}Command`;
-                if (this.config[settingInConfig] === true) {
-                    await this.loader.loadCommand(commandDir);
-                }
-            }
-        }
+        await items.loadItems(this.postCommandFunctions, PostCommandFunction, [
+            "/CommandUtils/PostCommand"
+        ]);
 
-        const commandFiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "..", "Commands")
-        );
-        for (const file of commandFiles) {
-            await this.loader.loadCommand(file);
-        }
+        await this.mongo.connect();
+        await this.configurations.init();
 
-        const defaultEventfiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "DefaultEvents")
-        );
+        await items.registerSlashCommands();
 
-        for (const eventDir of defaultEventfiles) {
-            await this.loader.loadEvent(eventDir);
-        }
+        await items.loadItems(this.extensions, Extension, [
+            "/Handler/Defaults/Extensions"
+        ]);
 
-        const eventFiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "..", "Events")
-        );
-        for (const file of eventFiles) {
-            await this.loader.loadEvent(file);
-        }
-
-        await this.login(this.config.token);
-
-        if (this.config.botDevelopers !== "") {
-            let botDevelopers = [];
-
-            if (typeof this.config.botDevelopers === "string") {
-                botDevelopers = [this.config.botDevelopers];
-            } else {
-                botDevelopers = this.config.botDevelopers;
-            }
-
-            for (const userId of this.config.botDevelopers) {
-                const user = await this.users.fetch(userId).catch(() => {
-                    this.messageHandler.warn(
-                        `Unable to load developerUserId: "${userId}"`
-                    );
-                });
-                if (!user) {
-                    continue;
-                } else if (this.developers.indexOf(user) !== -1) {
-                    this.messageHandler.warn(
-                        `Developer ID "${userId}" is registered more than once!`
-                    );
-                    continue;
-                }
-                this.developers.push(user);
-            }
-        }
-
-        await this.mongoHandler.connect();
-        await this.configurationHandler.init();
-
-        await this.commandManager.init();
-
-        const extensionFiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "..", "Extensions")
-        );
-        for (const file of extensionFiles) {
-            await this.loader.loadExtension(file);
-        }
-
-        const defaultExtensionFiles = await this.utils.loadFiles(
-            path.join(__dirname, "..", "DefaultExtensions")
-        );
-        for (const file of defaultExtensionFiles) {
-            await this.loader.loadExtension(file);
-        }
-        await this.loader.registerSlashCommands();
-
-        this.eventEmitter.emit("fullyLoaded");
+        await items.runExtensions();
     }
 }
 
