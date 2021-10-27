@@ -2,7 +2,7 @@ import { Guild, GuildMember } from "discord.js";
 import { Command } from "../../..";
 
 const command = new Command("help");
-command.description = "Displays the commansd you can use";
+command.description = "Displays the commands you can use";
 command.aliases = ["h"];
 command.overideGuildBlacklist = true;
 command.overideUserBlacklist = true;
