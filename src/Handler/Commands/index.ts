@@ -416,8 +416,6 @@ export class CommandManager {
             if (cachedGuildPrefix) {
                 if (message.content.startsWith(cachedGuildPrefix)) {
                     return cachedGuildPrefix;
-                } else {
-                    return false;
                 }
             } else {
                 const findGuildPrefix = await GuildPrefixModel.findById(
@@ -432,8 +430,6 @@ export class CommandManager {
                         message.content.startsWith(findGuildPrefix.guildPrefix)
                     ) {
                         return findGuildPrefix.guildPrefix;
-                    } else {
-                        return false;
                     }
                 }
             }
@@ -445,6 +441,12 @@ export class CommandManager {
             if (globalPrefixConfiguration) {
                 const globalPrefix: string =
                     globalPrefixConfiguration.options.globalPrefix;
+
+                if (message.content.startsWith(globalPrefix)) {
+                    return globalPrefix;
+                }
+            } else {
+                const globalPrefix = client.config.prefix;
 
                 if (message.content.startsWith(globalPrefix)) {
                     return globalPrefix;
@@ -467,6 +469,7 @@ export class CommandManager {
 
     public async startsWithPrefix(message: Message): Promise<boolean> {
         const prefix = await this.getPrefix(message);
+
         return !!prefix || prefix === null;
     }
 
@@ -1352,7 +1355,10 @@ export class CommandManager {
         }
 
         for (const preRunFunction of this.client.preCommandFunctions) {
-            const runFunction = await preRunFunction[1].run(this.client);
+            const runFunction = await preRunFunction[1].run(
+                this.client,
+                returnCommand
+            );
 
             if (runFunction === false) {
                 return;
@@ -1364,7 +1370,7 @@ export class CommandManager {
         if (command.run) command.run(this.client, returnCommand);
 
         for (const postRunFunction of this.client.postCommandFunctions) {
-            await postRunFunction[1].run(this.client);
+            await postRunFunction[1].run(this.client, returnCommand);
         }
     }
 }

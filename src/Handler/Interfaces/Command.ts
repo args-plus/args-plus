@@ -57,5 +57,11 @@ export type TimeEnding = [
 ];
 
 export type Run = (client: ExtendedClient, returnCommand: ReturnCommand) => any;
-export type PreCommandRun = (client: ExtendedClient) => void | false;
-export type PostCommandRun = (client: ExtendedClient) => void;
+export type PreCommandRun = (
+    client: ExtendedClient,
+    command: ReturnCommand
+) => void | false;
+export type PostCommandRun = (
+    client: ExtendedClient,
+    command: ReturnCommand
+) => void;

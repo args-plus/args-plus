@@ -1,1 +1,1 @@
-Commands to configure the bot
+Commands used to configure the bot
