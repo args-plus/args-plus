@@ -40,10 +40,10 @@ export class ExtendedClient extends Client {
     public aliases: Collection<string, Command> = new Collection();
     public categories: Collection<string, string> = new Collection();
     public commandCategories: Collection<string, Command[]> = new Collection();
+    // prettier-ignore
+    public cachedConfigurations: Collection<string, Configuration> = new Collection();
     public emptyCategories: Command[] = [];
     public events: Event[] = [];
-    public cachedConfigurations: Collection<string, Configuration> =
-        new Collection();
     public cachedGuildPrefixes: Collection<string, string> = new Collection();
     public preCommandFunctions: PreCommandFunction[] = [];
     public postCommandFunctions: PostCommandFunction[] = [];
