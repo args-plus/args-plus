@@ -17,7 +17,7 @@ Args plus has the ability to do many things, such as:
 -   The abilitiy to load "configurations", which are settings stored on mongoDB, and cached on startup
 -   Great built in commands
 
-# Please referto the [wiki][wiki] for documentation
+# Please refer to the [wiki][wiki] for documentation
 
 [wiki]: https://github.com/args-plus/args-plus/wiki
 
