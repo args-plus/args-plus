@@ -110,7 +110,7 @@ export class ExtendedClient extends Client {
 
         await items.loadItems(this.commands, Command, [
             "/Handler/Defaults/Commands",
-            "Commands"
+            "/Commands"
         ]);
 
         items.loadCommands();
