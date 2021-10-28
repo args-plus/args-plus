@@ -17,7 +17,11 @@ Args plus has the ability to do many things, such as:
 -   The abilitiy to load "configurations", which are settings stored on mongoDB, and cached on startup
 -   Great built in commands
 
-# Installation
+# Please referto the [wiki][wiki] for documentation
+
+[wiki]: https://github.com/args-plus/args-plus/wiki
+
+<!-- # Installation
 
 This isnt an npm package, rather args plus offers a framework in which you can customise
 <br />
@@ -117,4 +121,4 @@ Your command handler _should_ be updated
 [image4]: https://github.com/abisammy/args-plus-guide/blob/master/images/four.png?raw=true
 [image5]: https://github.com/abisammy/args-plus-guide/blob/master/images/five.png?raw=true
 [image6]: https://github.com/abisammy/args-plus-guide/blob/master/images/six.png?raw=true
-[image7]: https://github.com/abisammy/args-plus-guide/blob/master/images/seven.png?raw=true
+[image7]: https://github.com/abisammy/args-plus-guide/blob/master/images/seven.png?raw=true -->
