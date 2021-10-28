@@ -90,11 +90,13 @@ export class ExtendedClient extends Client {
         this.login(this.config.token);
 
         await items.loadItems(this.clientChecks, Check, [
-            "/Handler/Defaults/ClientChecks"
+            "/Handler/Defaults/ClientChecks",
+            "/Checks/UserChecks"
         ]);
 
         await items.loadItems(this.userChecks, Check, [
-            "/Handler/Defaults/UserChecks"
+            "/Handler/Defaults/UserChecks",
+            "/Checks/UserChecks"
         ]);
 
         items.loadChecks();
@@ -107,7 +109,8 @@ export class ExtendedClient extends Client {
         items.loadEvents();
 
         await items.loadItems(this.commands, Command, [
-            "/Handler/Defaults/Commands"
+            "/Handler/Defaults/Commands",
+            "Commands"
         ]);
 
         items.loadCommands();
