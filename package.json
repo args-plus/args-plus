@@ -20,6 +20,6 @@
     "dependencies": {
         "discord.js": "^13.1.0",
         "dotenv": "^10.0.0",
-        "mongoose": "^6.0.12"
+        "mongoose": "^5.13.12"
     }
 }
