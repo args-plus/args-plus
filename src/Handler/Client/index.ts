@@ -45,10 +45,8 @@ export class ExtendedClient extends Client {
     public cachedConfigurations: Collection<string, Configuration> =
         new Collection();
     public cachedGuildPrefixes: Collection<string, string> = new Collection();
-    public preCommandFunctions: Collection<string, PreCommandFunction> =
-        new Collection();
-    public postCommandFunctions: Collection<string, PostCommandFunction> =
-        new Collection();
+    public preCommandFunctions: PreCommandFunction[] = [];
+    public postCommandFunctions: PostCommandFunction[] = [];
 
     public blacklistedGuildIds: string[] = [];
     public blacklistedUserIds: string[] = [];

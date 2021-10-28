@@ -1355,7 +1355,7 @@ export class CommandManager {
         }
 
         for (const preRunFunction of this.client.preCommandFunctions) {
-            const runFunction = await preRunFunction[1].run(
+            const runFunction = await preRunFunction.run(
                 this.client,
                 returnCommand
             );
@@ -1370,7 +1370,7 @@ export class CommandManager {
         if (command.run) command.run(this.client, returnCommand);
 
         for (const postRunFunction of this.client.postCommandFunctions) {
-            await postRunFunction[1].run(this.client, returnCommand);
+            await postRunFunction.run(this.client, returnCommand);
         }
     }
 }

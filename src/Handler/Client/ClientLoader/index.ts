@@ -4,11 +4,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import settings from "../../../settings";
-import {
-    Command,
-    PostCommandFunction,
-    PreCommandFunction
-} from "../../Commands";
+import { Command } from "../../Commands";
 import { ClientConfig } from "../config";
 import { Check } from "../../Checks";
 import {
