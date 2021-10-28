@@ -131,7 +131,8 @@ export class ExtendedClient extends Client {
         await items.registerSlashCommands();
 
         await items.loadItems(this.extensions, Extension, [
-            "/Handler/Defaults/Extensions"
+            "/Handler/Defaults/Extensions",
+            "/Extensions"
         ]);
 
         await items.runExtensions();
