@@ -113,8 +113,6 @@ export class ExtendedClient extends Client {
 
         items.loadCommands();
 
-        items.loadCateogires();
-
         await items.loadItems(this.preCommandFunctions, PreCommandFunction, [
             "/CommandUtils/PreCommand"
         ]);
@@ -134,6 +132,8 @@ export class ExtendedClient extends Client {
         ]);
 
         await items.runExtensions();
+
+        items.loadCateogires();
     }
 }
 
