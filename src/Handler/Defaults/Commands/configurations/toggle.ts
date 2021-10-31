@@ -72,21 +72,21 @@ command.run = async (client, command) => {
                     currentDisabledCommands.indexOf(commandToFind),
                     1
                 );
-            } else {
                 onOrOff = "on";
+            } else {
                 currentDisabledCommands.push(commandToFind);
             }
         } else {
             if (onOrOff === "off") {
+                if (!currentDisabledCommands.includes(commandToFind)) {
+                    currentDisabledCommands.push(commandToFind);
+                }
+            } else {
                 if (currentDisabledCommands.includes(commandToFind)) {
                     currentDisabledCommands.splice(
                         currentDisabledCommands.indexOf(commandToFind),
                         1
                     );
-                }
-            } else {
-                if (!currentDisabledCommands.includes(commandToFind)) {
-                    currentDisabledCommands.push(commandToFind);
                 }
             }
         }
@@ -100,17 +100,10 @@ command.run = async (client, command) => {
         );
     }
 
-    if (onOrOff === "on") {
-        command.sendMessage(
-            `${commandToFind} is now \`\`off\`\``,
-            "Succesfully toggled command"
-        );
-    } else {
-        command.sendMessage(
-            `${commandToFind} is now \`\`on\`\``,
-            "Succesfully toggled command"
-        );
-    }
+    command.sendMessage(
+        `${commandToFind} is now \`\`${onOrOff}\`\``,
+        "Succesfully toggled command"
+    );
 };
 
 export default command;

@@ -124,12 +124,17 @@ command.run = async (client, commandRan) => {
         const addCommandToText = async (command: Command) => {
             let prefixes = await getPrefixes(command);
 
+            let commandDescription =
+                command.description.length !== 0 ? command.description : false;
+
             currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
             }** ${
                 command.aliases.length !== 0 && client.config.helpCommandAliases
-                    ? `(${command.aliases.join(", ")}) - ${command.description}`
-                    : `- ${command.description}`
+                    ? `(${command.aliases.join(", ")}) ${
+                          commandDescription ? `- ${commandDescription}` : ""
+                      }`
+                    : `${commandDescription ? `- ${commandDescription}` : ""}`
             }\n`;
         };
 
@@ -211,7 +216,7 @@ command.run = async (client, commandRan) => {
         let prefixes = await getPrefixes(command);
 
         commandRan.sendMessage(
-            `**Usage:**\n**\`\`${prefixes.join("`` or ``")}\`\`** - \`\`${
+            `**Usage:**\n**\`\`${prefixes.join("`` or ``")}\`\`** \`\`${
                 command.name
             }${
                 command.usage.length !== 0
