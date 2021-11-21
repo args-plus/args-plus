@@ -1,4 +1,4 @@
-import { ClientConfig } from "../config";
+import { ClientConfig } from "../settings";
 import ExtendedClient from "../index";
 
 export class Console {

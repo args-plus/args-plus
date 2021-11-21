@@ -33,4 +33,5 @@ export class ClientConfig {
     public logMessages: boolean = true;
     public logDebugs: boolean = true;
     public logErrors: boolean = true;
+    public autoRemoveCommands: boolean = false;
 }
