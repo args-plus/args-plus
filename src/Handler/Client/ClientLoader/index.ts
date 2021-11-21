@@ -5,7 +5,7 @@ import fs from "fs";
 import dotenv from "dotenv";
 import settings from "../../../settings";
 import { Command } from "../../Commands";
-import { ClientConfig } from "../config";
+import { ClientConfig } from "../settings";
 import { Check } from "../../Checks";
 import {
     ApplicationCommandData,

@@ -9,7 +9,7 @@ import {
 import { Event } from "../Events";
 import { ItemLoader } from "./ClientLoader";
 import { Console } from "./Console";
-import { ClientConfig } from "./config";
+import { ClientConfig } from "./settings";
 import { Check, CheckManger } from "../Checks";
 import { Configuration } from "../Defaults/Schemas";
 import { MongoManager } from "./MongoHandler";
@@ -17,7 +17,7 @@ import { ConfigurationManager } from "./Configurations";
 import { Extension } from "../Extensions";
 import mongoose from "mongoose";
 
-export { ClientConfig } from "./config";
+export { ClientConfig } from "./settings";
 
 export class ExtendedClient extends Client {
     public config: ClientConfig;
