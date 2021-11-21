@@ -4,7 +4,8 @@ import {
     Command,
     PostCommandFunction,
     PreCommandFunction,
-    CommandManager
+    CommandManager,
+    DisabledCommandManager
 } from "../Commands";
 import { Event } from "../Events";
 import { ItemLoader } from "./ClientLoader";
@@ -27,6 +28,7 @@ export class ExtendedClient extends Client {
     public console: Console = new Console(this);
     public checks = new CheckManger(this);
     public commandManager = new CommandManager(this);
+    public disabledCommandManager = new DisabledCommandManager(this);
     public mongo = new MongoManager(this);
     public configurations = new ConfigurationManager(this);
 
@@ -47,6 +49,7 @@ export class ExtendedClient extends Client {
     public cachedGuildPrefixes: Collection<string, string> = new Collection();
     public preCommandFunctions: PreCommandFunction[] = [];
     public postCommandFunctions: PostCommandFunction[] = [];
+    public disabledCommands: string[] = [];
 
     public blacklistedGuildIds: string[] = [];
     public blacklistedUserIds: string[] = [];
@@ -83,6 +86,7 @@ export class ExtendedClient extends Client {
         utils.client = this;
         this.checks.client = this;
         this.commandManager.client = this;
+        this.disabledCommandManager.client = this;
         this.mongo.client = this;
 
         this.login(this.config.token);

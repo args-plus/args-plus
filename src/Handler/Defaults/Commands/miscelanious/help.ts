@@ -42,15 +42,8 @@ command.run = async (client, commandRan) => {
         return prefixes;
     };
     const canRunCommand = (command: Command): boolean => {
-        const disabledCommandsConfiguration =
-            client.configurations.get("disabled commands");
-        if (disabledCommandsConfiguration) {
-            const disabledCommands: string[] =
-                disabledCommandsConfiguration.options.disabledCommands;
-
-            if (disabledCommands.includes(command.name)) {
-                return false;
-            }
+        if (client.disabledCommandManager.isDisabledCommand(command.name)) {
+            return false;
         }
 
         // prettier-ignore

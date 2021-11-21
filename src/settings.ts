@@ -8,6 +8,7 @@ settings.errorColor = "#ff0000";
 settings.useChatCommands = true;
 settings.indentMessageContent = false;
 settings.botDevelopers = [];
+settings.autoRemoveCommands = true;
 
 // Slash commands
 settings.loadGuildSlashCommands = false;

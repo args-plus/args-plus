@@ -300,6 +300,87 @@ export class ReturnCommand {
     }
 }
 
+export class DisabledCommandManager {
+    public client: ExtendedClient;
+
+    constructor(client: ExtendedClient) {
+        this.client = client;
+    }
+
+    public init() {
+        const findConfiguration =
+            this.client.configurations.get("disabled commands");
+
+        if (findConfiguration) {
+            let currentDisabledCommands: string[] =
+                findConfiguration.options.disabledCommands;
+
+            this.client.disabledCommands = currentDisabledCommands;
+        }
+    }
+
+    public async addCommand(name: string, temp?: boolean) {
+        this.client.disabledCommands.push(name);
+
+        if (!temp) {
+            const findConfiguration =
+                this.client.configurations.get("disabled commands");
+
+            if (findConfiguration) {
+                let currentDisabledCommands: string[] =
+                    findConfiguration.options.disabledCommands;
+
+                this.client.disabledCommands = currentDisabledCommands;
+                if (!currentDisabledCommands.includes(name)) {
+                    currentDisabledCommands.push(name);
+                }
+
+                await this.client.configurations.update(
+                    "disabled commands",
+                    {
+                        disabledCommands: currentDisabledCommands
+                    },
+                    false
+                );
+            }
+        }
+    }
+
+    public async removeCommand(name: string, temp?: boolean) {
+        this.client.disabledCommands.push(name);
+
+        if (!temp) {
+            const findConfiguration =
+                this.client.configurations.get("disabled commands");
+
+            if (findConfiguration) {
+                let currentDisabledCommands: string[] =
+                    findConfiguration.options.disabledCommands;
+
+                this.client.disabledCommands = currentDisabledCommands;
+                if (currentDisabledCommands.includes(name)) {
+                    currentDisabledCommands.splice(
+                        currentDisabledCommands.indexOf(name),
+                        1
+                    );
+                }
+
+                await this.client.configurations.update(
+                    "disabled commands",
+                    {
+                        disabledCommands: currentDisabledCommands
+                    },
+                    false
+                );
+            }
+        }
+    }
+
+    public isDisabledCommand(name: string) {
+        return this.client.disabledCommands.includes(name);
+    }
+}
+
 export class Command extends Item {
     // public client: null | ExtendedClient = null;
 
@@ -322,6 +403,7 @@ export class Command extends Item {
     public overideDefaultUserPermissions: boolean = false;
     public overideGuildBlacklist: boolean = false;
     public overideUserBlacklist: boolean = false;
+    public overideAutoRemove: boolean = false;
     public clientPermissions: Permission[] = [];
     public userPermissions: Permission[] = [];
     public clientChecks: string[] = [];
@@ -546,18 +628,11 @@ export class CommandManager {
 
         const { client } = this;
 
-        const disabledCommandsConfiguration =
-            client.configurations.get("disabled commands");
-        if (disabledCommandsConfiguration) {
-            const disabledCommands: string[] =
-                disabledCommandsConfiguration.options.disabledCommands;
-
-            if (disabledCommands.includes(command.name)) {
-                return [
-                    "It has been disabled by my developers",
-                    "I could not run that command"
-                ];
-            }
+        if (client.disabledCommandManager.isDisabledCommand(command.name)) {
+            return [
+                "It has been disabled by my developers",
+                "I could not run that command"
+            ];
         }
 
         if (
@@ -1367,7 +1442,31 @@ export class CommandManager {
 
         returnCommand.args = args[1];
 
-        if (command.run) command.run(this.client, returnCommand);
+        try {
+            if (command.run) command.run(this.client, returnCommand);
+        } catch (error: any) {
+            this.client.console.error(error);
+            if (this.client.config.sendErrorMessages) {
+                returnCommand.sendError(
+                    `There was an error while running that command: \n\`\`\`${error}\`\`\``,
+                    `I couldn't run that command`
+                );
+            } else {
+                returnCommand.sendError(
+                    "There was an error while running that command",
+                    "I couldn't run that command"
+                );
+            }
+            if (
+                this.client.config.autoRemoveCommands &&
+                !command.overideAutoRemove
+            ) {
+                await this.client.disabledCommandManager.addCommand(
+                    command.name,
+                    true
+                );
+            }
+        }
 
         for (const postRunFunction of this.client.postCommandFunctions) {
             await postRunFunction.run(this.client, returnCommand);

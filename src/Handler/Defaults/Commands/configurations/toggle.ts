@@ -68,36 +68,18 @@ command.run = async (client, command) => {
 
         if (!value) {
             if (currentDisabledCommands.includes(commandToFind)) {
-                currentDisabledCommands.splice(
-                    currentDisabledCommands.indexOf(commandToFind),
-                    1
-                );
+                client.disabledCommandManager.removeCommand(commandToFind);
                 onOrOff = "on";
             } else {
-                currentDisabledCommands.push(commandToFind);
+                client.disabledCommandManager.addCommand(commandToFind);
             }
         } else {
             if (onOrOff === "off") {
-                if (!currentDisabledCommands.includes(commandToFind)) {
-                    currentDisabledCommands.push(commandToFind);
-                }
+                client.disabledCommandManager.addCommand(commandToFind);
             } else {
-                if (currentDisabledCommands.includes(commandToFind)) {
-                    currentDisabledCommands.splice(
-                        currentDisabledCommands.indexOf(commandToFind),
-                        1
-                    );
-                }
+                client.disabledCommandManager.removeCommand(commandToFind);
             }
         }
-
-        await client.configurations.update(
-            "disabled commands",
-            {
-                disabledCommands: currentDisabledCommands
-            },
-            false
-        );
     }
 
     command.sendMessage(
