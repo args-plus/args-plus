@@ -199,16 +199,42 @@ export class ReturnCommand {
         color: ColorResolvable,
         header?: string
     ) {
-        if (this.client.config.indentMessageContent) {
-            body = `> ${this.client.utils
-                .splitStringByNewLine(body)
-                .join(`\n> `)}`;
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
         }
 
         const embed = new MessageEmbed().setColor(color).setDescription(body);
 
+        const getIcon = (): string => {
+            if (config.embedIcon) {
+                if (config.embedIcon === "botAvatar" && client.user) {
+                    return client.user.displayAvatarURL();
+                } else {
+                    return config.embedIcon;
+                }
+            }
+            return "";
+        };
+
+        const getFooter = (): string => {
+            if (config.embedFooter) {
+                return config.embedFooter;
+            } else {
+                return "";
+            }
+        };
+
+        embed.setFooter(getFooter(), getIcon());
+
         if (header) {
-            embed.setAuthor(header);
+            embed.setAuthor(header, getIcon());
+        }
+
+        if (config.sendTimestamp) {
+            embed.setTimestamp(Date.now());
         }
 
         const splitEmbeds = this.splitMessageEmbedDescription(embed);
@@ -223,8 +249,23 @@ export class ReturnCommand {
     ) {
         const { client, commandRan } = this;
 
+        // FIXME: Catch for errors
+        // TODO: Sending custom embeds && convert embeds into messages
+
+        const { config } = client;
+        const { messagesOrEmbeds } = config;
+
         if (commandRan instanceof Message) {
-            if (client.config.messagesOrEmbeds === "messages") {
+            if (
+                messagesOrEmbeds === "messages" ||
+                (messagesOrEmbeds === "embeds" &&
+                    commandRan.channel.type !== "DM" &&
+                    commandRan.guild &&
+                    commandRan.guild.me &&
+                    !commandRan.channel
+                        .permissionsFor(commandRan.guild.me)
+                        .has("EMBED_LINKS"))
+            ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage = await commandRan.channel.send(messages[0]);
                 messages.shift();
@@ -246,7 +287,17 @@ export class ReturnCommand {
                 return lastMessage;
             }
         } else {
-            if (client.config.messagesOrEmbeds === "messages") {
+            if (
+                messagesOrEmbeds === "messages" ||
+                (messagesOrEmbeds === "embeds" &&
+                    commandRan.channel &&
+                    commandRan.channel.type !== "DM" &&
+                    commandRan.guild &&
+                    commandRan.guild.me &&
+                    !commandRan.channel
+                        .permissionsFor(commandRan.guild.me)
+                        .has("EMBED_LINKS"))
+            ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage: null | Message | APIMessage | void = null;
                 for (const message of messages) {

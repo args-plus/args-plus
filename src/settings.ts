@@ -2,13 +2,19 @@ import { ClientConfig } from "./Handler/Client/settings";
 const settings = new ClientConfig("ts!");
 
 // General configs
-settings.messagesOrEmbeds = "embeds";
-settings.mainColor = "#ffffff";
-settings.errorColor = "#ff0000";
 settings.useChatCommands = true;
 settings.indentMessageContent = false;
-settings.botDevelopers = [];
+settings.botDevelopers = ["468128787884670986"];
 settings.autoRemoveCommands = false;
+
+// Message configs
+settings.messagesOrEmbeds = "embeds";
+settings.mainColor = "BLUE";
+settings.errorColor = "RED";
+settings.sendTimestamp = false;
+settings.embedIcon = false;
+settings.embedFooter = false;
+settings.sendMessageWithoutPermissions = false;
 
 // Slash commands
 settings.loadGuildSlashCommands = false;
