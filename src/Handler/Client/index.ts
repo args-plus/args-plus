@@ -17,6 +17,7 @@ import { MongoManager } from "./MongoHandler";
 import { ConfigurationManager } from "./Configurations";
 import { Extension } from "../Extensions";
 import mongoose from "mongoose";
+import { Constraint } from "../Interfaces";
 
 export { ClientConfig } from "./settings";
 
@@ -40,7 +41,8 @@ export class ExtendedClient extends Client {
 
     public commands: Collection<string, Command> = new Collection();
     public aliases: Collection<string, Command> = new Collection();
-    public categories: Collection<string, string> = new Collection();
+    public categories: Collection<string, [string, Constraint[]]> =
+        new Collection();
     public commandCategories: Collection<string, Command[]> = new Collection();
     // prettier-ignore
     public cachedConfigurations: Collection<string, Configuration> = new Collection();

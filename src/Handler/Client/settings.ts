@@ -12,8 +12,12 @@ export class ClientConfig {
     }
 
     public messagesOrEmbeds: "messages" | "embeds" = "embeds";
-    public mainColor: ColorResolvable = "#ffffff";
-    public errorColor: ColorResolvable = "#ff0000";
+    public mainColor: ColorResolvable = "BLUE";
+    public errorColor: ColorResolvable = "RED";
+    public sendTimestamp: boolean = false;
+    public embedIcon: string | false = false;
+    public embedFooter: string | false = false;
+    public sendMessageWithoutPermissions: boolean = false;
     public loadGuildSlashCommands: boolean = false;
     public slashCommandGuilds: string[] = [];
     public loadGlobalSlashCommands: boolean = false;

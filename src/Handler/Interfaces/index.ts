@@ -8,6 +8,7 @@ export {
     PostCommandRun,
     argType,
     TimeEnding,
-    ReturnTime
+    ReturnTime,
+    Constraint
 } from "./Command";
 export { Run as CheckRun } from "./Check";

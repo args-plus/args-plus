@@ -10,8 +10,10 @@ import { Check } from "../../Checks";
 import {
     ApplicationCommandData,
     ApplicationCommandOptionData,
-    ChatInputApplicationCommandData
+    ChatInputApplicationCommandData,
+    Constants
 } from "discord.js";
+import { Constraint } from "../../Interfaces";
 
 export abstract class Item {
     public name: string;
@@ -46,7 +48,6 @@ export class ItemLoader {
             const files = await this.client.utils.loadFiles(
                 path.join(__dirname, "../../..", dir)
             );
-
             for (const file of files) {
                 type isItem = { default: typeof item };
 
@@ -320,6 +321,22 @@ export class ItemLoader {
                             .splice(0, commandPathArray.length - 1)
                             .join("/");
 
+                        let constraints: Constraint[] = [];
+
+                        if (
+                            fs.existsSync(
+                                `${commandCategoryPath}/constraints.txt`
+                            )
+                        ) {
+                            const readFile = fs.readFileSync(
+                                `${commandCategoryPath}/constraints.txt`,
+                                "utf8"
+                            );
+
+                            // @ts-ignore
+                            constraints = readFile.split(/ +/g);
+                        }
+
                         if (fs.existsSync(`${commandCategoryPath}/desc.txt`)) {
                             const readFile = fs.readFileSync(
                                 `${commandCategoryPath}/desc.txt`,
@@ -343,10 +360,10 @@ export class ItemLoader {
                                 );
                                 continue;
                             } else {
-                                client.categories.set(
-                                    commandCategory,
-                                    readFile
-                                );
+                                client.categories.set(commandCategory, [
+                                    readFile,
+                                    constraints
+                                ]);
                                 client.console.log(
                                     `Loaded category description for: ${commandCategory}`
                                 );
@@ -357,16 +374,16 @@ export class ItemLoader {
             } else if (typeof category === "string") {
                 const getCategory = client.categories.get(category);
                 if (!getCategory) {
-                    client.categories.set(
-                        category,
-                        "No description available for this category"
-                    );
+                    client.categories.set(category, [
+                        "No description available for this category",
+                        []
+                    ]);
                 }
                 addCategory(category);
             } else if (typeof category !== "boolean") {
                 const categoryName = category[0];
                 const categoryDescription = category[1];
-                client.categories.set(categoryName, categoryDescription);
+                client.categories.set(categoryName, [categoryDescription, []]);
                 command[1].category = categoryName;
                 addCategory(categoryName);
                 commandsToReload.push(command[1]);

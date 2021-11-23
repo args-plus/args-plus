@@ -2,7 +2,6 @@ import { Command } from "../../..";
 
 const command = new Command("toggle");
 command.description = "Toggle a command on or off";
-command.developerOnly = true;
 command.overideLoadSlashCommand = true;
 command.args = [
     {

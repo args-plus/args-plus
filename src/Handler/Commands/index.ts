@@ -24,7 +24,8 @@ import {
     ReturnArgument,
     TimeEnding,
     ReturnTime,
-    PostCommandRun
+    PostCommandRun,
+    Constraint
 } from "../Interfaces";
 import { Utils } from "../Utils";
 
@@ -199,16 +200,42 @@ export class ReturnCommand {
         color: ColorResolvable,
         header?: string
     ) {
-        if (this.client.config.indentMessageContent) {
-            body = `> ${this.client.utils
-                .splitStringByNewLine(body)
-                .join(`\n> `)}`;
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
         }
 
         const embed = new MessageEmbed().setColor(color).setDescription(body);
 
+        const getIcon = (): string => {
+            if (config.embedIcon) {
+                if (config.embedIcon === "botAvatar" && client.user) {
+                    return client.user.displayAvatarURL();
+                } else {
+                    return config.embedIcon;
+                }
+            }
+            return "";
+        };
+
+        const getFooter = (): string => {
+            if (config.embedFooter) {
+                return config.embedFooter;
+            } else {
+                return "";
+            }
+        };
+
+        embed.setFooter(getFooter(), getIcon());
+
         if (header) {
-            embed.setAuthor(header);
+            embed.setAuthor(header, getIcon());
+        }
+
+        if (config.sendTimestamp) {
+            embed.setTimestamp(Date.now());
         }
 
         const splitEmbeds = this.splitMessageEmbedDescription(embed);
@@ -223,8 +250,22 @@ export class ReturnCommand {
     ) {
         const { client, commandRan } = this;
 
+        // FIXME: Catch for errors
+
+        const { config } = client;
+        const { messagesOrEmbeds } = config;
+
         if (commandRan instanceof Message) {
-            if (client.config.messagesOrEmbeds === "messages") {
+            if (
+                messagesOrEmbeds === "messages" ||
+                (messagesOrEmbeds === "embeds" &&
+                    commandRan.channel.type !== "DM" &&
+                    commandRan.guild &&
+                    commandRan.guild.me &&
+                    !commandRan.channel
+                        .permissionsFor(commandRan.guild.me)
+                        .has("EMBED_LINKS"))
+            ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage = await commandRan.channel.send(messages[0]);
                 messages.shift();
@@ -246,7 +287,17 @@ export class ReturnCommand {
                 return lastMessage;
             }
         } else {
-            if (client.config.messagesOrEmbeds === "messages") {
+            if (
+                messagesOrEmbeds === "messages" ||
+                (messagesOrEmbeds === "embeds" &&
+                    commandRan.channel &&
+                    commandRan.channel.type !== "DM" &&
+                    commandRan.guild &&
+                    commandRan.guild.me &&
+                    !commandRan.channel
+                        .permissionsFor(commandRan.guild.me)
+                        .has("EMBED_LINKS"))
+            ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage: null | Message | APIMessage | void = null;
                 for (const message of messages) {
@@ -404,6 +455,7 @@ export class Command extends Item {
     public overideGuildBlacklist: boolean = false;
     public overideUserBlacklist: boolean = false;
     public overideAutoRemove: boolean = false;
+    public overideConstraints: boolean = false;
     public clientPermissions: Permission[] = [];
     public userPermissions: Permission[] = [];
     public clientChecks: string[] = [];
@@ -617,6 +669,18 @@ export class CommandManager {
 
         const { commandClass: command } = returnCommand;
 
+        const { category } = command;
+
+        let constraints: Constraint[] = [];
+
+        if (typeof category === "string" && !command.overideConstraints) {
+            const findCategory = this.client.categories.get(category);
+
+            if (findCategory) {
+                constraints = findCategory[1];
+            }
+        }
+
         const incorrectPermissions = (
             message: string
         ): string | [string, string] => {
@@ -637,7 +701,8 @@ export class CommandManager {
 
         if (
             guild &&
-            !command.overideGuildBlacklist &&
+            (!command.overideGuildBlacklist ||
+                !constraints.includes("overideGuildBlacklist")) &&
             client.blacklistedGuildIds.includes(guild.id)
         ) {
             const blacklistObject = client.config.blacklistedGuilds.filter(
@@ -658,7 +723,8 @@ export class CommandManager {
         }
 
         if (
-            !command.overideUserBlacklist &&
+            (!command.overideUserBlacklist ||
+                !constraints.includes("overideUserBlacklist")) &&
             client.blacklistedUserIds.includes(author.id)
         ) {
             const blacklistObject = client.config.blacklistedUsers.filter(
@@ -677,7 +743,7 @@ export class CommandManager {
         }
 
         if (
-            command.developerOnly &&
+            (command.developerOnly || constraints.includes("developerOnly")) &&
             !client.config.botDevelopers.includes(author.id)
         ) {
             return incorrectPermissions(
@@ -685,7 +751,10 @@ export class CommandManager {
             );
         }
 
-        if (command.guildOnly && !guild) {
+        if (
+            (command.guildOnly || constraints.includes("guildOnly")) &&
+            !guild
+        ) {
             return "This command has to be ran on a server";
         }
 
@@ -773,7 +842,7 @@ export class CommandManager {
                 // prettier-ignore
                 const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
 
-                if (typeof permission !== "boolean") {
+                if (permission !== true) {
                     // prettier-ignore
                     return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
                 }
@@ -782,9 +851,28 @@ export class CommandManager {
                 //prettier-ignore
                 const permission = hasPermission( client.config.defaultUserPermissions, member)
 
-                if (typeof permission !== "boolean") {
+                if (permission !== true) {
                     // prettier-ignore
                     return incorrectPermissions(`You are missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`)
+                }
+            }
+            for (const permission of constraints) {
+                if (
+                    permission !== "overideGuildBlacklist" &&
+                    permission !== "overideUserBlacklist" &&
+                    permission !== "guildOnly" &&
+                    permission !== "developerOnly" &&
+                    guild.me &&
+                    member
+                ) {
+                    // prettier-ignore
+                    const userPermission = hasPermission( [permission], member)
+
+                    if (userPermission !== true) {
+                        // prettier-ignore
+                        return incorrectPermissions(`You are missing the ${userPermission[1].toLowerCase().replace(/_/g, " ")} to run this command`
+                        );
+                    }
                 }
             }
         }
