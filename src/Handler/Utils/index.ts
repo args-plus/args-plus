@@ -50,7 +50,7 @@ export class Utils {
                 } else {
                     if (this.isFile(file)) {
                         const commandDir = path.join(dir, file);
-                        await filePaths.push(commandDir);
+                        filePaths.push(commandDir);
                     }
                 }
             }
