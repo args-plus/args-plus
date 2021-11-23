@@ -46,7 +46,6 @@ export class ItemLoader {
             const files = await this.client.utils.loadFiles(
                 path.join(__dirname, "../../..", dir)
             );
-
             for (const file of files) {
                 type isItem = { default: typeof item };
 
