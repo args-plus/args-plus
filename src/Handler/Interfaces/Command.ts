@@ -8,6 +8,8 @@ import {
 import ExtendedClient from "../Client";
 import { Command, ReturnCommand } from "../Commands";
 
+import { Permission } from "./Permissions";
+
 export type argType =
     | "single"
     | "multiple"
@@ -65,3 +67,10 @@ export type PostCommandRun = (
     client: ExtendedClient,
     command: ReturnCommand
 ) => void;
+
+export type Constraint =
+    | Permission
+    | "guildOnly"
+    | "developerOnly"
+    | "overideUserBlacklist"
+    | "overideGuildBlacklist";

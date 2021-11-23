@@ -3,6 +3,7 @@ import { Command } from "../../../Commands";
 const command = new Command("globalprefix");
 command.aliases = ["gprefix", "setgprefix", "setglobalprefix"];
 command.description = "Get or change the prefix of the bot";
+command.overideConstraints = false;
 command.args = [
     {
         name: "newprefix",

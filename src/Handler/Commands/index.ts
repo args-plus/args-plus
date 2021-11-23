@@ -24,7 +24,8 @@ import {
     ReturnArgument,
     TimeEnding,
     ReturnTime,
-    PostCommandRun
+    PostCommandRun,
+    Constraint
 } from "../Interfaces";
 import { Utils } from "../Utils";
 
@@ -250,7 +251,6 @@ export class ReturnCommand {
         const { client, commandRan } = this;
 
         // FIXME: Catch for errors
-        // TODO: Sending custom embeds && convert embeds into messages
 
         const { config } = client;
         const { messagesOrEmbeds } = config;
@@ -455,6 +455,7 @@ export class Command extends Item {
     public overideGuildBlacklist: boolean = false;
     public overideUserBlacklist: boolean = false;
     public overideAutoRemove: boolean = false;
+    public overideConstraints: boolean = false;
     public clientPermissions: Permission[] = [];
     public userPermissions: Permission[] = [];
     public clientChecks: string[] = [];
@@ -668,6 +669,18 @@ export class CommandManager {
 
         const { commandClass: command } = returnCommand;
 
+        const { category } = command;
+
+        let constraints: Constraint[] = [];
+
+        if (typeof category === "string" && !command.overideConstraints) {
+            const findCategory = this.client.categories.get(category);
+
+            if (findCategory) {
+                constraints = findCategory[1];
+            }
+        }
+
         const incorrectPermissions = (
             message: string
         ): string | [string, string] => {
@@ -688,7 +701,8 @@ export class CommandManager {
 
         if (
             guild &&
-            !command.overideGuildBlacklist &&
+            (!command.overideGuildBlacklist ||
+                !constraints.includes("overideGuildBlacklist")) &&
             client.blacklistedGuildIds.includes(guild.id)
         ) {
             const blacklistObject = client.config.blacklistedGuilds.filter(
@@ -709,7 +723,8 @@ export class CommandManager {
         }
 
         if (
-            !command.overideUserBlacklist &&
+            (!command.overideUserBlacklist ||
+                !constraints.includes("overideUserBlacklist")) &&
             client.blacklistedUserIds.includes(author.id)
         ) {
             const blacklistObject = client.config.blacklistedUsers.filter(
@@ -728,7 +743,7 @@ export class CommandManager {
         }
 
         if (
-            command.developerOnly &&
+            (command.developerOnly || constraints.includes("developerOnly")) &&
             !client.config.botDevelopers.includes(author.id)
         ) {
             return incorrectPermissions(
@@ -736,7 +751,10 @@ export class CommandManager {
             );
         }
 
-        if (command.guildOnly && !guild) {
+        if (
+            (command.guildOnly || constraints.includes("guildOnly")) &&
+            !guild
+        ) {
             return "This command has to be ran on a server";
         }
 
@@ -824,7 +842,7 @@ export class CommandManager {
                 // prettier-ignore
                 const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
 
-                if (typeof permission !== "boolean") {
+                if (permission !== true) {
                     // prettier-ignore
                     return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
                 }
@@ -833,9 +851,28 @@ export class CommandManager {
                 //prettier-ignore
                 const permission = hasPermission( client.config.defaultUserPermissions, member)
 
-                if (typeof permission !== "boolean") {
+                if (permission !== true) {
                     // prettier-ignore
                     return incorrectPermissions(`You are missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`)
+                }
+            }
+            for (const permission of constraints) {
+                if (
+                    permission !== "overideGuildBlacklist" &&
+                    permission !== "overideUserBlacklist" &&
+                    permission !== "guildOnly" &&
+                    permission !== "developerOnly" &&
+                    guild.me &&
+                    member
+                ) {
+                    // prettier-ignore
+                    const userPermission = hasPermission( [permission], member)
+
+                    if (userPermission !== true) {
+                        // prettier-ignore
+                        return incorrectPermissions(`You are missing the ${userPermission[1].toLowerCase().replace(/_/g, " ")} to run this command`
+                        );
+                    }
                 }
             }
         }

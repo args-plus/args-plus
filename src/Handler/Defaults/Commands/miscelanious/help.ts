@@ -1,5 +1,6 @@
 import { Guild, GuildMember } from "discord.js";
 import { Command } from "../../..";
+import { Constraint } from "../../../Interfaces";
 
 const command = new Command("help");
 command.description = "Displays the commands you can use";
@@ -42,12 +43,34 @@ command.run = async (client, commandRan) => {
         return prefixes;
     };
     const canRunCommand = (command: Command): boolean => {
+        let constraints: Constraint[] = [];
+
+        if (
+            typeof command.category === "string" &&
+            !command.overideConstraints
+        ) {
+            const findCategory = client.categories.get(command.category);
+
+            if (findCategory) {
+                constraints = findCategory[1];
+            }
+        }
+
         if (client.disabledCommandManager.isDisabledCommand(command.name)) {
             return false;
         }
 
-        // prettier-ignore
-        if(command.developerOnly && !client.config.botDevelopers.includes(author.id)){
+        if (
+            (command.developerOnly || constraints.includes("developerOnly")) &&
+            !client.config.botDevelopers.includes(author.id)
+        ) {
+            return false;
+        }
+
+        if (
+            (command.guildOnly || constraints.includes("guildOnly")) &&
+            !guild
+        ) {
             return false;
         }
 
@@ -80,13 +103,20 @@ command.run = async (client, commandRan) => {
             }
         }
 
-        // prettier-ignore
-        if(guild && client.blacklistedGuildIds.includes(guild.id) && !command.overideGuildBlacklist){
+        if (
+            guild &&
+            client.blacklistedGuildIds.includes(guild.id) &&
+            (!command.overideGuildBlacklist ||
+                !constraints.includes("overideGuildBlacklist"))
+        ) {
             return false;
         }
 
-        // prettier-ignore
-        if(client.blacklistedUserIds.includes(author.id) && !command.overideUserBlacklist){
+        if (
+            client.blacklistedUserIds.includes(author.id) &&
+            (!command.overideUserBlacklist ||
+                !constraints.includes("overideUserBlacklist"))
+        ) {
             return false;
         }
 
@@ -99,7 +129,19 @@ command.run = async (client, commandRan) => {
             }
             for (const permission of command.userPermissions) {
                 if (!channel.permissionsFor(member).has(permission)) {
-                    continue;
+                    hasPermissions = false;
+                }
+            }
+            for (const permission of constraints) {
+                if (
+                    permission !== "overideGuildBlacklist" &&
+                    permission !== "overideUserBlacklist" &&
+                    permission !== "guildOnly" &&
+                    permission !== "developerOnly"
+                ) {
+                    if (!channel.permissionsFor(member).has(permission)) {
+                        hasPermissions = false;
+                    }
                 }
             }
             if (!hasPermissions) {
@@ -151,7 +193,7 @@ command.run = async (client, commandRan) => {
                     const categoryDescription =
                         client.categories.get(categoryName);
                     if (categoryDescription) {
-                        currentCategoryText = `**${categoryName}:** __${categoryDescription}__\n`;
+                        currentCategoryText = `**${categoryName}:** __${categoryDescription[0]}__\n`;
                     } else {
                         currentCategoryText += `**${categoryName}:** __Category has no description__\n`;
                     }
