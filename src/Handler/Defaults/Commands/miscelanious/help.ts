@@ -27,10 +27,12 @@ command.run = async (client, commandRan) => {
     const getPrefixes = async (command: Command) => {
         let prefixes = [];
 
-        if (guild && client.cachedGuildPrefixes.has(guild.id)) {
-            prefixes.push(await client.utils.getGuildPrefix(guild));
-        } else {
-            prefixes.push(client.utils.getGlobalPrefix());
+        if (client.config.useChatCommands) {
+            if (guild && client.cachedGuildPrefixes.has(guild.id)) {
+                prefixes.push(await client.utils.getGuildPrefix(guild));
+            } else {
+                prefixes.push(client.utils.getGlobalPrefix());
+            }
         }
 
         if (
@@ -156,9 +158,10 @@ command.run = async (client, commandRan) => {
         let helpText = "";
         let currentCategoryText = "";
 
-        const addCommandToText = async (command: Command) => {
-            let prefixes = await getPrefixes(command);
-
+        const addCommandToText = async (
+            command: Command,
+            prefixes: string[]
+        ) => {
             let commandDescription =
                 command.description.length !== 0 &&
                 client.config.helpCommandCommandDescription
@@ -192,6 +195,11 @@ command.run = async (client, commandRan) => {
                     continue;
                 }
 
+                let prefixes = await getPrefixes(command);
+                if (prefixes.length === 0) {
+                    continue;
+                }
+
                 if (currentCategoryText.length === 0) {
                     const categoryDescription =
                         client.categories.get(categoryName);
@@ -207,7 +215,7 @@ command.run = async (client, commandRan) => {
                     }
                 }
 
-                await addCommandToText(command);
+                await addCommandToText(command, prefixes);
             }
             if (currentCategoryText.length !== 0) currentCategoryText += `\n`;
             helpText += currentCategoryText;
@@ -224,11 +232,16 @@ command.run = async (client, commandRan) => {
                 continue;
             }
 
+            let prefixes = await getPrefixes(command);
+            if (prefixes.length === 0) {
+                continue;
+            }
+
             if (currentCategoryText.length === 0) {
                 currentCategoryText += `**Commands with no category**\n`;
             }
 
-            await addCommandToText(command);
+            await addCommandToText(command, prefixes);
         }
 
         if (currentCategoryText.length !== 0) {
