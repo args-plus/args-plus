@@ -192,10 +192,15 @@ command.run = async (client, commandRan) => {
                 if (currentCategoryText.length === 0) {
                     const categoryDescription =
                         client.categories.get(categoryName);
-                    if (categoryDescription) {
-                        currentCategoryText = `**${categoryName}:** __${categoryDescription[0]}__\n`;
-                    } else {
+                    if (
+                        categoryDescription &&
+                        client.config.helpCommandCategoryDescription
+                    ) {
+                        currentCategoryText += `**${categoryName}:** __${categoryDescription[0]}__\n`;
+                    } else if (client.config.helpCommandCategoryDescription) {
                         currentCategoryText += `**${categoryName}:** __Category has no description__\n`;
+                    } else {
+                        currentCategoryText += `**${categoryName}**\n`;
                     }
                 }
 
