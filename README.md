@@ -114,11 +114,12 @@ In visual studio code press `control + shift + p` to open the command pallete (y
 <br />
 Your command handler _should_ be updated
 
-[discord.js]: https://discord.js.org/#/
 [gitcloneguide]: https://stackoverflow.com/questions/68775869/support-for-password-authentication-was-removed-please-use-a-personal-access-to/68781050#68781050
 [image1]: https://github.com/abisammy/args-plus-guide/blob/master/images/one.png?raw=true
 [image2]: https://github.com/abisammy/args-plus-guide/blob/master/images/two.png?raw=true
 [image4]: https://github.com/abisammy/args-plus-guide/blob/master/images/four.png?raw=true
 [image5]: https://github.com/abisammy/args-plus-guide/blob/master/images/five.png?raw=true
 [image6]: https://github.com/abisammy/args-plus-guide/blob/master/images/six.png?raw=true
-[image7]: https://github.com/abisammy/args-plus-guide/blob/master/images/seven.png?raw=true -->
+[image7]: https://github.com/abisammy/args-plus-guide/blob/master/images/seven.png?raw=true  -->
+
+[discord.js]: https://discord.js.org/#/
