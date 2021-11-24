@@ -209,7 +209,7 @@ command.run = async (client, commandRan) => {
 
                 await addCommandToText(command);
             }
-            currentCategoryText += `\n`;
+            if (currentCategoryText.length !== 0) currentCategoryText += `\n`;
             helpText += currentCategoryText;
         }
 
