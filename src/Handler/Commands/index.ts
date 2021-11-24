@@ -39,6 +39,7 @@ export class ReturnCommand {
     args: ReturnArgument[] = [];
     commandRepliedTo: boolean = false;
     client: ExtendedClient;
+    public returnValues: any[] = [];
 
     constructor(
         commandClass: Command,
