@@ -1,6 +1,5 @@
-import { config } from "dotenv";
-import { Command } from "../../../Commands";
-import { GuildPrefixModel } from "../../Schemas";
+import { Command } from "../../Handler";
+import { GuildPrefixModel } from "../../Handler/Defaults/Schemas";
 
 const command = new Command("prefix");
 command.aliases = ["setprefix"];

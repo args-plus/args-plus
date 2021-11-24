@@ -1,5 +1,5 @@
 import { CommandInteraction, Message, MessageEmbed } from "discord.js";
-import { Command } from "../../../Commands";
+import { Command } from "../../Handler";
 
 const command = new Command("ping");
 command.aliases = ["latency"];

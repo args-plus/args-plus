@@ -1,1 +1,0 @@
-Commands that can only be ran by bot bot developers

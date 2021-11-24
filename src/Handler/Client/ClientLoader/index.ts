@@ -307,12 +307,9 @@ export class ItemLoader {
             if (category === null) {
                 const commandPathArray = dir.split("/");
                 // prettier-ignore
-                const commandCategory = commandPathArray[commandPathArray.length - 2].toLowerCase();
+                const commandCategory = commandPathArray[commandPathArray.length - 2];
 
-                if (
-                    commandCategory !== "commands" &&
-                    commandCategory !== "defaultcommands"
-                ) {
+                if (commandCategory !== "Commands") {
                     command[1].category = commandCategory;
                     addCategory(commandCategory);
                     commandsToReload.push(command[1]);
