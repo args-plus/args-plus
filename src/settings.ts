@@ -4,8 +4,8 @@ const settings = new ClientConfig("ts!");
 // General configs
 settings.useChatCommands = true;
 settings.indentMessageContent = false;
-settings.botDevelopers = ["468128787884670986"];
-settings.autoRemoveCommands = false;
+settings.botDevelopers = [];
+settings.autoRemoveCommands = true;
 
 // Message configs
 settings.messagesOrEmbeds = "embeds";
@@ -14,7 +14,7 @@ settings.errorColor = "RED";
 settings.sendTimestamp = false;
 settings.embedIcon = false;
 settings.embedFooter = false;
-settings.sendMessageWithoutPermissions = false;
+settings.sendMessageWithoutPermissions = true;
 
 // Slash commands
 settings.loadGuildSlashCommands = false;
@@ -24,16 +24,34 @@ settings.loadGlobalSlashCommands = false;
 // Checks and permissions
 settings.defaultClientChecks = [];
 settings.defaultUserChecks = [];
-settings.defaultClientPermissions = [];
+settings.defaultClientPermissions = ["EMBED_LINKS", "SEND_MESSAGES"];
 settings.defaultUserPermissions = [];
 
 // Blacklisted guilds and users
-settings.blacklistedGuilds = [];
-settings.blacklistedUsers = [];
+settings.blacklistedGuilds = [
+    /*
+    Example:
+
+    {
+        id: "12345678",
+        reason: "Too cool"
+    },
+    {
+        id: "87654321",
+        reason: "Way too cool"
+    }
+    */
+];
+settings.blacklistedUsers = [
+    /*
+    Use the same format as blacklisting a guild
+    */
+];
 
 // Help command settings
-settings.helpCommandCategoryDescription = true;
 settings.helpCommandAliases = true;
+settings.helpCommandCommandDescription = true;
+settings.helpCommandCategoryDescription = true;
 
 // Logs and errors
 settings.sendErrorMessages = true;

@@ -160,7 +160,10 @@ command.run = async (client, commandRan) => {
             let prefixes = await getPrefixes(command);
 
             let commandDescription =
-                command.description.length !== 0 ? command.description : false;
+                command.description.length !== 0 &&
+                client.config.helpCommandCommandDescription
+                    ? command.description
+                    : false;
 
             currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
@@ -192,16 +195,21 @@ command.run = async (client, commandRan) => {
                 if (currentCategoryText.length === 0) {
                     const categoryDescription =
                         client.categories.get(categoryName);
-                    if (categoryDescription) {
-                        currentCategoryText = `**${categoryName}:** __${categoryDescription[0]}__\n`;
-                    } else {
+                    if (
+                        categoryDescription &&
+                        client.config.helpCommandCategoryDescription
+                    ) {
+                        currentCategoryText += `**${categoryName}:** __${categoryDescription[0]}__\n`;
+                    } else if (client.config.helpCommandCategoryDescription) {
                         currentCategoryText += `**${categoryName}:** __Category has no description__\n`;
+                    } else {
+                        currentCategoryText += `**${categoryName}**\n`;
                     }
                 }
 
                 await addCommandToText(command);
             }
-            currentCategoryText += `\n`;
+            if (currentCategoryText.length !== 0) currentCategoryText += `\n`;
             helpText += currentCategoryText;
         }
 

@@ -17,7 +17,7 @@ export class ClientConfig {
     public sendTimestamp: boolean = false;
     public embedIcon: string | false = false;
     public embedFooter: string | false = false;
-    public sendMessageWithoutPermissions: boolean = false;
+    public sendMessageWithoutPermissions: boolean = true;
     public loadGuildSlashCommands: boolean = false;
     public slashCommandGuilds: string[] = [];
     public loadGlobalSlashCommands: boolean = false;
@@ -30,6 +30,7 @@ export class ClientConfig {
     public botDevelopers: string[] = [];
     public helpCommandCategoryDescription: boolean = true;
     public helpCommandAliases: boolean = true;
+    public helpCommandCommandDescription: boolean = true;
     public blacklistedGuilds: Blacklist[] = [];
     public blacklistedUsers: Blacklist[] = [];
     public sendErrorMessages: boolean = true;
@@ -37,5 +38,5 @@ export class ClientConfig {
     public logMessages: boolean = true;
     public logDebugs: boolean = true;
     public logErrors: boolean = true;
-    public autoRemoveCommands: boolean = false;
+    public autoRemoveCommands: boolean = true;
 }
