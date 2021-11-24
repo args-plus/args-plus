@@ -1,6 +1,6 @@
 import { Guild, GuildMember } from "discord.js";
-import { Command } from "../../..";
-import { Constraint } from "../../../Interfaces";
+import { Command } from "../../Handler";
+import { Constraint } from "../../Handler/Interfaces";
 
 const command = new Command("help");
 command.description = "Displays the commands you can use";

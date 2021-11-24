@@ -1,4 +1,4 @@
-import { Command } from "../../../Commands";
+import { Command } from "../../Handler/Commands";
 
 const command = new Command("globalprefix");
 command.aliases = ["gprefix", "setgprefix", "setglobalprefix"];

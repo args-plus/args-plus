@@ -1,4 +1,4 @@
-import { Command } from "../../..";
+import { Command } from "../../Handler";
 
 const command = new Command("toggle");
 command.description = "Toggle a command on or off";

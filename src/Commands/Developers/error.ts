@@ -1,4 +1,4 @@
-import { Command } from "../../../Commands";
+import { Command } from "../../Handler/Commands";
 
 const command = new Command("error");
 command.description = "Shows an example error from tghe bot";
