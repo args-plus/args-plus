@@ -28,8 +28,25 @@ settings.defaultClientPermissions = ["EMBED_LINKS", "SEND_MESSAGES"];
 settings.defaultUserPermissions = [];
 
 // Blacklisted guilds and users
-settings.blacklistedGuilds = [];
-settings.blacklistedUsers = [];
+settings.blacklistedGuilds = [
+    /*
+    Example:
+
+    {
+        id: "12345678",
+        reason: "Too cool"
+    },
+    {
+        id: "87654321",
+        reason: "Way too cool"
+    }
+    */
+];
+settings.blacklistedUsers = [
+    /*
+    Use the same format as blacklisting a guild
+    */
+];
 
 // Help command settings
 settings.helpCommandAliases = true;
