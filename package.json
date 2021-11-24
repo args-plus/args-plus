@@ -1,6 +1,6 @@
 {
     "name": "args-plus",
-    "version": "0.3.6 Beta",
+    "version": "0.3.6",
     "description": "",
     "main": "src/index.ts",
     "scripts": {
