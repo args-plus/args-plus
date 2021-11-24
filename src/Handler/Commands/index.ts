@@ -11,7 +11,9 @@ import {
     Collection,
     Util,
     ColorResolvable,
-    MessageEmbed
+    MessageEmbed,
+    DiscordAPIError,
+    Constants
 } from "discord.js";
 import ExtendedClient from "../Client";
 import { Item } from "../Client/ClientLoader";
@@ -258,7 +260,8 @@ export class ReturnCommand {
         if (commandRan instanceof Message) {
             if (
                 messagesOrEmbeds === "messages" ||
-                (messagesOrEmbeds === "embeds" &&
+                (config.sendMessageWithoutPermissions &&
+                    messagesOrEmbeds === "embeds" &&
                     commandRan.channel.type !== "DM" &&
                     commandRan.guild &&
                     commandRan.guild.me &&
@@ -267,29 +270,66 @@ export class ReturnCommand {
                         .has("EMBED_LINKS"))
             ) {
                 const messages = this.getTextMessage(body, header);
-                let lastMessage = await commandRan.channel.send(messages[0]);
+                let lastMessage = await commandRan.channel
+                    .send(messages[0])
+                    .catch((error: DiscordAPIError) => {
+                        if (
+                            error.code !==
+                            Constants.APIErrors.MISSING_PERMISSIONS
+                        ) {
+                            client.console.error(error.message);
+                        }
+                    });
                 messages.shift();
                 for (const message of messages) {
-                    lastMessage = await commandRan.channel.send(message);
+                    lastMessage = await commandRan.channel
+                        .send(message)
+                        .catch((error: DiscordAPIError) => {
+                            if (
+                                error.code !==
+                                Constants.APIErrors.MISSING_PERMISSIONS
+                            ) {
+                                client.console.error(error.message);
+                            }
+                        });
                 }
                 return lastMessage;
             } else {
                 const embeds = this.getEmbedMessages(body, color, header);
-                let lastMessage = await commandRan.channel.send({
-                    embeds: [embeds[0]]
-                });
+                let lastMessage = await commandRan.channel
+                    .send({
+                        embeds: [embeds[0]]
+                    })
+                    .catch((error: DiscordAPIError) => {
+                        if (
+                            error.code !==
+                            Constants.APIErrors.MISSING_PERMISSIONS
+                        ) {
+                            client.console.error(error.message);
+                        }
+                    });
                 embeds.shift();
                 for (const embed of embeds) {
-                    lastMessage = await commandRan.channel.send({
-                        embeds: [embed]
-                    });
+                    lastMessage = await commandRan.channel
+                        .send({
+                            embeds: [embed]
+                        })
+                        .catch((error: DiscordAPIError) => {
+                            if (
+                                error.code !==
+                                Constants.APIErrors.MISSING_PERMISSIONS
+                            ) {
+                                client.console.error(error.message);
+                            }
+                        });
                 }
                 return lastMessage;
             }
         } else {
             if (
                 messagesOrEmbeds === "messages" ||
-                (messagesOrEmbeds === "embeds" &&
+                (config.sendMessageWithoutPermissions &&
+                    messagesOrEmbeds === "embeds" &&
                     commandRan.channel &&
                     commandRan.channel.type !== "DM" &&
                     commandRan.guild &&
@@ -302,10 +342,28 @@ export class ReturnCommand {
                 let lastMessage: null | Message | APIMessage | void = null;
                 for (const message of messages) {
                     if (!this.commandRepliedTo) {
-                        lastMessage = await commandRan.reply(message);
+                        lastMessage = await commandRan
+                            .reply(message)
+                            .catch((error: DiscordAPIError) => {
+                                if (
+                                    error.code !==
+                                    Constants.APIErrors.MISSING_PERMISSIONS
+                                ) {
+                                    client.console.error(error.message);
+                                }
+                            });
                         this.commandRepliedTo = true;
                     } else {
-                        lastMessage = await commandRan.followUp(message);
+                        lastMessage = await commandRan
+                            .followUp(message)
+                            .catch((error: DiscordAPIError) => {
+                                if (
+                                    error.code !==
+                                    Constants.APIErrors.MISSING_PERMISSIONS
+                                ) {
+                                    client.console.error(error.message);
+                                }
+                            });
                     }
                 }
                 if (lastMessage) {
@@ -316,14 +374,32 @@ export class ReturnCommand {
                 let lastMessage: null | Message | APIMessage | void = null;
                 for (const embed of embeds) {
                     if (!this.commandRepliedTo) {
-                        lastMessage = await commandRan.reply({
-                            embeds: [embed]
-                        });
+                        lastMessage = await commandRan
+                            .reply({
+                                embeds: [embed]
+                            })
+                            .catch((error: DiscordAPIError) => {
+                                if (
+                                    error.code !==
+                                    Constants.APIErrors.MISSING_PERMISSIONS
+                                ) {
+                                    client.console.error(error.message);
+                                }
+                            });
                         this.commandRepliedTo = true;
                     } else {
-                        lastMessage = await commandRan.followUp({
-                            embeds: [embed]
-                        });
+                        lastMessage = await commandRan
+                            .followUp({
+                                embeds: [embed]
+                            })
+                            .catch((error: DiscordAPIError) => {
+                                if (
+                                    error.code !==
+                                    Constants.APIErrors.MISSING_PERMISSIONS
+                                ) {
+                                    client.console.error(error.message);
+                                }
+                            });
                     }
                     if (lastMessage) {
                         return lastMessage;
@@ -692,6 +768,81 @@ export class CommandManager {
 
         const { client } = this;
 
+        const arrayIsNotZero = (array: string[]): boolean => {
+            if (array.length === 0) {
+                return false;
+            } else {
+                return true;
+            }
+        };
+
+        const hasPermission = (
+            permissionArray: Permission[],
+            member: GuildMember,
+            channel?: TextBasedChannels,
+            ignoreMessagePermissions?: boolean
+        ): true | [false, string] => {
+            for (const permission of permissionArray) {
+                if (
+                    ignoreMessagePermissions &&
+                    (permission === "VIEW_CHANNEL" ||
+                        permission === "SEND_MESSAGES")
+                ) {
+                    continue;
+                }
+                if (
+                    channel &&
+                    channel.type !== "DM" &&
+                    !channel.permissionsFor(member).has(permission)
+                ) {
+                    return [false, permission];
+                } else if (!member.permissions.has(permission)) {
+                    return [false, permission];
+                }
+            }
+            return true;
+        };
+
+        if (guild && channel) {
+            if (arrayIsNotZero(command.clientPermissions) && guild.me) {
+                // prettier-ignore
+                const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
+
+                if (permission !== true) {
+                    // prettier-ignore
+                    return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
+                }
+            }
+            if (arrayIsNotZero(command.userPermissions) && member) {
+                //prettier-ignore
+                const permission = hasPermission( client.config.defaultUserPermissions, member)
+
+                if (permission !== true) {
+                    // prettier-ignore
+                    return incorrectPermissions(`You are missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`)
+                }
+            }
+            for (const permission of constraints) {
+                if (
+                    permission !== "overideGuildBlacklist" &&
+                    permission !== "overideUserBlacklist" &&
+                    permission !== "guildOnly" &&
+                    permission !== "developerOnly" &&
+                    guild.me &&
+                    member
+                ) {
+                    // prettier-ignore
+                    const userPermission = hasPermission( [permission], member)
+
+                    if (userPermission !== true) {
+                        // prettier-ignore
+                        return incorrectPermissions(`You are missing the ${userPermission[1].toLowerCase().replace(/_/g, " ")} to run this command`
+                        );
+                    }
+                }
+            }
+        }
+
         if (client.disabledCommandManager.isDisabledCommand(command.name)) {
             return [
                 "It has been disabled by my developers",
@@ -758,14 +909,6 @@ export class CommandManager {
             return "This command has to be ran on a server";
         }
 
-        const arrayIsNotZero = (array: string[]): boolean => {
-            if (array.length === 0) {
-                return false;
-            } else {
-                return true;
-            }
-        };
-
         if (
             arrayIsNotZero(command.certainChannelsOnly) &&
             channel &&
@@ -800,80 +943,6 @@ export class CommandManager {
                 return incorrectPermissions(
                     "You do not have the correct roles to run this command"
                 );
-            }
-        }
-
-        const hasPermission = (
-            permissionArray: Permission[],
-            member: GuildMember,
-            channel?: TextBasedChannels,
-            ignoreMessagePermissions?: boolean
-        ): true | [false, string] => {
-            for (const permission of permissionArray) {
-                if (
-                    ignoreMessagePermissions &&
-                    (permission === "VIEW_CHANNEL" ||
-                        permission === "SEND_MESSAGES")
-                ) {
-                    continue;
-                }
-                if (
-                    channel &&
-                    channel.type !== "DM" &&
-                    !channel.permissionsFor(member).has(permission)
-                ) {
-                    return [false, permission];
-                } else if (!member.permissions.has(permission)) {
-                    return [false, permission];
-                }
-            }
-            return true;
-        };
-
-        const validPermission = (
-            permissionArray: Permission[],
-            setting: keyof Command
-        ): boolean => {
-            return arrayIsNotZero(permissionArray) && !command[setting];
-        };
-
-        if (guild && channel) {
-            if (arrayIsNotZero(command.clientPermissions) && guild.me) {
-                // prettier-ignore
-                const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
-
-                if (permission !== true) {
-                    // prettier-ignore
-                    return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
-                }
-            }
-            if (arrayIsNotZero(command.userPermissions) && member) {
-                //prettier-ignore
-                const permission = hasPermission( client.config.defaultUserPermissions, member)
-
-                if (permission !== true) {
-                    // prettier-ignore
-                    return incorrectPermissions(`You are missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`)
-                }
-            }
-            for (const permission of constraints) {
-                if (
-                    permission !== "overideGuildBlacklist" &&
-                    permission !== "overideUserBlacklist" &&
-                    permission !== "guildOnly" &&
-                    permission !== "developerOnly" &&
-                    guild.me &&
-                    member
-                ) {
-                    // prettier-ignore
-                    const userPermission = hasPermission( [permission], member)
-
-                    if (userPermission !== true) {
-                        // prettier-ignore
-                        return incorrectPermissions(`You are missing the ${userPermission[1].toLowerCase().replace(/_/g, " ")} to run this command`
-                        );
-                    }
-                }
             }
         }
 
