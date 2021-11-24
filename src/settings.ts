@@ -32,8 +32,9 @@ settings.blacklistedGuilds = [];
 settings.blacklistedUsers = [];
 
 // Help command settings
-settings.helpCommandCategoryDescription = false;
 settings.helpCommandAliases = false;
+settings.helpCommandCommandDescription = false;
+settings.helpCommandCategoryDescription = false;
 
 // Logs and errors
 settings.sendErrorMessages = true;

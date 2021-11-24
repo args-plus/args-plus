@@ -30,6 +30,7 @@ export class ClientConfig {
     public botDevelopers: string[] = [];
     public helpCommandCategoryDescription: boolean = true;
     public helpCommandAliases: boolean = true;
+    public helpCommandCommandDescription: boolean = true;
     public blacklistedGuilds: Blacklist[] = [];
     public blacklistedUsers: Blacklist[] = [];
     public sendErrorMessages: boolean = true;

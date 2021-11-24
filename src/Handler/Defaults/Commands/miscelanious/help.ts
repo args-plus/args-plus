@@ -160,7 +160,10 @@ command.run = async (client, commandRan) => {
             let prefixes = await getPrefixes(command);
 
             let commandDescription =
-                command.description.length !== 0 ? command.description : false;
+                command.description.length !== 0 &&
+                client.config.helpCommandCommandDescription
+                    ? command.description
+                    : false;
 
             currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
                 command.name
