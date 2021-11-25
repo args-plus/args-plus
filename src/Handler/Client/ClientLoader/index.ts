@@ -158,7 +158,7 @@ export class ItemLoader {
 
             let usage: string;
 
-            if (arg.type !== "customValue") {
+            if (arg.type !== "customValue" && !arg.customValues) {
                 usage = arg.displayName ? arg.displayName : arg.name;
             } else {
                 if (!arg.customValues) {
@@ -184,13 +184,15 @@ export class ItemLoader {
                         .join('", "')
                         .slice(0, lastWordLength * -1 - 3)} or "${lastWord}"`;
                 }
+                if (arg.type !== "customValue") {
+                    options = `${arg.type} or ${options}`;
+                }
                 usage = `${
                     arg.displayName
                         ? `${arg.displayName}: ${options}`
                         : `${arg.name}: ${options}`
                 }`;
             }
-
             if (arg.required) {
                 command.usage.push(`<${usage}>`);
             } else {
