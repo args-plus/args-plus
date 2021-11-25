@@ -1373,11 +1373,7 @@ export class CommandManager {
                     }
 
                     if (timeMentions.length === 0) {
-                        if (requiredArg.required) {
-                            return incorrectUsage();
-                        } else {
-                            continue;
-                        }
+                        return incorrectUsage();
                     }
 
                     let totalTime = 0;
@@ -1592,11 +1588,7 @@ export class CommandManager {
                         }
 
                         if (timeMentions.length === 0) {
-                            if (requiredArg.required) {
-                                return incorrectUsage();
-                            } else {
-                                continue;
-                            }
+                            return incorrectUsage();
                         }
 
                         let totalTime = 0;
