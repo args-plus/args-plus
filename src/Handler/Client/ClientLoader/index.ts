@@ -252,6 +252,22 @@ export class ItemLoader {
             client.aliases.set(alias, command);
         }
 
+        for (const alias of command.hiddenAliases) {
+            if (client.aliases.has(alias) || client.commands.has(alias)) {
+                client.console.warn(
+                    `Failed to load hidden alias: "${alias}", from command: "${command.name}" as it has been used before, either as an alias or command`
+                );
+                continue;
+            }
+            if (!isValidCommandName(alias)) {
+                client.console.warn(
+                    `Failed to load hidden alias: "${alias}", from command: "${command.name}", a command alias must have no spaces and be all lower case`
+                );
+                continue;
+            }
+            client.aliases.set(alias, command);
+        }
+
         // prettier-ignore
         if(!command.overideDefaultClientPermissions){
             command.clientPermissions = [...client.config.defaultClientPermissions, ...command.clientPermissions]
@@ -395,6 +411,9 @@ export class ItemLoader {
             client.commands.set(command.name, command);
 
             for (const alias of command.aliases) {
+                client.aliases.set(alias, command);
+            }
+            for (const alias of command.hiddenAliases) {
                 client.aliases.set(alias, command);
             }
         }

@@ -13,7 +13,8 @@ import {
     ColorResolvable,
     MessageEmbed,
     DiscordAPIError,
-    Constants
+    Constants,
+    MessageAttachment
 } from "discord.js";
 import ExtendedClient from "../Client";
 import { Item } from "../Client/ClientLoader";
@@ -249,11 +250,10 @@ export class ReturnCommand {
     private async sendMessageBase(
         body: string,
         color: ColorResolvable,
-        header?: string
+        header?: string,
+        overideEmbed?: boolean
     ) {
         const { client, commandRan } = this;
-
-        // FIXME: Catch for errors
 
         const { config } = client;
         const { messagesOrEmbeds } = config;
@@ -268,7 +268,8 @@ export class ReturnCommand {
                     commandRan.guild.me &&
                     !commandRan.channel
                         .permissionsFor(commandRan.guild.me)
-                        .has("EMBED_LINKS"))
+                        .has("EMBED_LINKS")) ||
+                overideEmbed
             ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage = await commandRan.channel
@@ -337,7 +338,8 @@ export class ReturnCommand {
                     commandRan.guild.me &&
                     !commandRan.channel
                         .permissionsFor(commandRan.guild.me)
-                        .has("EMBED_LINKS"))
+                        .has("EMBED_LINKS")) ||
+                overideEmbed
             ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage: null | Message | APIMessage | void = null;
@@ -424,6 +426,15 @@ export class ReturnCommand {
             body,
             this.client.config.errorColor,
             header
+        );
+    }
+
+    public async sendMessageNoEmbed(body: string, header?: string) {
+        return await this.sendMessageBase(
+            body,
+            this.client.config.errorColor,
+            header,
+            true
         );
     }
 }
@@ -517,6 +528,7 @@ export class Command extends Item {
     public args: Argument[] = [];
     public description: string = "";
     public aliases: string[] = [];
+    public hiddenAliases: string[] = [];
     public cooldownNumber: number = 0;
     public developerOnly: boolean = false;
     public guildOnly: boolean = false;
@@ -627,6 +639,8 @@ export class CommandManager {
             if (cachedGuildPrefix) {
                 if (message.content.startsWith(cachedGuildPrefix)) {
                     return cachedGuildPrefix;
+                } else {
+                    return false;
                 }
             } else {
                 const findGuildPrefix = await GuildPrefixModel.findById(
@@ -642,6 +656,8 @@ export class CommandManager {
                     ) {
                         return findGuildPrefix.guildPrefix;
                     }
+                } else {
+                    return false;
                 }
             }
         }
@@ -794,10 +810,10 @@ export class CommandManager {
                 if (
                     channel &&
                     channel.type !== "DM" &&
-                    !channel.permissionsFor(member).has(permission)
+                    !member.permissionsIn(channel).has(permission)
                 ) {
                     return [false, permission];
-                } else if (!member.permissions.has(permission)) {
+                } else if (!channel && !member.permissions.has(permission)) {
                     return [false, permission];
                 }
             }
@@ -808,7 +824,6 @@ export class CommandManager {
             if (arrayIsNotZero(command.clientPermissions) && guild.me) {
                 // prettier-ignore
                 const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
-
                 if (permission !== true) {
                     // prettier-ignore
                     return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
@@ -816,7 +831,7 @@ export class CommandManager {
             }
             if (arrayIsNotZero(command.userPermissions) && member) {
                 //prettier-ignore
-                const permission = hasPermission( client.config.defaultUserPermissions, member)
+                const permission = hasPermission( command.userPermissions, member)
 
                 if (permission !== true) {
                     // prettier-ignore
@@ -864,13 +879,15 @@ export class CommandManager {
             )[0];
 
             if (blacklistObject.reason) {
-                return incorrectPermissions(
-                    `This server is currently blacklisted for: \`\`${blacklistObject.reason}\`\``
-                );
+                return [
+                    `This server is currently blacklisted for: \`\`${blacklistObject.reason}\`\``,
+                    "Soz can't help you here, let's go somewhere else"
+                ];
             } else {
-                return incorrectPermissions(
-                    "This server is currently blacklisted"
-                );
+                return [
+                    "This server is currently blacklisted",
+                    "Soz can't help you here, lets go somewhere else"
+                ];
             }
         }
 
@@ -886,11 +903,12 @@ export class CommandManager {
             )[0];
 
             if (blacklistObject.reason) {
-                return incorrectPermissions(
-                    `You are currently blacklisted for: \`\`${blacklistObject.reason}\`\``
-                );
+                return [
+                    `You are currently blacklisted for: \`\`${blacklistObject.reason}\`\``,
+                    "Lol no"
+                ];
             } else {
-                return incorrectPermissions("You are currently blacklisted");
+                return ["You are currently blacklisted", "Lol no"];
             }
         }
 
@@ -1073,7 +1091,7 @@ export class CommandManager {
                     continue;
                 }
 
-                const lookForMention = (
+                const lookForMention = async (
                     text: string,
                     mentionToLookFor: "channels" | "members" | "users"
                 ) => {
@@ -1098,7 +1116,6 @@ export class CommandManager {
                                 ...newArg(text),
                                 stringValue: mention.id
                             };
-
                             // prettier-ignore
                             if (mentionToLookFor === "users" && mention instanceof User){
                                 arg.userMention = mention
@@ -1107,13 +1124,12 @@ export class CommandManager {
                             } else if (mentionToLookFor === "members" && mention instanceof GuildMember){
                                 arg.guildMemberMention = mention
                             }
+                            return arg;
                         }
-                        return {
-                            ...newArg(text)
-                        };
                     } else if (mentionToLookFor !== "users" && guild) {
-                        const findMention =
-                            guild[mentionToLookFor].cache.get(text);
+                        const findMention = await guild[mentionToLookFor].fetch(
+                            text
+                        );
 
                         if (!findMention) {
                             return false;
@@ -1133,7 +1149,6 @@ export class CommandManager {
                         ) {
                             arg.guildMemberMention = findMention;
                         }
-
                         return arg;
                     } else if (mentionToLookFor === "users") {
                         const findUser = this.client.users.cache.get(text);
@@ -1176,15 +1191,21 @@ export class CommandManager {
                         numberValue: argNumber
                     });
                 } else if (requiredArg.type === "channelMention") {
-                    const findChannel = lookForMention(providedArg, "channels");
+                    const findChannel = await lookForMention(
+                        providedArg,
+                        "channels"
+                    );
                     if (!findChannel) return incorrectUsage();
                     returnArgs.push(findChannel);
                 } else if (requiredArg.type === "memberMention") {
-                    const findMember = lookForMention(providedArg, "members");
+                    const findMember = await lookForMention(
+                        providedArg,
+                        "members"
+                    );
                     if (findMember === false) return incorrectUsage();
                     returnArgs.push(findMember);
                 } else if (requiredArg.type === "userMention") {
-                    const findUser = lookForMention(providedArg, "users");
+                    const findUser = await lookForMention(providedArg, "users");
                     if (findUser === false) return incorrectUsage();
                     returnArgs.push(findUser);
                 } else if (requiredArg.type === "customValue") {
@@ -1207,6 +1228,20 @@ export class CommandManager {
                         returnArgs.push({...newArg(providedArg), stringValue: providedArg})
                     }
                 } else if (requiredArg.type === "time") {
+                    if (requiredArg.customValues) {
+                        let argToLookFor = requiredArg.allowLowerCaseCustomValue
+                            ? providedArg.toLowerCase()
+                            : providedArg;
+
+                        if (requiredArg.customValues.includes(argToLookFor)) {
+                            returnArgs.push({
+                                ...newArg(providedArg),
+                                stringValue: argToLookFor
+                            });
+                            continue;
+                        }
+                    }
+
                     const remainingArgs = args.splice(
                         index,
                         args.length - index
@@ -1254,8 +1289,10 @@ export class CommandManager {
                         if (!!nextArg) {
                             timeEndingNextArg = endsWithTimeEnding(nextArg);
                         }
-
-                        if (!timeEndingArg || !timeEndingNextArg) {
+                        if (
+                            timeEndingArg === false &&
+                            timeEndingNextArg === false
+                        ) {
                             return false;
                         } else if (timeEndingArg) {
                             return [
@@ -1264,24 +1301,24 @@ export class CommandManager {
                                 timeEndingArg[1],
                                 timeEndingArg[2]
                             ];
-                        } else {
+                        } else if (timeEndingNextArg) {
                             return [
                                 true,
                                 timeEndingNextArg[0],
                                 timeEndingNextArg[1],
                                 timeEndingNextArg[2]
                             ];
+                        } else {
+                            return false;
                         }
                     };
 
                     let timeMentions: [string, ReturnTime][] = [];
-
                     for (let i = 0; i < remainingArgs.length; i++) {
                         const remainingArg = remainingArgs[i].toLowerCase();
                         const endsWithEnding = endsWithOrNextArg(i);
 
                         args.push(remainingArgs[i]);
-
                         if (!endsWithEnding) {
                             continue;
                         }
