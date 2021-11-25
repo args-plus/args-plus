@@ -751,9 +751,43 @@ export class CommandManager {
         return false;
     }
 
+    private returnMessage(
+        command: Command,
+        responses: [string[], string[] | null],
+        values?: [string, string][]
+    ): [string, string] {
+        const message: string = this.client.utils.randomElement(responses[0]);
+
+        const header: string | null = responses[1]
+            ? this.client.utils.randomElement(responses[1])
+            : null;
+
+        let newMessage = message;
+        let newHeader = header;
+
+        if (values) {
+            for (const value of values) {
+                newMessage = message.replace(
+                    new RegExp(`%${value[0].toUpperCase()}`, "g"),
+                    value[1]
+                );
+
+                if (header)
+                    newHeader = header.replace(
+                        new RegExp(`%${value[1].toUpperCase()}`, "g"),
+                        value[0]
+                    );
+            }
+        }
+        return [
+            newMessage.replace(/%COMMAND/g, command.name),
+            newHeader ? newHeader.replace(/%COMMAND/g, command.name) : ""
+        ];
+    }
+
     private async runCommandChecks(
         returnCommand: ReturnCommand
-    ): Promise<boolean | string | [string, string]> {
+    ): Promise<boolean | [string, string]> {
         const guild = returnCommand.getGuild();
         const author = returnCommand.getAuthor();
         const channel = returnCommand.getChannel();
@@ -766,6 +800,8 @@ export class CommandManager {
 
         let constraints: Constraint[] = [];
 
+        const { responses } = this.client.config;
+
         if (typeof category === "string" && !command.overideConstraints) {
             const findCategory = this.client.categories.get(category);
 
@@ -774,13 +810,11 @@ export class CommandManager {
             }
         }
 
-        const incorrectPermissions = (
-            message: string
-        ): string | [string, string] => {
-            return [
-                message,
-                "You do not have the correct permissions to run this command!"
-            ];
+        const returnMessage = (
+            responses: [string[], string[] | null],
+            values?: [string, string][]
+        ) => {
+            return this.returnMessage(command, responses, values);
         };
 
         const { client } = this;
@@ -825,8 +859,12 @@ export class CommandManager {
                 // prettier-ignore
                 const permission = hasPermission( command.clientPermissions, guild.me, channel, true);
                 if (permission !== true) {
-                    // prettier-ignore
-                    return `I am missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`
+                    return returnMessage(responses.missingClientPermissions, [
+                        [
+                            "permission",
+                            permission[1].toLowerCase().replace(/_/g, " ")
+                        ]
+                    ]);
                 }
             }
             if (arrayIsNotZero(command.userPermissions) && member) {
@@ -834,8 +872,12 @@ export class CommandManager {
                 const permission = hasPermission( command.userPermissions, member)
 
                 if (permission !== true) {
-                    // prettier-ignore
-                    return incorrectPermissions(`You are missing the ${permission[1].toLowerCase().replace(/_/g, " ")} to run this command`)
+                    return returnMessage(responses.missingUserPermissions, [
+                        [
+                            "permission",
+                            permission[1].toLowerCase().replace(/_/g, " ")
+                        ]
+                    ]);
                 }
             }
             for (const permission of constraints) {
@@ -851,19 +893,21 @@ export class CommandManager {
                     const userPermission = hasPermission( [permission], member)
 
                     if (userPermission !== true) {
-                        // prettier-ignore
-                        return incorrectPermissions(`You are missing the ${userPermission[1].toLowerCase().replace(/_/g, " ")} to run this command`
-                        );
+                        return returnMessage(responses.missingUserPermissions, [
+                            [
+                                "permission",
+                                userPermission[1]
+                                    .toLowerCase()
+                                    .replace(/_/g, " ")
+                            ]
+                        ]);
                     }
                 }
             }
         }
 
         if (client.disabledCommandManager.isDisabledCommand(command.name)) {
-            return [
-                "It has been disabled by my developers",
-                "I could not run that command"
-            ];
+            return returnMessage(responses.disabledCommand);
         }
 
         if (
@@ -879,15 +923,11 @@ export class CommandManager {
             )[0];
 
             if (blacklistObject.reason) {
-                return [
-                    `This server is currently blacklisted for: \`\`${blacklistObject.reason}\`\``,
-                    "Soz can't help you here, let's go somewhere else"
-                ];
+                return returnMessage(responses.blacklistedGuild, [
+                    ["reason", blacklistObject.reason]
+                ]);
             } else {
-                return [
-                    "This server is currently blacklisted",
-                    "Soz can't help you here, lets go somewhere else"
-                ];
+                return returnMessage(responses.blacklistedGuildNoReason);
             }
         }
 
@@ -903,12 +943,11 @@ export class CommandManager {
             )[0];
 
             if (blacklistObject.reason) {
-                return [
-                    `You are currently blacklisted for: \`\`${blacklistObject.reason}\`\``,
-                    "Lol no"
-                ];
+                return returnMessage(responses.blacklistedUser, [
+                    ["reason", blacklistObject.reason]
+                ]);
             } else {
-                return ["You are currently blacklisted", "Lol no"];
+                return returnMessage(responses.blacklistedUserNoReason);
             }
         }
 
@@ -916,16 +955,14 @@ export class CommandManager {
             (command.developerOnly || constraints.includes("developerOnly")) &&
             !client.config.botDevelopers.includes(author.id)
         ) {
-            return incorrectPermissions(
-                "This command can only be ran by bot developers"
-            );
+            return returnMessage(responses.developerOnly);
         }
 
         if (
             (command.guildOnly || constraints.includes("guildOnly")) &&
             !guild
         ) {
-            return "This command has to be ran on a server";
+            return returnMessage(responses.guildOnly);
         }
 
         if (
@@ -933,9 +970,7 @@ export class CommandManager {
             channel &&
             !command.certainChannelsOnly.includes(channel.id)
         ) {
-            return incorrectPermissions(
-                "This command cannot be ran in this channel"
-            );
+            return returnMessage(responses.incorrectChannel);
         }
 
         if (
@@ -943,9 +978,7 @@ export class CommandManager {
             guild &&
             !command.certainGuildsOnly.includes(guild.id)
         ) {
-            return incorrectPermissions(
-                "This command cannot be ran in this server"
-            );
+            return returnMessage(responses.incorrectGuild);
         }
 
         if (command.certainRolesOnly.length !== 0 && guild && member) {
@@ -959,9 +992,7 @@ export class CommandManager {
             }
 
             if (!hasValidRole && !member.permissions.has("ADMINISTRATOR")) {
-                return incorrectPermissions(
-                    "You do not have the correct roles to run this command"
-                );
+                return returnMessage(responses.missingRoles);
             }
         }
 
@@ -1013,11 +1044,21 @@ export class CommandManager {
                 const timeDifference = Date.now() - cooldown;
 
                 if (command.cooldownNumber > timeDifference) {
-                    return `This command has a \`\`${this.client.utils.msToTime(
-                        command.cooldownNumber
-                    )}\`\` cooldown!\nYou have \`\`${this.client.utils.msToTime(
-                        command.cooldownNumber - timeDifference
-                    )}\`\` left!`;
+                    // return `This command has a \`\`${this.client.utils.msToTime(
+                    //     command.cooldownNumber
+                    // )}\`\` cooldown!\nYou have \`\`${this.client.utils.msToTime(
+                    //     command.cooldownNumber
+                    // )}\`\` left!`;
+                    return returnMessage(responses.cooldown, [
+                        [
+                            "amount",
+                            this.client.utils.msToTime(command.cooldownNumber)
+                        ],
+                        [
+                            "timeleft",
+                            this.client.utils.msToTime(command.cooldownNumber)
+                        ]
+                    ]);
                 } else {
                     command.activeCooldowns.delete(author.id);
                 }
@@ -1600,9 +1641,7 @@ export class CommandManager {
 
         const commandChecks = await this.runCommandChecks(returnCommand);
 
-        if (typeof commandChecks === "string") {
-            return returnCommand.sendError(commandChecks);
-        } else if (typeof commandChecks !== "boolean") {
+        if (typeof commandChecks !== "boolean") {
             return returnCommand.sendError(commandChecks[0], commandChecks[1]);
         } else if (commandChecks === false) {
             return;
@@ -1618,10 +1657,15 @@ export class CommandManager {
         }
 
         if (args[0] === false) {
-            return returnCommand.sendError(
-                `Correct usage: \`\`${prefixUsed}\`\` ${args[1]}`,
-                `Incorrect usage for ${returnCommand.commandClass.name}`
+            const usageMessage = this.returnMessage(
+                command,
+                this.client.config.responses.incorrectArgs,
+                [
+                    ["prefixused", prefixUsed],
+                    ["usage", args[1]]
+                ]
             );
+            return returnCommand.sendError(...usageMessage);
         }
 
         for (const preRunFunction of this.client.preCommandFunctions) {
@@ -1641,17 +1685,15 @@ export class CommandManager {
             if (command.run) command.run(this.client, returnCommand);
         } catch (error: any) {
             this.client.console.error(error);
-            if (this.client.config.sendErrorMessages) {
-                returnCommand.sendError(
-                    `There was an error while running that command: \n\`\`\`${error}\`\`\``,
-                    `I couldn't run that command`
-                );
-            } else {
-                returnCommand.sendError(
-                    "There was an error while running that command",
-                    "I couldn't run that command"
-                );
-            }
+
+            const errorMessage = this.returnMessage(
+                command,
+                this.client.config.responses.errorInCommand,
+                [["error", error]]
+            );
+
+            returnCommand.sendError(...errorMessage);
+
             if (
                 this.client.config.autoRemoveCommands &&
                 !command.overideAutoRemove

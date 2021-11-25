@@ -54,10 +54,68 @@ settings.helpCommandCommandDescription = true;
 settings.helpCommandCategoryDescription = true;
 
 // Logs and errors
-settings.sendErrorMessages = true;
 settings.logErrors = true;
 settings.logWarnings = true;
 settings.logMessages = true;
 settings.logDebugs = true;
+
+const incorrectPermissions = [
+    "You do not have the permissions to run this command"
+];
+
+// Responses
+settings.responses = {
+    developerOnly: [
+        ["This command can only be ran by bot developers"],
+        incorrectPermissions
+    ],
+    disabledCommand: [
+        ["This command has been disabled by my developers"],
+        null
+    ],
+    guildOnly: [["This command can only be ran in a server"], null],
+    incorrectArgs: [
+        ["Correct usage: %USAGE"],
+        ["Incorrect usage for %COMMAND"]
+    ],
+    errorInCommand: [
+        ["Please try again later"],
+        ["There was an error while executing that command"]
+    ],
+    blacklistedGuild: [
+        ["This server is currently blacklisted for: %REASON"],
+        null
+    ],
+    blacklistedGuildNoReason: [["This server is currently blacklisted"], null],
+    blacklistedUser: [
+        ["You are currently blacklisted for %REASON"],
+        incorrectPermissions
+    ],
+    blacklistedUserNoReason: [
+        ["You are currently blacklisted"],
+        incorrectPermissions
+    ],
+    cooldown: [
+        ["This command has a %AMOUNT cooldown!\nYou have %TIMELEFT left!"],
+        null
+    ],
+    incorrectChannel: [
+        ["This command cannot be ran in this channel"],
+        incorrectPermissions
+    ],
+    incorrectGuild: [["This command cannot be ran in this server"], null],
+    missingRoles: [
+        ["You do not have the correct roles to run this command"],
+        incorrectPermissions
+    ],
+    missingClientPermissions: [
+        ["I am missing the %PERMISSION permission to run this command"],
+        null
+    ],
+    missingUserPermissions: [
+        ["You are missing the %PERMISSION permission to run this command"],
+        ["You do not have the permissions to run this command"]
+    ]
+};
 
 export default settings;

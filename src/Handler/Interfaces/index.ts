@@ -1,4 +1,4 @@
-export { Blacklist } from "./Config";
+export { Blacklist, Response } from "./Config";
 export { Permission } from "./Permissions";
 export {
     Argument,
