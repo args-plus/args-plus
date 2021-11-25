@@ -13,6 +13,11 @@ export class Utils {
         this.loadFiles.bind(this);
     }
 
+    public randomElement(array: any[]) {
+        const element = array[Math.floor(Math.random() * array.length)];
+        return element;
+    }
+
     private isFile(name: string): boolean {
         if (
             (name.endsWith(".ts") && !name.endsWith(".d.ts")) ||
