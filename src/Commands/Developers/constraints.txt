@@ -1,1 +1,1 @@
-developerOnly
+developerOnly overideLoadSlashCommand
