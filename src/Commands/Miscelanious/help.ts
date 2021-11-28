@@ -2,9 +2,10 @@ import { Guild, GuildMember } from "discord.js";
 import { Command } from "../../Handler";
 import { Constraint } from "../../Handler/Interfaces";
 
-const command = new Command("help");
+const command = new Command("helpme");
 command.description = "Displays the commands you can use";
-command.aliases = ["h"];
+command.hiddenAliases = ["helpmepls", "h"];
+command.aliases = ["help"];
 command.overideGuildBlacklist = true;
 command.overideUserBlacklist = true;
 command.args = [
@@ -24,29 +25,9 @@ command.run = async (client, commandRan) => {
     const { certainChannelsOnly, certainGuildsOnly, certainRolesOnly } =
         commandClass;
 
-    const getPrefixes = async (command: Command) => {
-        let prefixes = [];
+    let constraints: Constraint[] = [];
 
-        if (client.config.useChatCommands) {
-            if (guild && client.cachedGuildPrefixes.has(guild.id)) {
-                prefixes.push(await client.utils.getGuildPrefix(guild));
-            } else {
-                prefixes.push(client.utils.getGlobalPrefix());
-            }
-        }
-
-        if (
-            (!command.overideLoadSlashCommand &&
-                client.config.loadGuildSlashCommands) ||
-            client.config.loadGlobalSlashCommands
-        ) {
-            prefixes.push("/");
-        }
-        return prefixes;
-    };
-    const canRunCommand = (command: Command): boolean => {
-        let constraints: Constraint[] = [];
-
+    const setConstraints = (command: Command) => {
         if (
             typeof command.category === "string" &&
             !command.overideConstraints
@@ -57,7 +38,29 @@ command.run = async (client, commandRan) => {
                 constraints = findCategory[1];
             }
         }
+    };
 
+    const getPrefixes = async (command: Command) => {
+        let prefixes = [];
+
+        if (client.config.useChatCommands) {
+            if (guild && client.cachedGuildPrefixes.has(guild.id)) {
+                prefixes.push(await client.utils.getGuildPrefix(guild));
+            } else {
+                prefixes.push(client.utils.getGlobalPrefix());
+            }
+        }
+        if (
+            !command.overideLoadSlashCommand &&
+            !constraints.includes("overideLoadSlashCommand") &&
+            (client.config.loadGuildSlashCommands ||
+                client.config.loadGlobalSlashCommands)
+        ) {
+            prefixes.push("/");
+        }
+        return prefixes;
+    };
+    const canRunCommand = (command: Command): boolean => {
         if (client.disabledCommandManager.isDisabledCommand(command.name)) {
             return false;
         }
@@ -139,7 +142,8 @@ command.run = async (client, commandRan) => {
                     permission !== "overideGuildBlacklist" &&
                     permission !== "overideUserBlacklist" &&
                     permission !== "guildOnly" &&
-                    permission !== "developerOnly"
+                    permission !== "developerOnly" &&
+                    permission !== "overideLoadSlashCommand"
                 ) {
                     if (!channel.permissionsFor(member).has(permission)) {
                         hasPermissions = false;
@@ -186,6 +190,8 @@ command.run = async (client, commandRan) => {
             const commands = key[1];
 
             for (const command of commands) {
+                setConstraints(command);
+
                 // prettier-ignore
                 if(command.guildOnly && !guild){
                     continue;
@@ -227,6 +233,8 @@ command.run = async (client, commandRan) => {
             if(command.guildOnly && !guild){
                 continue;
             }
+
+            setConstraints(command);
 
             if (!canRunCommand(command)) {
                 continue;
@@ -282,6 +290,10 @@ command.run = async (client, commandRan) => {
                 command.aliases.length !== 0
                     ? `\`\`"${command.aliases.join('" or "')}"\`\``
                     : "``None``"
+            }${
+                command.hiddenAliases.length !== 0
+                    ? ` \`\`or "${command.hiddenAliases.join('" or "')}" \`\``
+                    : ""
             }\n**Description:** ${
                 command.description.length !== 0
                     ? `\`\`${command.description}\`\``
