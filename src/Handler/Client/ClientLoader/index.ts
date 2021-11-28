@@ -503,7 +503,21 @@ export class ItemLoader {
         for (const commandKey of commands) {
             const command = commandKey[1];
 
-            if (command.overideLoadSlashCommand) {
+            let constraints: Constraint[] = [];
+
+            if (typeof command.category === "string") {
+                const getCategory = this.client.categories.get(
+                    command.category
+                );
+
+                if (getCategory) constraints = getCategory[1];
+            }
+
+            if (
+                command.overideLoadSlashCommand ||
+                (!command.overideConstraints &&
+                    constraints.includes("overideLoadSlashCommand"))
+            ) {
                 continue;
             }
 
@@ -525,6 +539,24 @@ export class ItemLoader {
         let index = loadedCommandsArray.length;
         for (const commandKey of aliases) {
             const command = commandKey[1];
+
+            let constraints: Constraint[] = [];
+
+            if (typeof command.category === "string") {
+                const getCategory = this.client.categories.get(
+                    command.category
+                );
+
+                if (getCategory) constraints = getCategory[1];
+            }
+
+            if (
+                command.overideLoadSlashCommand ||
+                (!command.overideConstraints &&
+                    constraints.includes("overideLoadSlashCommand"))
+            ) {
+                continue;
+            }
 
             if (command.overideLoadSlashCommand) {
                 continue;

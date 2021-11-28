@@ -32,6 +32,9 @@ import {
 } from "../Interfaces";
 import { Utils } from "../Utils";
 
+type Body = string | string[];
+type Header = string | string[] | null;
+
 export class ReturnCommand {
     message: Message | null;
     slashCommand: CommandInteraction | null;
@@ -247,7 +250,7 @@ export class ReturnCommand {
         return splitEmbeds;
     }
 
-    private async sendMessageBase(
+    private async sendMessageMethod(
         body: string,
         color: ColorResolvable,
         header?: string,
@@ -413,7 +416,38 @@ export class ReturnCommand {
         return null;
     }
 
-    public async sendMessage(body: string, header?: string) {
+    public async sendMessageBase(
+        body: string | string[],
+        color: ColorResolvable,
+        header?: string | string[] | null,
+        overideEmbed?: boolean
+    ) {
+        let messageBody: string;
+        let messageHeader: string;
+
+        if (typeof body !== "string") {
+            messageBody = this.client.utils.randomElement(body);
+        } else {
+            messageBody = body;
+        }
+
+        if (!header) {
+            messageHeader = "";
+        } else if (typeof header !== "string") {
+            messageHeader = this.client.utils.randomElement(header);
+        } else {
+            messageHeader = header;
+        }
+
+        return await this.sendMessageMethod(
+            messageBody,
+            this.client.config.mainColor,
+            messageHeader,
+            overideEmbed
+        );
+    }
+
+    public async sendMessage(body: Body, header?: Header) {
         return await this.sendMessageBase(
             body,
             this.client.config.mainColor,
@@ -421,7 +455,7 @@ export class ReturnCommand {
         );
     }
 
-    public async sendError(body: string, header?: string) {
+    public async sendError(body: Body, header?: Header) {
         return await this.sendMessageBase(
             body,
             this.client.config.errorColor,
@@ -429,7 +463,7 @@ export class ReturnCommand {
         );
     }
 
-    public async sendMessageNoEmbed(body: string, header?: string) {
+    public async sendMessageNoEmbed(body: Body, header?: Header) {
         return await this.sendMessageBase(
             body,
             this.client.config.errorColor,
@@ -886,6 +920,7 @@ export class CommandManager {
                     permission !== "overideUserBlacklist" &&
                     permission !== "guildOnly" &&
                     permission !== "developerOnly" &&
+                    permission !== "overideLoadSlashCommand" &&
                     guild.me &&
                     member
                 ) {
@@ -1550,7 +1585,10 @@ export class CommandManager {
                                 timeEndingNextArg = endsWithTimeEnding(nextArg);
                             }
 
-                            if (!timeEndingArg || !timeEndingNextArg) {
+                            if (
+                                timeEndingArg === false &&
+                                timeEndingNextArg === false
+                            ) {
                                 return false;
                             } else if (timeEndingArg) {
                                 return [
@@ -1559,13 +1597,15 @@ export class CommandManager {
                                     timeEndingArg[1],
                                     timeEndingArg[2]
                                 ];
-                            } else {
+                            } else if (timeEndingNextArg) {
                                 return [
                                     true,
                                     timeEndingNextArg[0],
                                     timeEndingNextArg[1],
                                     timeEndingNextArg[2]
                                 ];
+                            } else {
+                                return false;
                             }
                         };
 
