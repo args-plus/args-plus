@@ -158,7 +158,7 @@ export class ItemLoader {
 
             let usage: string;
 
-            if (arg.type !== "customValue") {
+            if (arg.type !== "customValue" && !arg.customValues) {
                 usage = arg.displayName ? arg.displayName : arg.name;
             } else {
                 if (!arg.customValues) {
@@ -184,13 +184,15 @@ export class ItemLoader {
                         .join('", "')
                         .slice(0, lastWordLength * -1 - 3)} or "${lastWord}"`;
                 }
+                if (arg.type !== "customValue") {
+                    options = `${arg.type} or ${options}`;
+                }
                 usage = `${
                     arg.displayName
                         ? `${arg.displayName}: ${options}`
                         : `${arg.name}: ${options}`
                 }`;
             }
-
             if (arg.required) {
                 command.usage.push(`<${usage}>`);
             } else {
@@ -501,7 +503,21 @@ export class ItemLoader {
         for (const commandKey of commands) {
             const command = commandKey[1];
 
-            if (command.overideLoadSlashCommand) {
+            let constraints: Constraint[] = [];
+
+            if (typeof command.category === "string") {
+                const getCategory = this.client.categories.get(
+                    command.category
+                );
+
+                if (getCategory) constraints = getCategory[1];
+            }
+
+            if (
+                command.overideLoadSlashCommand ||
+                (!command.overideConstraints &&
+                    constraints.includes("overideLoadSlashCommand"))
+            ) {
                 continue;
             }
 
@@ -523,6 +539,24 @@ export class ItemLoader {
         let index = loadedCommandsArray.length;
         for (const commandKey of aliases) {
             const command = commandKey[1];
+
+            let constraints: Constraint[] = [];
+
+            if (typeof command.category === "string") {
+                const getCategory = this.client.categories.get(
+                    command.category
+                );
+
+                if (getCategory) constraints = getCategory[1];
+            }
+
+            if (
+                command.overideLoadSlashCommand ||
+                (!command.overideConstraints &&
+                    constraints.includes("overideLoadSlashCommand"))
+            ) {
+                continue;
+            }
 
             if (command.overideLoadSlashCommand) {
                 continue;

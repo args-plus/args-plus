@@ -127,6 +127,8 @@ export class ExtendedClient extends Client {
         await this.mongo.connect();
         await this.configurations.init();
 
+        items.loadCateogires();
+
         await items.registerSlashCommands();
 
         await items.loadItems(this.extensions, Extension, [
@@ -135,8 +137,6 @@ export class ExtendedClient extends Client {
         ]);
 
         await items.runExtensions();
-
-        items.loadCateogires();
     }
 }
 

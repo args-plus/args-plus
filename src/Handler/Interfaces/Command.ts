@@ -73,4 +73,5 @@ export type Constraint =
     | "guildOnly"
     | "developerOnly"
     | "overideUserBlacklist"
-    | "overideGuildBlacklist";
+    | "overideGuildBlacklist"
+    | "overideLoadSlashCommand";
