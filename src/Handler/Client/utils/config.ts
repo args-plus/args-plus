@@ -41,7 +41,6 @@ export class ClientConfig {
     public helpCommandCommandDescription: boolean = true;
 
     // blacklisted guildsa nd users
-    public blacklistedGuilds: Blacklist[] = [];
     public unBlacklistableUsers: string[] = [];
 
     // Logs and errors

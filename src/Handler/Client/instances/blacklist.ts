@@ -1,15 +1,23 @@
 import { Collection, User } from "discord.js";
 import { Client } from "..";
-import { BlacklistedUser, BlacklistedusersModel } from "../../Defaults/Schemas/blacklist";
+import { Blacklist, BlacklistModel } from "../../Defaults/Schemas";
 import { Types } from "mongoose";
 
 export class ClientBlacklists {
     readonly client: Client;
 
-    public cachedBlacklists: Collection<string, BlacklistedUser> = new Collection();
+    public cachedBlacklists: Collection<string, Blacklist> = new Collection();
 
     constructor(client: Client) {
         this.client = client;
+    }
+
+    public isUnblacklistable(userId: string) {
+        return (
+            (this.client.config.unBlacklistableUsers.includes("DEVELOPERS") &&
+                this.client.config.botDevelopers.includes(userId)) ||
+            this.client.config.unBlacklistableUsers.includes(userId)
+        );
     }
 
     private async loadBlacklists(logUpdate = false) {
@@ -17,33 +25,30 @@ export class ClientBlacklists {
 
         if (!client.getConnected()) return false;
 
-        const blacklistedUsers = await BlacklistedusersModel.find();
-        for (const blacklistedUser of blacklistedUsers) {
-            const findBlackList = this.cachedBlacklists.get(blacklistedUser.userId);
+        const blacklists = await BlacklistModel.find();
+        for (const blacklist of blacklists) {
+            const findBlackList = this.cachedBlacklists.get(blacklist.itemId);
 
             if (findBlackList) {
                 if (
                     findBlackList.blacklistedOn.getTime() >
-                    blacklistedUser.blacklistedOn.getTime()
+                    blacklist.blacklistedOn.getTime()
                 )
                     continue;
             }
 
             if (
-                (blacklistedUser.expiery.getTime() > Date.now() ||
-                    blacklistedUser.permanent) &&
-                blacklistedUser.enabled
+                (blacklist.expiery.getTime() > Date.now() || blacklist.permanent) &&
+                blacklist.enabled
             ) {
-                this.cachedBlacklists.set(blacklistedUser.userId, blacklistedUser);
+                this.cachedBlacklists.set(blacklist.itemId, blacklist);
 
                 if (logUpdate) {
-                    client.console.log(
-                        `Loaded blacklisted user id: ${blacklistedUser.userId}`
-                    );
+                    client.console.log(`Loaded blacklist id: ${blacklist.itemId}`);
                 }
             } else {
-                if (!blacklistedUser.enabled) {
-                    await this.deleteBlacklist(blacklistedUser.userId);
+                if (!blacklist.enabled) {
+                    await this.deleteBlacklist(blacklist.itemId);
                 }
             }
         }
@@ -79,9 +84,9 @@ export class ClientBlacklists {
         reason: string = "No reason provided",
         blacklistedBy?: User
     ) {
-        const blacklistedUserConstructor: BlacklistedUser = {
+        const blacklistConstructor: Blacklist = {
             _id: new Types.ObjectId(),
-            userId: id,
+            itemId: id,
             blacklistedOn: new Date(),
             enabled: true,
             permanent: duration === true ? duration : false,
@@ -90,9 +95,9 @@ export class ClientBlacklists {
             blacklistedBy: blacklistedBy ? blacklistedBy.id : ""
         };
 
-        this.cachedBlacklists.set(id, blacklistedUserConstructor);
+        this.cachedBlacklists.set(id, blacklistConstructor);
 
-        await BlacklistedusersModel.create(blacklistedUserConstructor);
+        await BlacklistModel.create(blacklistConstructor);
     }
 
     public editBlacklist = this.blacklistUser;
@@ -111,11 +116,9 @@ export class ClientBlacklists {
 
         this.cachedBlacklists.delete(id);
 
-        await BlacklistedusersModel.findOneAndUpdate(
-            { _id: findBlacklist._id },
-            findBlacklist,
-            { upsert: true }
-        );
+        await BlacklistModel.findOneAndUpdate({ _id: findBlacklist._id }, findBlacklist, {
+            upsert: true
+        });
 
         return true;
     }

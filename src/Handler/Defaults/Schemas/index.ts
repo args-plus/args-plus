@@ -4,3 +4,4 @@ export {
     DisabledCommand as DisabledCommands,
     DisabledCommandsModel
 } from "./disabledCommands";
+export { BlacklistModel, Blacklist } from "./blacklist";

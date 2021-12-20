@@ -19,7 +19,7 @@ import { SlashCommandManager } from "./instances/slashCommand";
 import { PostCommandFunction, PreCommandFunction } from "../Commands/functions";
 import { Extension } from "../Extensions";
 import { DisabledCommandManager } from "./instances/disabledCommands";
-import { ClientBlacklists } from "./instances/blacklistedUsers";
+import { ClientBlacklists } from "./instances/blacklist";
 
 export class Client extends DJSClient {
     private readonly clientToken: string;
@@ -46,7 +46,7 @@ export class Client extends DJSClient {
     public commandManager = new CommandManager(this);
     public slashCommandManager = new SlashCommandManager(this);
     public disabledCommands = new DisabledCommandManager(this);
-    public userBlacklists = new ClientBlacklists(this);
+    public blacklists = new ClientBlacklists(this);
 
     public commands: Collection<string, Command> = new Collection();
     public aliases: Collection<string, Command> = new Collection();
@@ -65,8 +65,6 @@ export class Client extends DJSClient {
     public cachedConfigurations: Collection<string, Configuration> = new Collection();
 
     public cachedGuildPrefixes: Collection<string, string> = new Collection();
-
-    readonly blacklistedGuildIds: string[] = [];
 
     constructor(options: ClientOptions, token: string | boolean, mongoURI?: string) {
         super(options);
@@ -93,10 +91,6 @@ export class Client extends DJSClient {
         }
 
         this.config = settings;
-
-        for (const blacklistedGuild of this.config.blacklistedGuilds) {
-            this.blacklistedGuildIds.push(blacklistedGuild.id);
-        }
     }
 
     public async registerDefaultCommands() {
@@ -236,7 +230,7 @@ export class Client extends DJSClient {
     }
 
     public async loadBlacklists(autoConnectToMongo?: boolean, mongoURI?: string) {
-        await this.userBlacklists.init(autoConnectToMongo, mongoURI);
+        await this.blacklists.init(autoConnectToMongo, mongoURI);
     }
 
     public async init(

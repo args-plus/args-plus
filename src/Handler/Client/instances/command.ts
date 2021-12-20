@@ -405,7 +405,7 @@ export class CommandManager {
             return true;
         };
 
-        const blacklist = await client.userBlacklists.isBlacklisted(author.id);
+        const blacklist = await client.blacklists.isBlacklisted(author.id);
 
         if (!command.overideUserBlacklist && blacklist[0] === true) {
             if (!!blacklist[1] && blacklist[1] !== "No reason provided") {
@@ -454,23 +454,19 @@ export class CommandManager {
                     ]);
                 }
             }
+            const blacklist = await client.blacklists.isBlacklisted(guild.id);
 
-            if (
-                !command.overideGuildBlacklist &&
-                client.blacklistedGuildIds.includes(guild.id)
-            ) {
-                const blacklistObject = client.config.blacklistedGuilds.filter(
-                    (blacklist) => {
-                        return blacklist.id === guild.id;
+            if (!command.overideGuildBlacklist && blacklist[0] === true) {
+                if (!client.blacklists.isUnblacklistable(author.id)) {
+                    if (!!blacklist[1] && blacklist[1] !== "No reason provided") {
+                        return returnMessage(responses.blacklistedGuild, [
+                            ["reason", blacklist[1]]
+                        ]);
+                    } else {
+                        return returnMessage(responses.blacklistedGuildNoReason);
                     }
-                )[0];
-
-                if (blacklistObject.reason) {
-                    return returnMessage(responses.blacklistedGuild, [
-                        ["reason", blacklistObject.reason]
-                    ]);
                 } else {
-                    return returnMessage(responses.blacklistedGuildNoReason);
+                    await returnCommand.sendMessage("This server is blacklisted");
                 }
             }
 
