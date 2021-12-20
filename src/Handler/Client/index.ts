@@ -106,7 +106,7 @@ export class Client extends DJSClient {
         await this.loader.loadItems(this.commands, Command, ["/Commands"]);
         this.commandManager.loadCommands();
 
-        await this.registerSlashCommands();
+        await this.loadSlashCommands();
 
         return true;
     }
@@ -118,7 +118,7 @@ export class Client extends DJSClient {
         await this.loader.loadItems(this.commands, Command, dirs);
         this.commandManager.loadCommands();
 
-        await this.registerSlashCommands();
+        await this.loadSlashCommands();
 
         return true;
     }
@@ -129,12 +129,12 @@ export class Client extends DJSClient {
 
         this.commandManager.loadCommands();
 
-        await this.registerSlashCommands();
+        await this.loadSlashCommands();
 
         return true;
     }
 
-    public async registerSlashCommands() {
+    public async loadSlashCommands() {
         return await this.slashCommandManager.loadSlashCommands();
     }
 

@@ -37,6 +37,8 @@ export class SlashCommandManager {
 
             if (!command.getLoaded()) return false;
 
+            if (command.getLoadedSlashCommand()) return false;
+
             if (command.description.length === 0) {
                 return failedtoLoadSlashCommand("it has no description");
             }
@@ -79,10 +81,7 @@ export class SlashCommandManager {
                         type: "NUMBER",
                         required: arg.required
                     });
-                } else if (
-                    arg.type === "memberMention" ||
-                    arg.type === "userMention"
-                ) {
+                } else if (arg.type === "memberMention" || arg.type === "userMention") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "USER",
@@ -93,6 +92,7 @@ export class SlashCommandManager {
 
             slashCommandConstructor.options = argsArray;
 
+            command.setLoadedSlashCommand();
             return slashCommandConstructor;
         };
 
@@ -134,7 +134,7 @@ export class SlashCommandManager {
                     continue;
                 }
 
-                guild.commands.set(this.loadedCommandsArray);
+                await guild.commands.set(this.loadedCommandsArray);
             }
         } else if (config.loadGlobalSlashCommands && this.client.application) {
             for (const guildID of config.slashCommandGuilds) {

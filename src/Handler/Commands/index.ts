@@ -44,12 +44,22 @@ export class Command extends Item {
 
     private cooldownNumber: [number, number] = [0, 0];
 
+    private loadedSlashCommand = false;
+
+    public getLoadedSlashCommand() {
+        return this.loadedSlashCommand;
+    }
+
+    public setLoadedSlashCommand() {
+        this.loadedSlashCommand = true;
+        return true;
+    }
+
     public getCooldownNumber() {
         return this.cooldownNumber;
     }
 
-    public run: (client: Client, returnCommand: ReturnCommand) => any =
-        () => {};
+    public run: (client: Client, returnCommand: ReturnCommand) => any = () => {};
 
     // prettier-ignore
     public setCooldown(cooldownKey:  [`${string}s`| `${string}m` | `${string}h`| `${string}d`| `${string}m ${string}s`| `${string}h ${string}m`| number, number] = [0, 0]){
@@ -124,9 +134,7 @@ export class Command extends Item {
                         currentExample += Math.floor(randomNumber).toString();
                     }
                 } else {
-                    currentExample += ClientUtils.randomElement(
-                        example as string[]
-                    );
+                    currentExample += ClientUtils.randomElement(example as string[]);
                 }
 
                 currentExample += " ";
