@@ -1000,13 +1000,10 @@ export class CommandManager {
                     let totalTime = 0;
                     for (const time of timeMentions) {
                         const duration: string = time[0].replace(/\D/g, "");
+
                         const timeOptions = time[1];
                         if (duration.length === 0) {
-                            if (requiredArg.required) {
-                                return incorrectUsage();
-                            } else {
-                                continue;
-                            }
+                            return incorrectUsage();
                         }
 
                         const durationNumber = parseFloat(duration);
@@ -1175,11 +1172,7 @@ export class CommandManager {
                             const duration: string = time[0].replace(/\D/g, "");
                             const timeOptions = time[1];
                             if (duration.length === 0) {
-                                if (requiredArg.required) {
-                                    return incorrectUsage();
-                                } else {
-                                    continue;
-                                }
+                                return incorrectUsage();
                             }
                             const durationNumber = parseFloat(duration);
                             totalTime += durationNumber * timeOptions[3];
