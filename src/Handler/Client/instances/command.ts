@@ -221,6 +221,7 @@ export class CommandManager {
                         command.category = categoryName;
                         command.categoryName = categoryName;
                         command.categoryId = client.utils.generateId(categoryName);
+                        break;
                     } else {
                         if (i === this.loadedCategoryDirs.length - 1) {
                             client.console.debug(
