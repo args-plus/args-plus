@@ -46,7 +46,7 @@ export class Client extends DJSClient {
     public commandManager = new CommandManager(this);
     public slashCommandManager = new SlashCommandManager(this);
     public disabledCommands = new DisabledCommandManager(this);
-    public blacklists = new ClientBlacklists(this);
+    public userBlacklists = new ClientBlacklists(this);
 
     public commands: Collection<string, Command> = new Collection();
     public aliases: Collection<string, Command> = new Collection();
@@ -236,7 +236,7 @@ export class Client extends DJSClient {
     }
 
     public async loadBlacklists(autoConnectToMongo?: boolean, mongoURI?: string) {
-        await this.blacklists.init(autoConnectToMongo, mongoURI);
+        await this.userBlacklists.init(autoConnectToMongo, mongoURI);
     }
 
     public async init(

@@ -96,7 +96,7 @@ blacklistCommand.run = async (client, command) => {
     let permanent = false;
 
     if (duration.getStringValue() === "off") {
-        await client.blacklists.deleteBlacklist(user.id, command.getAuthor().id);
+        await client.userBlacklists.deleteBlacklist(user.id, command.getAuthor().id);
 
         return command.sendMessage(
             `${user.username} has been unblacklisted`,
@@ -121,7 +121,7 @@ blacklistCommand.run = async (client, command) => {
     const amountOfTime = duration.getNumberValue();
     if (!amountOfTime && !permanent) return;
 
-    await client.blacklists.blacklistUser(
+    await client.userBlacklists.blacklistUser(
         user.id,
         permanent ? permanent : new Date(Date.now() + (amountOfTime as number)),
         reason?.getText(),

@@ -405,7 +405,7 @@ export class CommandManager {
             return true;
         };
 
-        const blacklist = await client.blacklists.isBlacklisted(author.id);
+        const blacklist = await client.userBlacklists.isBlacklisted(author.id);
 
         if (!command.overideUserBlacklist && blacklist[0] === true) {
             if (!!blacklist[1] && blacklist[1] !== "No reason provided") {
