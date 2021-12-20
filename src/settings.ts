@@ -1,14 +1,16 @@
 import { ClientConfig } from "./Handler/Client/utils/config";
+
 const settings = new ClientConfig("ts!");
 
 // General configs
 settings.useChatCommands = true;
-settings.indentMessageContent = false;
 settings.botDevelopers = [];
 settings.autoRemoveCommands = true;
+settings.amountOfExamples = 2;
 
 // Message configs
 settings.messagesOrEmbeds = "embeds";
+settings.indentMessageContent = false;
 settings.mainColor = "BLUE";
 settings.errorColor = "RED";
 settings.sendTimestamp = false;
@@ -69,7 +71,12 @@ settings.responses = {
     ],
     disabledCommand: [["This command has been disabled by my developers"], null],
     guildOnly: [["This command can only be ran in a server"], null],
-    incorrectArgs: [["Correct usage: %USAGE"], ["Incorrect usage for %COMMAND"]],
+    incorrectArgs: [
+        [
+            "**Correct usage:** \n``%USAGE``\n*%REQUIRED_ARG_KEY\n%UNREQUIRED_ARG_KEY*\n\n**Examples:**\n``%EXAMPLES``"
+        ],
+        ["Incorrect usage for %COMMAND"]
+    ],
     errorInCommand: [
         ["Please try again later"],
         ["There was an error while executing that command"]
@@ -77,11 +84,11 @@ settings.responses = {
     blacklistedGuild: [["This server is currently blacklisted for: %REASON"], null],
     blacklistedGuildNoReason: [["This server is currently blacklisted"], null],
     blacklistedUser: [
-        ["You are currently blacklisted for %REASON"],
+        ["You are currently blacklisted for: %REASON"],
         incorrectPermissions
     ],
     blacklistedUserNoReason: [["You are currently blacklisted"], incorrectPermissions],
-    cooldown: [["This command has a %AMOUNT cooldown!\nYou have %TIMELEFT left!"], null],
+    cooldown: [["This command can only be ran %AMOUNT times per %PERIOD"], null],
     incorrectChannel: [
         ["This command cannot be ran in this channel"],
         incorrectPermissions
@@ -99,6 +106,23 @@ settings.responses = {
         ["You are missing the %PERMISSION permission to run this command"],
         ["You do not have the permissions to run this command"]
     ]
+};
+
+// Examples
+settings.argExamples = {
+    single: ["car", "dog", "discord", "clap", "horses"],
+    multiple: [
+        "seventy seven steep steps",
+        "hello from the other side",
+        "henry the hoover",
+        "this is an example!"
+    ],
+    number: [10, 100, false],
+    interger: [10, 100, true],
+    channelMention: ["#rules", "#general", "780045299698892801", "#welcome"],
+    memberMention: ["@abisammy", "%CLIENT", "755080996088447057", "@hello"],
+    userMention: ["@abisammy", "%CLIENT", "755080996088447057", "@hello"],
+    time: ["24d 23h", "10s", "9000h", "40d"]
 };
 
 export default settings;
