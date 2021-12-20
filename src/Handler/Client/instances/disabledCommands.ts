@@ -14,7 +14,7 @@ export class DisabledCommandManager {
         this.client = client;
     }
 
-    private async loadConfigurations(logUpdate = false) {
+    private async loadDisabledItems(logUpdate = false) {
         const { client } = this;
 
         if (!client.getConnected()) return false;
@@ -25,9 +25,10 @@ export class DisabledCommandManager {
 
             if (logUpdate) {
                 // prettier-ignore
-                client.console.log(`Loaded configuration: "${disabledCommand.name}", with ID: ${disabledCommand.id}`);
+                client.console.log(`Loaded dsiabled command: "${disabledCommand.name}"`);
             }
         }
+        return true;
     }
 
     public async init(autoConnectToMongo = true, mongoURI?: string) {
@@ -50,8 +51,7 @@ export class DisabledCommandManager {
                 return false;
             }
         }
-
-        return await this.loadConfigurations(true);
+        return await this.loadDisabledItems(true);
     }
 
     private getType(name: string) {
