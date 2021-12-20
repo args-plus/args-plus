@@ -12,12 +12,12 @@ export type argType =
 export type ReturnTime = [
     boolean,
     string,
-    "SECONDS" | "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "YEARS",
+    "SECONDS" | "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "MONTHS" | "YEARS",
     number
 ];
 
 export type TimeEnding = [
     string,
-    "SECONDS" | "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "YEARS",
+    "SECONDS" | "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "MONTHS" | "YEARS",
     number
 ];

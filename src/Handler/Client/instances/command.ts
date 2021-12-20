@@ -723,6 +723,22 @@ export class CommandManager {
         return false;
     }
 
+    private timeEndings: TimeEnding[] = [
+        ["seconds", "SECONDS", 1000],
+        ["minutes", "MINUTES", 1000 * 60],
+        ["hours", "HOURS", 1000 * 60 * 60],
+        ["days", "DAYS", 1000 * 60 * 60 * 24],
+        ["weeks", "WEEKS", 1000 * 60 * 60 * 24 * 7],
+        ["months", "MONTHS", 1000 * 60 * 60 * 24 * 30],
+        ["years", "YEARS", 1000 * 60 * 60 * 24 * 365],
+        ["s", "SECONDS", 1000],
+        ["m", "MINUTES", 1000 * 60],
+        ["h", "HOURS", 1000 * 60 * 60],
+        ["d", "DAYS", 1000 * 60 * 60 * 24],
+        ["w", "WEEKS", 1000 * 60 * 60 * 24 * 7],
+        ["y", "YEARS", 1000 * 60 * 60 * 24 * 265]
+    ];
+
     public async getArguments(
         returnCommand: ReturnCommand
     ): Promise<[true, Argument[]] | [false, string, string]> {
@@ -898,24 +914,8 @@ export class CommandManager {
                     }
 
                     const remainingArgs = args.splice(index, args.length - index);
-
-                    const timeEndings: TimeEnding[] = [
-                        ["seconds", "SECONDS", 1000],
-                        ["minutes", "MINUTES", 1000 * 60],
-                        ["hours", "HOURS", 1000 * 60 * 60],
-                        ["days", "DAYS", 1000 * 60 * 60 * 24],
-                        ["weeks", "WEEKS", 1000 * 60 * 60 * 24 * 7],
-                        ["years", "YEARS", 1000 * 60 * 60 * 24 * 365],
-                        ["s", "SECONDS", 1000],
-                        ["m", "MINUTES", 1000 * 60],
-                        ["h", "HOURS", 1000 * 60 * 60],
-                        ["d", "DAYS", 1000 * 60 * 60 * 24],
-                        ["w", "WEEKS", 1000 * 60 * 60 * 24 * 7],
-                        ["y", "YEARS", 1000 * 60 * 60 * 24 * 265]
-                    ];
-
                     const endsWithTimeEnding = (string: string, nextArg = false) => {
-                        for (const ending of timeEndings) {
+                        for (const ending of this.timeEndings) {
                             if (string === ending[0]) {
                                 return ending;
                             } else if (string.endsWith(ending[0]) && !nextArg) {
@@ -1094,23 +1094,9 @@ export class CommandManager {
                         }
                     } else {
                         const timeMentionArray = providedArg.value.toString().split(/ +/);
-                        const timeEndings: TimeEnding[] = [
-                            ["seconds", "SECONDS", 1000],
-                            ["minutes", "MINUTES", 1000 * 60],
-                            ["hours", "HOURS", 1000 * 60 * 60],
-                            ["days", "DAYS", 1000 * 60 * 60 * 24],
-                            ["weeks", "WEEKS", 1000 * 60 * 60 * 24 * 7],
-                            ["years", "YEARS", 1000 * 60 * 60 * 24 * 365],
-                            ["s", "SECONDS", 1000],
-                            ["m", "MINUTES", 1000 * 60],
-                            ["h", "HOURS", 1000 * 60 * 60],
-                            ["d", "DAYS", 1000 * 60 * 60 * 24],
-                            ["w", "WEEKS", 1000 * 60 * 60 * 24 * 7],
-                            ["y", "YEARS", 1000 * 60 * 60 * 24 * 265]
-                        ];
 
                         const endsWithTimeEnding = (string: string) => {
-                            for (const ending of timeEndings) {
+                            for (const ending of this.timeEndings) {
                                 if (string === ending[0]) {
                                     return ending;
                                 } else if (string.endsWith(ending[0])) {
