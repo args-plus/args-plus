@@ -239,7 +239,9 @@ export class Client extends DJSClient {
         }
     }
 
-    public loadBlacklists = this.blacklists.init;
+    public async loadBlacklists(autoConnectToMongo?: boolean, mongoURI?: string) {
+        await this.blacklists.init(autoConnectToMongo, mongoURI);
+    }
 
     public async init(
         loadAll = true,

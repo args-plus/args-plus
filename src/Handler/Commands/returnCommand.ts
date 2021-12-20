@@ -42,6 +42,10 @@ export class ReturnCommand {
         this.commandRepliedTo = true;
     }
 
+    public getRepliedTo() {
+        return this.commandRepliedTo;
+    }
+
     public getMessage() {
         if (this.isMessage(this.commandRan)) {
             return this.commandRan;
@@ -101,10 +105,7 @@ export class ReturnCommand {
         if (this.isMessage(this.commandRan)) {
             return this.commandRan.member ? this.commandRan.member : false;
         } else {
-            if (
-                this.commandRan.member &&
-                this.commandRan.member instanceof GuildMember
-            ) {
+            if (this.commandRan.member && this.commandRan.member instanceof GuildMember) {
                 return this.commandRan.member;
             }
         }
@@ -159,11 +160,7 @@ export class ReturnCommand {
             return [embed];
         }
 
-        if (
-            embed.length < 6000 &&
-            embed.description &&
-            embed.description.length < 4096
-        ) {
+        if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
             return [embed];
         }
 
@@ -178,9 +175,7 @@ export class ReturnCommand {
         let index = 0;
         for (const embedDescription of splitEmbeds) {
             if (index === 0) {
-                returnEmbeds.push(
-                    embed.setDescription(embedDescription).setFooter("")
-                );
+                returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
             } else if (index === splitEmbeds.length - 1) {
                 const newEmbed = new MessageEmbed()
                     .setColor(embed.color !== null ? embed.color : "#000000")
@@ -189,10 +184,7 @@ export class ReturnCommand {
                     if (embedFooter.text && !embedFooter.iconURL) {
                         newEmbed.setFooter(embedFooter.text);
                     } else if (embedFooter.text && embedFooter.iconURL) {
-                        newEmbed.setFooter(
-                            embedFooter.text,
-                            embedFooter.iconURL
-                        );
+                        newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
                     } else if (embedFooter.iconURL) {
                         newEmbed.setFooter(embedFooter.iconURL);
                     }
@@ -202,9 +194,7 @@ export class ReturnCommand {
             } else {
                 returnEmbeds.push(
                     new MessageEmbed()
-                        .setColor(
-                            embed.color !== null ? embed.color : "#000000"
-                        )
+                        .setColor(embed.color !== null ? embed.color : "#000000")
                         .setDescription(embedDescription)
                 );
             }
@@ -215,11 +205,7 @@ export class ReturnCommand {
         return returnEmbeds;
     }
 
-    private getEmbedMessages(
-        body: string,
-        color: ColorResolvable,
-        header?: string
-    ) {
+    private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
         const { client } = this;
         const { config } = client;
 
@@ -396,26 +382,12 @@ export class ReturnCommand {
         );
     }
 
-    public async sendMessage(
-        body: string | string[],
-        header?: string | string[] | null
-    ) {
-        return await this.sendMessageBase(
-            body,
-            this.client.config.mainColor,
-            header
-        );
+    public async sendMessage(body: string | string[], header?: string | string[] | null) {
+        return await this.sendMessageBase(body, this.client.config.mainColor, header);
     }
 
-    public async sendError(
-        body: string | string[],
-        header?: string | string[] | null
-    ) {
-        return await this.sendMessageBase(
-            body,
-            this.client.config.errorColor,
-            header
-        );
+    public async sendError(body: string | string[], header?: string | string[] | null) {
+        return await this.sendMessageBase(body, this.client.config.errorColor, header);
     }
 
     public async sendMessageNoEmbed(
