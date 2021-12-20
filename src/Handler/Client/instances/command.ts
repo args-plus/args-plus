@@ -932,6 +932,8 @@ export class CommandManager {
 
                     const remainingArgs = args.splice(index, args.length - index);
                     const endsWithTimeEnding = (string: string, nextArg = false) => {
+                        if (!/\d/.test(string)) return false;
+
                         for (const ending of this.timeEndings) {
                             if (string === ending[0]) {
                                 return ending;
@@ -1001,9 +1003,21 @@ export class CommandManager {
                         args.push(arg);
                     }
 
-                    for (let j = 0; j < timeMentions.length - 1; j++) {
-                        args.shift();
+                    let timeArg = ``;
+
+                    for (let i = 0; i < timeMentions.length; i++) {
+                        timeArg += `${remainingArgs[i]} `;
                     }
+
+                    for (let j = 0; j < timeMentions.length - 1; j++) {
+                        let tmp = args.shift();
+                        args[j] = tmp ? tmp : "";
+                    }
+
+                    args[index] = timeArg;
+
+                    requiredArg.setTextValue(timeArg);
+                    requiredArg.setStringValue(timeArg);
 
                     if (timeMentions.length === 0) {
                         return incorrectUsage();
@@ -1012,6 +1026,8 @@ export class CommandManager {
                     let totalTime = 0;
                     for (const time of timeMentions) {
                         const duration: string = time[0].replace(/\D/g, "");
+
+                        console.log(time);
 
                         const timeOptions = time[1];
                         if (duration.length === 0) {
