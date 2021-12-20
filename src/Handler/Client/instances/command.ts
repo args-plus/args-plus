@@ -311,7 +311,6 @@ export class CommandManager {
                 command.hidden = category.hidden;
                 command.overideGuildBlacklist = category.overideGuildBlacklist;
                 command.overideUserBlacklist = category.overideUserBlacklist;
-                // prettier-ignore
                 command.overideLoadSlashCommand = category.overideLoadSlashCommand;
             }
         } else {
@@ -525,7 +524,7 @@ export class CommandManager {
 
         const commandCooldown = command.getCooldownNumber();
 
-        if (commandCooldown !== [0, 0]) {
+        if (commandCooldown[0] !== 0 && commandCooldown[1] !== 0) {
             const activeCooldowns = command.activeCooldowns.get(author.id);
 
             if (activeCooldowns) {
@@ -1211,6 +1210,14 @@ export class CommandManager {
         let returnArgs = await this.getArguments(returnCommand);
 
         if (returnArgs[0] === false) {
+            let clientUserName = "";
+
+            if (client.user) {
+                clientUserName = client.user.username;
+            } else {
+                clientUserName = "argsplus";
+            }
+
             return returnCommand.sendError(
                 ...this.returnMessage(command, client.config.responses.incorrectArgs, [
                     ["usage", command.getUsage(returnArgs[1], returnArgs[2])],
@@ -1218,7 +1225,8 @@ export class CommandManager {
                     ["required arg key", "<> = Required"],
                     ["unrequired arg key", "() = Unrequired"],
                     // prettier-ignore
-                    ["examples", command.getExample(returnArgs[1], returnArgs[2], client.config.amountOfExamples)]
+                    ["examples", command.getExample(returnArgs[1], returnArgs[2], client.config.amountOfExamples)],
+                    ["client", `@${clientUserName}`]
                 ])
             );
         }
