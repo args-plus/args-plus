@@ -109,6 +109,7 @@ export class Client extends DJSClient {
         this.commandManager.loadCommands();
 
         await this.loadSlashCommands();
+        await this.disabledCommands.init();
 
         return true;
     }
@@ -121,6 +122,7 @@ export class Client extends DJSClient {
         this.commandManager.loadCommands();
 
         await this.loadSlashCommands();
+        await this.disabledCommands.init();
 
         return true;
     }
@@ -132,6 +134,7 @@ export class Client extends DJSClient {
         this.commandManager.loadCommands();
 
         await this.loadSlashCommands();
+        await this.disabledCommands.init();
 
         return true;
     }
@@ -252,25 +255,25 @@ export class Client extends DJSClient {
             await this.loadChecks();
         }
 
-        if (loadCommands || loadAll) {
-            await this.registerDefaultCommands();
-        }
-
         if (loadCommandFunctions || loadAll) {
             await this.loadCommandFunctions();
+        }
+
+        if (loadEvents || loadAll) {
+            await this.registerDefaultEvents();
+            await this.registerEvents();
         }
 
         if (connectToMongo || loadAll) {
             await this.connectToMongo();
         }
 
-        if (loadConfigurations || loadAll) {
-            await this.loadConfigurations();
+        if (loadCommands || loadAll) {
+            await this.registerDefaultCommands();
         }
 
-        if (loadEvents || loadAll) {
-            await this.registerDefaultEvents();
-            await this.registerEvents();
+        if (loadConfigurations || loadAll) {
+            await this.loadConfigurations();
         }
 
         if (loadExtensions || loadAll) {
