@@ -10,18 +10,10 @@ export type checkOptions = {
 };
 
 export class Check extends Item {
-    readonly id: string;
-
     public requireMember = false;
     public requireUser = false;
     public requireChannel = false;
     public requireGuild = false;
 
-    public run: (checkOptions: checkOptions, ...options: any[]) => boolean =
-        () => true;
-
-    constructor(name: string) {
-        super(name);
-        this.id = ClientUtils.generateId(name);
-    }
+    public run: (checkOptions: checkOptions, ...options: any[]) => boolean = () => true;
 }

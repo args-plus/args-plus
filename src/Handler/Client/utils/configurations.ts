@@ -59,12 +59,11 @@ export class ClientConfigurations {
             { upsert: true }
         );
 
-        await this.loadConfigurations();
+        // await this.loadConfigurations();
+        client.cachedConfigurations.set(id, { _id: id, name, options: data });
 
         if (logUpdate) {
-            client.console.log(
-                `Updated/Created configuration ${name}, with ID: ${id}`
-            );
+            client.console.log(`Updated/Created configuration ${name}, with ID: ${id}`);
         }
         return true;
     }

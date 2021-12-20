@@ -18,6 +18,7 @@ import { ClientChecks } from "./instances/checks";
 import { SlashCommandManager } from "./instances/slashCommand";
 import { PostCommandFunction, PreCommandFunction } from "../Commands/functions";
 import { Extension } from "../Extensions";
+import { DisabledCommandManager } from "./instances/disabledCommands";
 
 export class Client extends DJSClient {
     private readonly clientToken: string;
@@ -43,6 +44,7 @@ export class Client extends DJSClient {
     public checks = new ClientChecks(this);
     public commandManager = new CommandManager(this);
     public slashCommandManager = new SlashCommandManager(this);
+    public disabledCommands = new DisabledCommandManager(this);
 
     public commands: Collection<string, Command> = new Collection();
     public aliases: Collection<string, Command> = new Collection();

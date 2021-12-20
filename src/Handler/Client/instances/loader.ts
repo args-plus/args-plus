@@ -1,10 +1,12 @@
 import { Collection } from "discord.js";
 import { Client } from "..";
 import path from "path";
+import { ClientUtils } from "../utils/utils";
 
 export abstract class Item {
     public name: string;
     public dir: string = "";
+    public readonly id: string;
 
     private registered = false;
 
@@ -29,6 +31,7 @@ export abstract class Item {
 
     constructor(name: string) {
         this.name = name;
+        this.id = ClientUtils.generateId(name);
     }
 }
 

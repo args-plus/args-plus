@@ -220,6 +220,7 @@ export class CommandManager {
                     if (categoryDir === splitCommandDir.join(path.sep)) {
                         command.category = categoryName;
                         command.categoryName = categoryName;
+                        command.categoryId = client.utils.generateId(categoryName);
                     } else {
                         if (i === this.loadedCategoryDirs.length - 1) {
                             client.console.debug(
@@ -227,6 +228,7 @@ export class CommandManager {
                             );
                         }
                         command.categoryName = false;
+                        command.categoryId = false;
                     }
                 }
             } else {
@@ -236,6 +238,7 @@ export class CommandManager {
                 this.loadCategories();
 
                 command.categoryName = command.category;
+                command.categoryName = newCategory.id;
             }
         } else if (typeof command.category !== "boolean") {
             const categoryName = command.category[0];
@@ -244,6 +247,7 @@ export class CommandManager {
             const findCategory = client.categories.get(categoryName);
 
             command.categoryName = categoryName;
+            command.categoryId = client.utils.generateId(categoryName);
 
             if (findCategory) {
                 findCategory.description = categoryDescription;
@@ -257,6 +261,7 @@ export class CommandManager {
             }
         } else {
             command.categoryName = false;
+            command.categoryId = false;
         }
 
         let commandClientPermissions: Permission[] = [];

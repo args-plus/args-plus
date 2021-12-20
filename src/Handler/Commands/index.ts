@@ -35,6 +35,7 @@ export class Command extends Item {
     public hidden = false;
     public category: [string, string] | string | false = ""; // DONE
     public categoryName: string | false = ""; // DONE
+    public categoryId: string | false = "";
     public toggleable = true;
 
     public usage: string[] = []; // DONE
