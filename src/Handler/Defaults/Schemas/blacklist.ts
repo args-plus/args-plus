@@ -7,7 +7,8 @@ export interface Blacklist {
     expiery: Date;
     enabled: boolean;
     permanent: boolean;
-    reason?: string;
+    blacklistReason?: string;
+    unblacklistReason?: string;
     blacklistedBy?: string;
     unblacklistedBy?: string;
 }
@@ -19,7 +20,8 @@ const BlacklistSchema = new Schema<Blacklist>({
     expiery: { type: Date, required: true },
     enabled: { type: Boolean, required: true },
     permanent: { type: Boolean, required: true },
-    reason: { type: String, required: false },
+    blacklistReason: { type: String, required: false },
+    unblacklistReason: { type: String, required: false },
     blacklistedBy: { type: String, required: false },
     unblacklistedBy: { type: String, required: false }
 });

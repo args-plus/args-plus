@@ -52,7 +52,8 @@ userBlacklistCommand.run = async (client, command) => {
                 blacklistedOn,
                 permanent,
                 expiery,
-                reason,
+                blacklistReason,
+                unblacklistReason,
                 blacklistedBy,
                 enabled,
                 unblacklistedBy
@@ -62,7 +63,7 @@ userBlacklistCommand.run = async (client, command) => {
             blacklistsMessage += `Expires: ${
                 permanent ? "``never``" : getFullDate(expiery)
             }\n`;
-            blacklistsMessage += `Reason: \`\`${reason}\`\`\n`;
+            blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
                 const findBlacklister = client.users.cache.get(blacklistedBy);
@@ -72,16 +73,22 @@ userBlacklistCommand.run = async (client, command) => {
                 else blacklistsMessage += "*Blacklister not found*\n";
             }
 
+            blacklistsMessage += `Reason: \`\`${
+                blacklistReason ? blacklistReason : "No reason provided"
+            }\`\`\n`;
             if (!enabled && !!unblacklistedBy) {
-                if (unblacklistedBy === "CLIENT") {
-                    blacklistsMessage += "*Unblacklisted by timeout*";
-                }
-
                 const findUnBlacklister = client.users.cache.get(unblacklistedBy);
 
-                if (findUnBlacklister)
-                    blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
-                else blacklistsMessage += "*Unblacklister not found*\n";
+                if (unblacklistedBy === "CLIENT") {
+                    blacklistsMessage += "*Unblacklisted by timeout*\n";
+                } else {
+                    if (findUnBlacklister)
+                        blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
+                    else blacklistsMessage += "*Unblacklister not found*\n";
+                    blacklistsMessage += `Reason: \`\`${
+                        unblacklistReason ? unblacklistReason : "No reason provided"
+                    }\`\`\n`;
+                }
             }
 
             blacklistsMessage += "\n";
@@ -96,7 +103,11 @@ userBlacklistCommand.run = async (client, command) => {
     let permanent = false;
 
     if (duration.getStringValue() === "off") {
-        await client.blacklists.deleteBlacklist(user.id, command.getAuthor().id);
+        await client.blacklists.deleteBlacklist(
+            user.id,
+            command.getAuthor().id,
+            reason ? reason.getText() : "No reason provided"
+        );
 
         return command.sendMessage(
             `${user.username} has been unblacklisted`,
@@ -177,7 +188,8 @@ guildBlacklistCommand.run = async (client, command) => {
                 blacklistedOn,
                 permanent,
                 expiery,
-                reason,
+                blacklistReason,
+                unblacklistReason,
                 blacklistedBy,
                 enabled,
                 unblacklistedBy
@@ -187,7 +199,7 @@ guildBlacklistCommand.run = async (client, command) => {
             blacklistsMessage += `Expires: ${
                 permanent ? "``never``" : getFullDate(expiery)
             }\n`;
-            blacklistsMessage += `Reason: \`\`${reason}\`\`\n`;
+            blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
                 const findBlacklister = client.users.cache.get(blacklistedBy);
@@ -197,16 +209,22 @@ guildBlacklistCommand.run = async (client, command) => {
                 else blacklistsMessage += "*Blacklister not found*\n";
             }
 
+            blacklistsMessage += `Reason: \`\`${
+                blacklistReason ? blacklistReason : "No reason provided"
+            }\`\`\n`;
             if (!enabled && !!unblacklistedBy) {
-                if (unblacklistedBy === "CLIENT") {
-                    blacklistsMessage += "*Unblacklisted by timeout*";
-                }
-
                 const findUnBlacklister = client.users.cache.get(unblacklistedBy);
 
-                if (findUnBlacklister)
-                    blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
-                else blacklistsMessage += "*Unblacklister not found*\n";
+                if (unblacklistedBy === "CLIENT") {
+                    blacklistsMessage += "*Unblacklisted by timeout*\n";
+                } else {
+                    if (findUnBlacklister)
+                        blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
+                    else blacklistsMessage += "*Unblacklister not found*\n";
+                    blacklistsMessage += `Reason: \`\`${
+                        unblacklistReason ? unblacklistReason : "No reason provided"
+                    }\`\`\n`;
+                }
             }
 
             blacklistsMessage += "\n";
@@ -221,7 +239,11 @@ guildBlacklistCommand.run = async (client, command) => {
     let permanent = false;
 
     if (duration.getStringValue() === "off") {
-        await client.blacklists.deleteBlacklist(findGuild.id, command.getAuthor().id);
+        await client.blacklists.deleteBlacklist(
+            findGuild.id,
+            command.getAuthor().id,
+            reason ? reason.getText() : "No reason provided"
+        );
 
         return command.sendMessage(
             `${findGuild.name} has been unblacklisted`,

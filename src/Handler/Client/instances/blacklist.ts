@@ -91,7 +91,7 @@ export class ClientBlacklists {
             enabled: true,
             permanent: duration === true ? duration : false,
             expiery: duration !== true ? duration : new Date(),
-            reason: reason,
+            blacklistReason: reason,
             blacklistedBy: blacklistedBy ? blacklistedBy.id : ""
         };
 
@@ -104,7 +104,8 @@ export class ClientBlacklists {
 
     public async deleteBlacklist(
         id: string,
-        unblacklistedBy: string | "CLIENT" = "CLIENT"
+        unblacklistedBy: string | "CLIENT" = "CLIENT",
+        reason: string = "No reason provided"
     ) {
         const findBlacklist = this.cachedBlacklists.get(id);
 
@@ -113,6 +114,8 @@ export class ClientBlacklists {
         findBlacklist.enabled = false;
 
         findBlacklist.unblacklistedBy = unblacklistedBy;
+
+        findBlacklist.unblacklistReason = reason;
 
         this.cachedBlacklists.delete(id);
 
@@ -132,10 +135,10 @@ export class ClientBlacklists {
             return [false];
         }
 
-        if (findBlacklist.permanent) return [true, findBlacklist.reason];
+        if (findBlacklist.permanent) return [true, findBlacklist.blacklistReason];
 
         if (findBlacklist.expiery.getTime() > Date.now() && findBlacklist.enabled) {
-            return [true, findBlacklist.reason];
+            return [true, findBlacklist.blacklistReason];
         } else {
             await this.deleteBlacklist(id);
             return [false];
