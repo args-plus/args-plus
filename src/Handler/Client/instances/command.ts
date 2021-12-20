@@ -147,6 +147,11 @@ export class CommandManager {
                 }
                 if (arg.type !== "customValue") {
                     options = `${arg.type} or ${options}`;
+
+                    for (const normalExample of client.config.argExamples[arg.type]) {
+                        if (typeof normalExample === "string")
+                            examples.push(normalExample);
+                    }
                 }
                 usage = `${
                     arg.displayName
