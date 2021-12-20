@@ -104,6 +104,17 @@ blacklistCommand.run = async (client, command) => {
         );
     }
 
+    if (
+        (client.config.unBlacklistableUsers.includes("DEVELOPERS") &&
+            client.config.botDevelopers.includes(user.id)) ||
+        client.config.unBlacklistableUsers.includes(user.id)
+    ) {
+        return command.sendError(
+            "They are unblacklistable",
+            "I could not blacklist that user"
+        );
+    }
+
     if (duration.getStringValue() === "perm" || duration.getStringValue() === "permanent")
         permanent = true;
 

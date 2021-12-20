@@ -42,7 +42,7 @@ export class ClientConfig {
 
     // blacklisted guildsa nd users
     public blacklistedGuilds: Blacklist[] = [];
-    public blacklistedUsers: Blacklist[] = [];
+    public unBlacklistableUsers: string[] = [];
 
     // Logs and errors
     public logWarnings: boolean = true;
@@ -56,27 +56,15 @@ export class ClientConfig {
             ["This command can only be ran by bot developers"],
             ["You do not have the permissions to run this command"]
         ],
-        disabledCommand: [
-            ["This command has been disabled by my developers"],
-            null
-        ],
+        disabledCommand: [["This command has been disabled by my developers"], null],
         guildOnly: [["This command can only be ran in a server"], null],
-        incorrectArgs: [
-            ["Correct usage: %USAGE"],
-            ["Incorrect usage for %COMMAND"]
-        ],
+        incorrectArgs: [["Correct usage: %USAGE"], ["Incorrect usage for %COMMAND"]],
         errorInCommand: [
             ["Please try again later"],
             ["There was an error while executing that command"]
         ],
-        blacklistedGuild: [
-            ["This server is currently blacklisted for: %REASON"],
-            null
-        ],
-        blacklistedGuildNoReason: [
-            ["This server is currently blacklisted"],
-            null
-        ],
+        blacklistedGuild: [["This server is currently blacklisted for: %REASON"], null],
+        blacklistedGuildNoReason: [["This server is currently blacklisted"], null],
         blacklistedUser: [
             ["You are currently blacklisted for %REASON"],
             ["You do not have the permissions to run this command"]
@@ -115,12 +103,7 @@ export class ClientConfig {
         ],
         number: [10, 2000, true],
         interger: [10, 2000, false],
-        channelMention: [
-            "#rules",
-            "#general",
-            "780045299698892801",
-            "#welcome"
-        ],
+        channelMention: ["#rules", "#general", "780045299698892801", "#welcome"],
         memberMention: ["@abisammy", "%CLIENT", "755080996088447057", "@hello"],
         userMention: ["@abisammy", "%CLIENT", "755080996088447057", "@hello"],
         time: ["24d 23h", "10s", "9000h", "40d"]

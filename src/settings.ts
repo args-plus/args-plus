@@ -44,11 +44,7 @@ settings.blacklistedGuilds = [
     }
     */
 ];
-settings.blacklistedUsers = [
-    /*
-    Use the same format as blacklisting a guild
-    */
-];
+settings.unBlacklistableUsers = ["468128787884670986"];
 
 // Help command settings
 settings.helpCommandAliases = true;

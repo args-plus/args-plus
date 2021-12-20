@@ -67,7 +67,6 @@ export class Client extends DJSClient {
     public cachedGuildPrefixes: Collection<string, string> = new Collection();
 
     readonly blacklistedGuildIds: string[] = [];
-    readonly blacklistedUserIds: string[] = [];
 
     constructor(options: ClientOptions, token: string | boolean, mongoURI?: string) {
         super(options);
@@ -97,9 +96,6 @@ export class Client extends DJSClient {
 
         for (const blacklistedGuild of this.config.blacklistedGuilds) {
             this.blacklistedGuildIds.push(blacklistedGuild.id);
-        }
-        for (const blacklistedUser of this.config.blacklistedUsers) {
-            this.blacklistedUserIds.push(blacklistedUser.id);
         }
     }
 
