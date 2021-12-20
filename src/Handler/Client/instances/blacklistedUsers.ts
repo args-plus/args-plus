@@ -71,23 +71,13 @@ export class ClientBlacklists {
 
         this.cachedBlacklists.set(id, blacklistedUserConstructor);
 
-        await BlacklistedusersModel.findOneAndUpdate(
-            { userId: id },
-            blacklistedUserConstructor,
-            { upsert: true }
-        );
+        await BlacklistedusersModel.create(blacklistedUserConstructor);
     }
 
     public editBlacklist = this.blacklistUser;
 
     public async unblacklistuser(id: string) {
-        const deleteBlacklist = await this.cachedBlacklists.delete(id);
-
-        if (!deleteBlacklist) return false;
-
-        await BlacklistedusersModel.findOneAndDelete({ userId: id });
-
-        return true;
+        // return await this.cachedBlacklists.delete(id);
     }
 
     public isBlacklisted(id: string) {

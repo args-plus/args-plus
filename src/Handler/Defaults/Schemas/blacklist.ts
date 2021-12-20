@@ -11,6 +11,7 @@ export interface BlacklistedUser {
 
 const schema = new Schema<BlacklistedUser>({
     blacklistedOn: { type: Date, required: true },
+    userId: { type: String, required: true },
     expiery: { type: Date, required: true },
     permanent: { type: Boolean, required: false },
     reason: { type: String, required: false },

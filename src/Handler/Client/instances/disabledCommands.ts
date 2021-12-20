@@ -122,7 +122,7 @@ export class DisabledCommandManager {
                 disabledCategoryConstructor
             );
 
-            if (temporary) {
+            if (!temporary) {
                 await DisabledCommandsModel.findByIdAndUpdate(
                     this.generateId(name),
                     disabledCategoryConstructor,
