@@ -1230,16 +1230,13 @@ export class CommandManager {
             );
         }
 
-        // for (const preRunFunction of this.client.preCommandFunctions) {
-        //     const runFunction = await preRunFunction.run(
-        //         this.client,
-        //         returnCommand
-        //     );
+        for (const preRunFunction of this.client.preCommandFunctions) {
+            const runFunction = await preRunFunction.run(this.client, returnCommand);
 
-        //     if (runFunction === false) {
-        //         return;
-        //     }
-        // }
+            if (runFunction === false) {
+                return;
+            }
+        }
 
         returnCommand.args = returnArgs[1];
 
@@ -1257,8 +1254,8 @@ export class CommandManager {
         //     returnCommand.sendError(...errorMessage);
         // }
 
-        // for (const postRunFunction of this.client.postCommandFunctions) {
-        //     await postRunFunction.run(this.client, returnCommand);
-        // }
+        for (const postRunFunction of this.client.postCommandFunctions) {
+            await postRunFunction.run(this.client, returnCommand);
+        }
     }
 }
