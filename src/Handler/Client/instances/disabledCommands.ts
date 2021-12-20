@@ -122,11 +122,13 @@ export class DisabledCommandManager {
                 disabledCategoryConstructor
             );
 
-            await DisabledCommandsModel.findByIdAndUpdate(
-                this.generateId(name),
-                disabledCategoryConstructor,
-                { upsert: true }
-            );
+            if (temporary) {
+                await DisabledCommandsModel.findByIdAndUpdate(
+                    this.generateId(name),
+                    disabledCategoryConstructor,
+                    { upsert: true }
+                );
+            }
 
             return true;
         }
