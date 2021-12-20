@@ -83,7 +83,7 @@ userBlacklistCommand.run = async (client, command) => {
                     blacklistsMessage += "*Unblacklisted by timeout*\n";
                 } else {
                     if (findUnBlacklister)
-                        blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
+                        blacklistsMessage += `Unblacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
                     else blacklistsMessage += "*Unblacklister not found*\n";
                     blacklistsMessage += `Reason: \`\`${
                         unblacklistReason ? unblacklistReason : "No reason provided"
@@ -219,7 +219,7 @@ guildBlacklistCommand.run = async (client, command) => {
                     blacklistsMessage += "*Unblacklisted by timeout*\n";
                 } else {
                     if (findUnBlacklister)
-                        blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
+                        blacklistsMessage += `Unblacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
                     else blacklistsMessage += "*Unblacklister not found*\n";
                     blacklistsMessage += `Reason: \`\`${
                         unblacklistReason ? unblacklistReason : "No reason provided"
