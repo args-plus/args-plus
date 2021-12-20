@@ -1,12 +1,9 @@
-import { ColorResolvable } from "discord.js";
-import { Permission } from "./Permissions";
-
 export interface Blacklist {
     id: string;
     reason?: string;
 }
 
-type ResponseElement = [string[], string[] | null];
+export type ResponseElement = [string[], string[] | null];
 
 export interface Response {
     missingRoles: ResponseElement;
@@ -24,4 +21,17 @@ export interface Response {
     incorrectGuild: ResponseElement;
     cooldown: ResponseElement;
     incorrectArgs: ResponseElement;
+}
+
+export type ExampleElement = string[];
+
+export interface ArgExample {
+    single: ExampleElement;
+    multiple: ExampleElement;
+    interger: ExampleElement | [number, number, boolean];
+    number: ExampleElement | [number, number, boolean];
+    userMention: ExampleElement;
+    channelMention: ExampleElement;
+    memberMention: ExampleElement;
+    time: ExampleElement;
 }

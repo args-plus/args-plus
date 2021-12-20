@@ -1,2 +1,2 @@
 export { Configuration, ConfigurationsModel } from "./configurations";
-export { GuildPrefixModel } from "./guildPrefixes";
+export { GuildPrefixModel } from "./guildPrefix";

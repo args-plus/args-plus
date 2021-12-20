@@ -7,7 +7,7 @@ interface GuildPrefix {
 
 const schema = new Schema<GuildPrefix>({
     _id: { type: String, required: true },
-    guildPrefix: { type: String, required: true },
+    guildPrefix: { type: String, required: true }
 });
 
 export const GuildPrefixModel = model<GuildPrefix>("guild-prefixes", schema);

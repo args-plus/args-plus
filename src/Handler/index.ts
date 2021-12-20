@@ -1,5 +1,4 @@
-export { ExtendedClient as Client, ClientConfig } from "./Client";
-export { Command, PreCommandFunction, PostCommandFunction } from "./Commands";
-export { Event } from "./Events";
-export { Check } from "./Checks";
-export { Extension } from "./Extensions";
+export { Client, ClientConfig } from "./Client";
+export { Command } from "./Commands";
+export { Argument } from "./Commands/argument";
+export { Category } from "./Commands/category";
