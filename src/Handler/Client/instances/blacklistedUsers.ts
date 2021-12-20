@@ -1,6 +1,7 @@
 import { Collection, User } from "discord.js";
 import { Client } from "..";
 import { BlacklistedUser, BlacklistedusersModel } from "../../Defaults/Schemas/blacklist";
+import { Types } from "mongoose";
 
 export class ClientBlacklists {
     readonly client: Client;
@@ -18,13 +19,31 @@ export class ClientBlacklists {
 
         const blacklistedUsers = await BlacklistedusersModel.find();
         for (const blacklistedUser of blacklistedUsers) {
-            if (blacklistedUser.expiery.getTime() > Date.now()) {
-                this.cachedBlacklists.set(blacklistedUser.id, blacklistedUser);
+            const findBlackList = this.cachedBlacklists.get(blacklistedUser.userId);
+
+            if (findBlackList) {
+                if (
+                    findBlackList.blacklistedOn.getTime() >
+                    blacklistedUser.blacklistedOn.getTime()
+                )
+                    continue;
+            }
+
+            if (
+                (blacklistedUser.expiery.getTime() > Date.now() ||
+                    blacklistedUser.permanent) &&
+                blacklistedUser.enabled
+            ) {
+                this.cachedBlacklists.set(blacklistedUser.userId, blacklistedUser);
 
                 if (logUpdate) {
                     client.console.log(
-                        `Loaded blacklisted user id: ${blacklistedUser.id}`
+                        `Loaded blacklisted user id: ${blacklistedUser.userId}`
                     );
+                }
+            } else {
+                if (!blacklistedUser.enabled) {
+                    await this.deleteBlacklist(blacklistedUser.userId);
                 }
             }
         }
@@ -51,7 +70,7 @@ export class ClientBlacklists {
                 return false;
             }
         }
-        return await this.loadBlacklists(true);
+        return await this.loadBlacklists(false);
     }
 
     public async blacklistUser(
@@ -61,8 +80,10 @@ export class ClientBlacklists {
         blacklistedBy?: User
     ) {
         const blacklistedUserConstructor: BlacklistedUser = {
+            _id: new Types.ObjectId(),
             userId: id,
             blacklistedOn: new Date(),
+            enabled: true,
             permanent: duration === true ? duration : false,
             expiery: duration !== true ? duration : new Date(),
             reason: reason,
@@ -76,19 +97,45 @@ export class ClientBlacklists {
 
     public editBlacklist = this.blacklistUser;
 
-    public async unblacklistuser(id: string) {
-        // return await this.cachedBlacklists.delete(id);
+    public async deleteBlacklist(
+        id: string,
+        unblacklistedBy: string | "CLIENT" = "CLIENT"
+    ) {
+        const findBlacklist = this.cachedBlacklists.get(id);
+
+        if (!findBlacklist) return false;
+
+        findBlacklist.enabled = false;
+
+        findBlacklist.unblacklistedBy = unblacklistedBy;
+
+        this.cachedBlacklists.delete(id);
+
+        await BlacklistedusersModel.findOneAndUpdate(
+            { _id: findBlacklist._id },
+            findBlacklist,
+            { upsert: true }
+        );
+
+        return true;
     }
 
-    public isBlacklisted(id: string) {
+    public async isBlacklisted(
+        id: string
+    ): Promise<[false] | [true, string | undefined]> {
         const findBlacklist = this.cachedBlacklists.get(id);
 
         if (!findBlacklist) {
-            return false;
+            return [false];
         }
 
-        if (findBlacklist.permanent) return true;
+        if (findBlacklist.permanent) return [true, findBlacklist.reason];
 
-        return findBlacklist.expiery.getTime() > Date.now();
+        if (findBlacklist.expiery.getTime() > Date.now() && findBlacklist.enabled) {
+            return [true, findBlacklist.reason];
+        } else {
+            await this.deleteBlacklist(id);
+            return [false];
+        }
     }
 }

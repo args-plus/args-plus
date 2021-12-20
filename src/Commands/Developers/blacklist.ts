@@ -9,7 +9,7 @@ user.displayName = "User";
 const duration = new Argument("duration", "time");
 duration.description = "The amount of time you want to blacklist them for";
 duration.allowLowerCaseCustomValues = true;
-duration.customValues = ["perm", "permanent"];
+duration.customValues = ["perm", "permanent", "off"];
 duration.displayName = "Duration";
 
 const reason = new Argument("reason", "multiple", false);
@@ -48,8 +48,15 @@ blacklistCommand.run = async (client, command) => {
         let blacklistsMessage = "";
 
         for (const blacklist of findBlacklists) {
-            const { blacklistedOn, permanent, expiery, reason, blacklistedBy } =
-                blacklist;
+            const {
+                blacklistedOn,
+                permanent,
+                expiery,
+                reason,
+                blacklistedBy,
+                enabled,
+                unblacklistedBy
+            } = blacklist;
 
             blacklistsMessage += `Blacklisted on: ${getFullDate(blacklistedOn)}\n`;
             blacklistsMessage += `Expires: ${
@@ -65,6 +72,18 @@ blacklistCommand.run = async (client, command) => {
                 else blacklistsMessage += "*Blacklister not found*\n";
             }
 
+            if (!enabled && !!unblacklistedBy) {
+                if (unblacklistedBy === "CLIENT") {
+                    blacklistsMessage += "*Unblacklisted by timeout*";
+                }
+
+                const findUnBlacklister = client.users.cache.get(unblacklistedBy);
+
+                if (findUnBlacklister)
+                    blacklistsMessage += `Blacklisted by: \`\`${findUnBlacklister.tag} (${unblacklistedBy})\`\`\n`;
+                else blacklistsMessage += "*Unblacklister not found*\n";
+            }
+
             blacklistsMessage += "\n";
         }
 
@@ -75,6 +94,15 @@ blacklistCommand.run = async (client, command) => {
     }
 
     let permanent = false;
+
+    if (duration.getStringValue() === "off") {
+        await client.blacklists.deleteBlacklist(user.id, command.getAuthor().id);
+
+        return command.sendMessage(
+            `${user.username} has been unblacklisted`,
+            `${user.tag} is no longer blacklisted`
+        );
+    }
 
     if (duration.getStringValue() === "perm" || duration.getStringValue() === "permanent")
         permanent = true;
@@ -90,9 +118,9 @@ blacklistCommand.run = async (client, command) => {
     );
 
     await command.sendMessage(
-        `I succesfully blacklisted: ${
-            user.username
-        }\nReason: \`\`${reason?.getText()}\`\`\nIt will expire:  ${
+        `I succesfully blacklisted: ${user.username}\nReason: \`\`${
+            reason ? reason.getText() : "No reason provided"
+        }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
                 : getFullDate(new Date(Date.now() + (amountOfTime as number)))
