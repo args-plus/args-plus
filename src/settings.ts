@@ -1,4 +1,4 @@
-import { ClientConfig } from "./Handler/Client/settings";
+import { ClientConfig } from "./Handler/Client/utils/config";
 const settings = new ClientConfig("ts!");
 
 // General configs
@@ -59,9 +59,7 @@ settings.logWarnings = true;
 settings.logMessages = true;
 settings.logDebugs = true;
 
-const incorrectPermissions = [
-    "You do not have the permissions to run this command"
-];
+const incorrectPermissions = ["You do not have the permissions to run this command"];
 
 // Responses
 settings.responses = {
@@ -69,36 +67,21 @@ settings.responses = {
         ["This command can only be ran by bot developers"],
         incorrectPermissions
     ],
-    disabledCommand: [
-        ["This command has been disabled by my developers"],
-        null
-    ],
+    disabledCommand: [["This command has been disabled by my developers"], null],
     guildOnly: [["This command can only be ran in a server"], null],
-    incorrectArgs: [
-        ["Correct usage: %USAGE"],
-        ["Incorrect usage for %COMMAND"]
-    ],
+    incorrectArgs: [["Correct usage: %USAGE"], ["Incorrect usage for %COMMAND"]],
     errorInCommand: [
         ["Please try again later"],
         ["There was an error while executing that command"]
     ],
-    blacklistedGuild: [
-        ["This server is currently blacklisted for: %REASON"],
-        null
-    ],
+    blacklistedGuild: [["This server is currently blacklisted for: %REASON"], null],
     blacklistedGuildNoReason: [["This server is currently blacklisted"], null],
     blacklistedUser: [
         ["You are currently blacklisted for %REASON"],
         incorrectPermissions
     ],
-    blacklistedUserNoReason: [
-        ["You are currently blacklisted"],
-        incorrectPermissions
-    ],
-    cooldown: [
-        ["This command has a %AMOUNT cooldown!\nYou have %TIMELEFT left!"],
-        null
-    ],
+    blacklistedUserNoReason: [["You are currently blacklisted"], incorrectPermissions],
+    cooldown: [["This command has a %AMOUNT cooldown!\nYou have %TIMELEFT left!"], null],
     incorrectChannel: [
         ["This command cannot be ran in this channel"],
         incorrectPermissions
