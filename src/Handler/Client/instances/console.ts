@@ -46,7 +46,9 @@ export class ClientConsole {
 
         if (config.logErrors) {
             if (stack) {
-                console.error(new Error(error).stack);
+                const errorMessage = new Error(error);
+                errorMessage.stack;
+                console.error(errorMessage);
             } else {
                 console.error("Error: " + error);
             }

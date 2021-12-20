@@ -400,6 +400,13 @@ export class CommandManager {
             return true;
         };
 
+        if (
+            client.disabledCommands.getDisabledItem(command.name) ||
+            (command.categoryName &&
+                client.disabledCommands.getDisabledItem(command.categoryName))
+        )
+            return returnMessage(responses.disabledCommand);
+
         if (command.guildOnly && !guild) return returnMessage(responses.guildOnly);
 
         // prettier-ignore
@@ -576,8 +583,8 @@ export class CommandManager {
 
             if (newHeader)
                 newHeader = newHeader.replace(
-                    new RegExp(`%${this.client.utils.generateId(value[1])}`, "g"),
-                    value[0]
+                    new RegExp(`%${this.client.utils.generateId(value[0])}`, "g"),
+                    value[1]
                 );
         }
         return [
@@ -1207,13 +1214,13 @@ export class CommandManager {
             returnCommand.setRepliedTo();
         }
 
-        // let commandChecks = await this.runCommandChecks(returnCommand);
+        let commandChecks = await this.runCommandChecks(returnCommand);
 
-        // if (typeof commandChecks !== "boolean") {
-        //     return returnCommand.sendError(commandChecks[0], commandChecks[1]);
-        // } else if (commandChecks === false) {
-        //     return;
-        // }
+        if (typeof commandChecks !== "boolean") {
+            return returnCommand.sendError(commandChecks[0], commandChecks[1]);
+        } else if (commandChecks === false) {
+            return;
+        }
 
         let returnArgs = await this.getArguments(returnCommand);
 
@@ -1240,19 +1247,29 @@ export class CommandManager {
 
         returnCommand.args = returnArgs[1];
 
-        // try {
-        await command.run(this.client, returnCommand);
-        // } catch (error: any) {
-        //     this.client.console.error(error);
+        try {
+            await command.run(this.client, returnCommand);
+        } catch (error: any) {
+            this.client.console.error(error);
 
-        //     const errorMessage = this.returnMessage(
-        //         command,
-        //         this.client.config.responses.errorInCommand,
-        //         [["error", error]]
-        //     );
+            const errorMessage = this.returnMessage(
+                command,
+                this.client.config.responses.errorInCommand,
+                [["error", error]]
+            );
 
-        //     returnCommand.sendError(...errorMessage);
-        // }
+            returnCommand.sendError(...errorMessage);
+
+            if (this.client.config.autoRemoveCommands && !command.overideAutoRemove) {
+                await this.client.disabledCommands.disableItem(
+                    command.name,
+                    true,
+                    "command",
+                    undefined,
+                    error
+                );
+            }
+        }
 
         for (const postRunFunction of this.client.postCommandFunctions) {
             await postRunFunction.run(this.client, returnCommand);

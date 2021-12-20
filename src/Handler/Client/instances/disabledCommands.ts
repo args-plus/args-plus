@@ -133,8 +133,6 @@ export class DisabledCommandManager {
     }
 
     public async enableItem(name: string) {
-        const { client } = this;
-
         const type = this.getType(name);
 
         if (!type) return false;

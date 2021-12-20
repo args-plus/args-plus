@@ -108,8 +108,7 @@ export class ClientUtils {
 
     public getGlobalPrefix(): string {
         if (this.client.getConnected() !== false) {
-            const cachedPrefix =
-                this.client.configurations.get("global prefix");
+            const cachedPrefix = this.client.configurations.get("global prefix");
             if (!cachedPrefix) {
                 return this.client.config.prefix;
             } else {
