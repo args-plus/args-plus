@@ -19,6 +19,7 @@ import { SlashCommandManager } from "./instances/slashCommand";
 import { PostCommandFunction, PreCommandFunction } from "../Commands/functions";
 import { Extension } from "../Extensions";
 import { DisabledCommandManager } from "./instances/disabledCommands";
+import { ClientBlacklists } from "./instances/blacklistedUsers";
 
 export class Client extends DJSClient {
     private readonly clientToken: string;
@@ -45,6 +46,7 @@ export class Client extends DJSClient {
     public commandManager = new CommandManager(this);
     public slashCommandManager = new SlashCommandManager(this);
     public disabledCommands = new DisabledCommandManager(this);
+    public blacklists = new ClientBlacklists(this);
 
     public commands: Collection<string, Command> = new Collection();
     public aliases: Collection<string, Command> = new Collection();
@@ -237,6 +239,8 @@ export class Client extends DJSClient {
         }
     }
 
+    public loadBlacklists = this.blacklists.init;
+
     public async init(
         loadAll = true,
         loadChecks = true,
@@ -244,6 +248,7 @@ export class Client extends DJSClient {
         loadCommands = true,
         connectToMongo = true,
         loadConfigurations = true,
+        loadBlacklists = true,
         loadEvents = true,
         loadExtensions = true
     ) {
@@ -266,6 +271,10 @@ export class Client extends DJSClient {
 
         if (connectToMongo || loadAll) {
             await this.connectToMongo();
+        }
+
+        if (loadBlacklists || loadAll) {
+            await this.loadBlacklists();
         }
 
         if (loadCommands || loadAll) {

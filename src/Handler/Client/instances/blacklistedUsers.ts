@@ -28,6 +28,7 @@ export class ClientBlacklists {
                 }
             }
         }
+        return true;
     }
 
     public async init(autoConnectToMongo = true, mongoURI?: string) {
