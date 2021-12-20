@@ -22,6 +22,8 @@ export class ReturnCommand {
     public commandClass: Command;
     public args: Argument[];
 
+    public returnValues: any[] = [];
+
     private commandRepliedTo: boolean = false;
     private client: Client;
 

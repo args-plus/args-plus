@@ -16,7 +16,7 @@ import { Configuration } from "../Defaults/Schemas";
 import { Check } from "../Checks";
 import { ClientChecks } from "./instances/checks";
 import { SlashCommandManager } from "./instances/slashCommand";
-import { PostCommandFuntcion, PreCommandFunction } from "../Commands/functions";
+import { PostCommandFunction, PreCommandFunction } from "../Commands/functions";
 import { Extension } from "../Extensions";
 
 export class Client extends DJSClient {
@@ -53,7 +53,7 @@ export class Client extends DJSClient {
     public userChecks: Collection<string, Check> = new Collection();
 
     public preCommandFunctions: PreCommandFunction[] = [];
-    public postCommandFunctions: PostCommandFuntcion[] = [];
+    public postCommandFunctions: PostCommandFunction[] = [];
 
     public extensions: Extension[] = [];
 
@@ -205,7 +205,7 @@ export class Client extends DJSClient {
     public async loadPostCommandFunctions(
         dirs: string[] = ["/CommandUtils/postCommand"]
     ) {
-        await this.loader.loadItems(this.postCommandFunctions, PostCommandFuntcion, dirs);
+        await this.loader.loadItems(this.postCommandFunctions, PostCommandFunction, dirs);
     }
 
     public async loadCommandFunctions(
