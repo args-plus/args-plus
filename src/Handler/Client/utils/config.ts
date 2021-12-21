@@ -38,16 +38,11 @@ export class ClientConfig {
     // Checks and permissions
     public defaultClientChecks: string[] = [];
     public defaultUserChecks: string[] = [];
-    public defaultClientPermissions: Permission[] = [];
+    public defaultClientPermissions: Permission[] = ["EMBED_LINKS", "SEND_MESSAGES"];
     public defaultUserPermissions: Permission[] = [];
 
-    // Help command settings
-    public helpCommandCategoryDescription: boolean = true;
-    public helpCommandAliases: boolean = true;
-    public helpCommandCommandDescription: boolean = true;
-
     // blacklisted guildsa nd users
-    public unBlacklistableUsers: string[] = [];
+    public unBlacklistableUsers: string[] = ["DEVELOPERS"];
 
     // Logs and errors
     public logWarnings: boolean = true;
@@ -55,47 +50,62 @@ export class ClientConfig {
     public logDebugs: boolean = true;
     public logErrors: boolean = true;
 
+    private incorrectPermissions = [
+        "You do not have the permissions to run this command"
+    ];
+
     // Responses
     // All have %COMMAND available
     public responses: Response = {
         developerOnly: [
             ["This command can only be ran by bot developers"],
-            ["You do not have the permissions to run this command"]
+            this.incorrectPermissions
         ],
         disabledCommand: [["This command has been disabled by my developers"], null],
         guildOnly: [["This command can only be ran in a server"], null],
-        incorrectArgs: [["Correct usage: %USAGE"], ["Incorrect usage for %COMMAND"]], // Available values: %USAGE, %REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY, %EXAMPLES
+        // Available values: %USAGE, %REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY, %EXAMPLES
+        incorrectArgs: [
+            [
+                "**Correct usage:** \n``%USAGE``\n*%REQUIRED_ARG_KEY\n%UNREQUIRED_ARG_KEY*\n\n**Examples:**\n``%EXAMPLES``"
+            ],
+            ["Incorrect usage for %COMMAND"]
+        ],
+        // Avialable values: %ERROR
         errorInCommand: [
-            // Available values: %ERROR
             ["Please try again later"],
             ["There was an error while executing that command"]
         ],
-        blacklistedGuild: [["This server is currently blacklisted for: %REASON"], null], // Available values: %REASON
+        // Avaialable values: %REASON
+        blacklistedGuild: [["This server is currently blacklisted for: %REASON"], null],
         blacklistedGuildNoReason: [["This server is currently blacklisted"], null],
+        // Avaialable values: %REASON
         blacklistedUser: [
-            ["You are currently blacklisted for %REASON"], // Available values: %REASON
-            ["You do not have the permissions to run this command"]
+            ["You are currently blacklisted for: %REASON"],
+            this.incorrectPermissions
         ],
         blacklistedUserNoReason: [
             ["You are currently blacklisted"],
-            ["You do not have the permissions to run this command"]
+            this.incorrectPermissions
         ],
-        cooldown: [["This command can only be ran %AMOUNT per %PERIOD"], null], // Avialable values: %PERIOD, %AMOUNT
+        // Avialable values: %PERIOD, %AMOUNT
+        cooldown: [["This command can only be ran %AMOUNT times per %PERIOD"], null],
         incorrectChannel: [
             ["This command cannot be ran in this channel"],
-            ["You do not have the permissions to run this command"]
+            this.incorrectPermissions
         ],
         incorrectGuild: [["This command cannot be ran in this server"], null],
         missingRoles: [
             ["You do not have the correct roles to run this command"],
-            ["You do not have the permissions to run this command"]
+            this.incorrectPermissions
         ],
+        // Available values: %PERMISSION
         missingClientPermissions: [
-            ["I am missing the %PERMISSION permission to run this command"], // Available values: %PERMISSION
+            ["I am missing the %PERMISSION permission to run this command"],
             null
         ],
+        // Available values: %PERMISSION
         missingUserPermissions: [
-            ["You are missing the %PERMISSION permission to run this command"], // Available values: %PERMISSION
+            ["You are missing the %PERMISSION permission to run this command"],
             ["You do not have the permissions to run this command"]
         ]
     };
@@ -118,16 +128,24 @@ export class ClientConfig {
     };
 
     public helpCommand: HelpCommand = {
+        // Available values: %PREFIX_USED
         beginingParagraph: [
-            "**Help**\nShowing commands you can use. To run a command use %PREFIXUSED help command for a specific command"
-        ], // Available values: %PREFIX_USED
-        endParagraph: ["\n\nI mean it is pretty customisable"], // Available values: %PREFIX_USED
-        category: ["\n\n**%NAME**: *%DESCRIPTION*"], // Available values: %NAME, %DESCRIPTION
-        command: ["\n``%PREFIX``**%NAME** %ALIASES %DESCRIPTION"], // Available values: %PREFIX, %NAME, %ALIASES, %ALWAYS_ALIASES %USAGE, %ARGS, %DESCRIPTION, %ALWAYS_DESCRIPTION
+            "**Help**\nUse ``%PREFIX_USEDhelp`` to view all the available commands. \nUse ``%PREFIX_USEDhelp (command name)`` to view help for a specific command and ``%PREFIX_USEDhelp (category name)`` to view help for a scpeific category.\n\n__**Showing the commands you can use**__"
+        ],
+        // Available values: %PREFIX_USED
+        endParagraph: [""],
+        // Available values: %NAME, %DESCRIPTION
+        category: ["\n\n**%NAME |** __%DESCRIPTION__"],
+        // Available values: %PREFIX, %NAME, %ALIASES, %ALWAYS_ALIASES %USAGE, %ARGS, %DESCRIPTION, %ALWAYS_DESCRIPTION
+        noCategory: ["\n**Comands with no category**"],
+        command: ["\n``%PREFIX``**%NAME** %ALIASES - %ALWAYS_DESCRIPTION"],
+        // Available values: %NAME, %DESCRIPTION, %COMMANDS
+        detailedCategory: [
+            "**%NAME |** __%DESCRIPTION__\n\n**__Available commands__**%COMMANDS"
+        ],
+        // Available values: %NAME, %PREFIX_USED, %USAGE, %REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY, %ARGS, %CAPITALISED_NAME, %DESCRIPTION, %ALIASES, %CATEGORY, %HIDDEN_ALIASES, %ALL_ALIASES, %GUILD_ONLY, %1EXAMPLE, %2EXAMPLE, %3EXAMPLE, %EXAMPLES, %COOLDOWN
         detailedCommand: [
-            "**%NAME**\n%DESCRIPTION%ALIASES%HIDDEN_ALIASES%GUILD_ONLY%COOLDOWN"
-        ], // Available values: %NAME, %DESCRIPTION, %ALIASES, %HIDDEN_ALIASES, %GUILD_ONLY, %1EXAMPLE, %2EXAMPLE, %3EXAMPLE, %EXAMPLES, %COOLDOWN
-        noCategory: ["\n**Commands without a category**"],
-        detailedCategory: ["%NAME%DESCRIPTION%COMMANDS"] // Available values: %NAME, %DESCRIPTION, %COMMANDS
+            "**%CAPITALISED_NAME |** __%DESCRIPTION__\n\n**Usage:**\n``%USAGE``\n*%REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY*\n\n**Category: **``%CATEGORY``\n**Aliases: **``%ALL_ALIASES``\n**Cooldown: **``%COOLDOWN``\n**Server only: ** ``%GUILD_ONLY``"
+        ]
     };
 }

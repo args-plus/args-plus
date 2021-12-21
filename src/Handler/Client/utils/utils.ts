@@ -186,4 +186,12 @@ export class ClientUtils {
         }
         return [newMessage, newHeader ? newHeader : null];
     }
+
+    public static capitaliseString(string: string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    public capitaliseString(string: string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 }

@@ -129,18 +129,21 @@ helpCommand.run = async (client, command) => {
         return client.utils.returnMessage(helpCommand.command, [
             ["prefix", prefixes.join(" or ")],
             ["name", command.name],
+            ["capitalised name", client.utils.capitaliseString(command.name)],
             [
                 "aliases",
                 command.aliases.length !== 0 ? `(${command.aliases.join(", ")})` : ""
             ],
-            ["alwaysaliases", command.aliases.join(", ")],
+            ["always aliases", command.aliases.join(", ")],
             ["usage", command.getUsage(command.name)],
             ["args", argsMessage],
+            ["description", command.description.length !== 0 ? command.description : ""],
             [
-                "description",
-                command.description.length !== 0 ? `- ${command.description}` : ""
-            ],
-            ["alwaysdescription", command.description]
+                "always description",
+                command.description.length !== 0
+                    ? command.description
+                    : "This command has no description"
+            ]
         ])[0];
     };
 
@@ -191,7 +194,7 @@ helpCommand.run = async (client, command) => {
         }
 
         let helpMessage = client.utils.returnMessage(helpCommand.beginingParagraph, [
-            ["prefix used", command.prefixUsed]
+            ["prefix used", command.prefixUsed ? command.prefixUsed : ""]
         ])[0];
 
         for (const categoryKey of loadedCommandDescriptions) {
@@ -201,7 +204,7 @@ helpCommand.run = async (client, command) => {
         helpMessage += `\n${emptyCategoryDescription}`;
 
         helpMessage += client.utils.returnMessage(helpCommand.endParagraph, [
-            ["prefix used", command.prefixUsed]
+            ["prefix used", command.prefixUsed ? command.prefixUsed : ""]
         ])[0];
 
         return command.sendMessage(helpMessage);
@@ -214,7 +217,7 @@ helpCommand.run = async (client, command) => {
 
         if (prefixes.length === 0) return false;
 
-        let cooldownMessage = "";
+        let cooldownMessage = "None";
 
         const commandCooldown = command.getCooldownNumber();
 
@@ -228,17 +231,39 @@ helpCommand.run = async (client, command) => {
             )[0];
         }
 
+        let argsMessage = "";
+
+        for (const arg of command.args) {
+            argsMessage += `${arg.displayName ? arg.displayName : arg.name} `;
+        }
+
         let helpMessage = client.utils.returnMessage(helpCommand.detailedCommand, [
             ["name", command.name],
+            ["capitalised name", client.utils.capitaliseString(command.name)],
             [
                 "description",
                 command.description.length !== 0
                     ? command.description
                     : "This command has no description"
             ],
-            ["aliases", command.aliases.join(", ")],
-            ["hidden aliases", command.hiddenAliases.join(", ")],
+            [
+                "aliases",
+                command.aliases.length != 0 ? command.aliases.join(", ") : "None"
+            ],
+            [
+                "hidden aliases",
+                command.hiddenAliases.length !== 0
+                    ? command.hiddenAliases.join(", ")
+                    : "None"
+            ],
+            [
+                "all aliases",
+                [...command.aliases, ...command.hiddenAliases].length !== 0
+                    ? [...command.aliases, ...command.hiddenAliases].join(", ")
+                    : "None"
+            ],
             ["guild only", command.guildOnly ? "yes" : "no"],
+            ["usage", command.getUsage(command.name, prefixUsed)],
             ["1example", command.getExample(command.name, prefixUsed, 1)],
             ["2example", command.getExample(command.name, prefixUsed, 2)],
             ["3example", command.getExample(command.name, prefixUsed, 3)],
@@ -250,7 +275,12 @@ helpCommand.run = async (client, command) => {
                     client.config.amountOfExamples
                 )
             ],
-            ["cooldown", cooldownMessage]
+            ["cooldown", cooldownMessage],
+            ["args", argsMessage],
+            ["required arg key", "<> = Required"],
+            ["unrequired arg key", "() = Unrequired"],
+            ["prefix used", prefixUsed],
+            ["category", command.categoryName ? command.categoryName : "None"]
         ]);
 
         return helpMessage[0];
@@ -289,15 +319,21 @@ helpCommand.run = async (client, command) => {
         return command.categoryName === category.name;
     });
 
+    let avialableCommands = 0;
     let categoryCommandsText = "";
     for (const commandKey of categoryCommands) {
         const command = commandKey[1];
+
+        if (!(await canRunCommand(command))) continue;
+        else avialableCommands++;
 
         const prefixes = await getPrefixes(command);
         if (prefixes.length === 0) continue;
 
         categoryCommandsText += addCommandToText(command, prefixes);
     }
+
+    if (avialableCommands === 0) return sendHelpMessage();
 
     command.sendMessage(
         client.utils.returnMessage(helpCommand.detailedCategory, [

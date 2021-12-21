@@ -107,7 +107,9 @@ export class Command extends Item {
     }
 
     public getUsage(name: string, prefix?: string): string {
-        return `${prefix ? prefix : ""}${name} ${this.usage.join(" ")}`;
+        return `${prefix ? prefix : ""}${name}${
+            this.usage.length !== 0 ? ` ${this.usage.join(" ")}` : ""
+        }`;
     }
 
     public getExample(
