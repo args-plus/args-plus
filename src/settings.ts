@@ -132,7 +132,7 @@ settings.helpCommand = {
     ],
     // Available values: %NAME, %PREFIX_USED, %USAGE, %REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY, %ARGS, %CAPITALISED_NAME, %DESCRIPTION, %ALIASES, %CATEGORY, %HIDDEN_ALIASES, %ALL_ALIASES, %GUILD_ONLY, %1EXAMPLE, %2EXAMPLE, %3EXAMPLE, %EXAMPLES, %COOLDOWN
     detailedCommand: [
-        "**%CAPITALISED_NAME |** __%DESCRIPTION__\n\n**Usage:**\n``%USAGE``\n*%REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY*\n\n**Category: **``%CATEGORY``\n**Aliases: **``%ALL_ALIASES``\n**Cooldown: **``%COOLDOWN``\n**Server only: ** ``%GUILD_ONLY``"
+        "**%CAPITALISED_NAME |** __%DESCRIPTION__\n\n**Usage:**\n``%USAGE``\n*%REQUIRED_ARG_KEY, %UNREQUIRED_ARG_KEY*\n\n**Category: **``%CATEGORY``\n**Aliases: **``%ALL_ALIASES``\n**Cooldown: **``%COOLDOWN``\n**Server only: ** ``%GUILD_ONLY``\n\n**Examples**\n``%2EXAMPLE``"
     ]
 };
 
