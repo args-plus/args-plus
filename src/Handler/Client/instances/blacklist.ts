@@ -95,6 +95,17 @@ export class ClientBlacklists {
             blacklistedBy: blacklistedBy ? blacklistedBy.id : ""
         };
 
+        const findBlacklist = this.cachedBlacklists.get(id);
+
+        if (findBlacklist) {
+            findBlacklist.enabled = false;
+            await BlacklistModel.findByIdAndUpdate(
+                { _id: findBlacklist._id.toString() },
+                { enabled: false },
+                { upsert: true }
+            );
+        }
+
         this.cachedBlacklists.set(id, blacklistConstructor);
 
         await BlacklistModel.create(blacklistConstructor);
