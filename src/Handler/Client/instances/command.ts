@@ -1271,7 +1271,6 @@ export class CommandManager {
                 await this.client.disabledCommands.disableItem(
                     command.name,
                     true,
-                    "command",
                     undefined,
                     error
                 );

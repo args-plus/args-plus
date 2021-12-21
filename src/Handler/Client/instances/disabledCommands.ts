@@ -54,7 +54,7 @@ export class DisabledCommandManager {
         return await this.loadDisabledItems(true);
     }
 
-    private getType(name: string) {
+    public getType(name: string) {
         const findCategory = this.client.categories.get(name);
         const findCommand = this.client.commands.get(name);
 
@@ -84,7 +84,6 @@ export class DisabledCommandManager {
     public async disableItem(
         name: string,
         temporary = false,
-        type?: "command" | "category",
         user?: User,
         reason?: string
     ) {
@@ -99,8 +98,7 @@ export class DisabledCommandManager {
         } else {
             const disabledCategoryConstructor: DisabledCommand = {
                 _id: this.generateId(name),
-                name,
-                type: type ? type : findType
+                name
             };
 
             if (reason) {
@@ -110,10 +108,10 @@ export class DisabledCommandManager {
             if (temporary) {
                 disabledCategoryConstructor.autoDisable = true;
             } else if (user) {
-                disabledCategoryConstructor;
+                disabledCategoryConstructor.disablerId = user.id;
             } else {
                 return client.console.error(
-                    "To disable a category there must be a user or temporary argument provided"
+                    "To disable an item there must be a user or temporary argument provided"
                 );
             }
 
@@ -157,7 +155,6 @@ export class DisabledCommandManager {
     public async toggleItem(
         name: string,
         temporary = false,
-        type?: "command" | "category",
         user?: User,
         reason?: string
     ) {
@@ -166,7 +163,7 @@ export class DisabledCommandManager {
         if (this.isDisabledItem(name)) {
             return await this.enableItem(name);
         } else {
-            return await this.disableItem(name, temporary, type, user, reason);
+            return await this.disableItem(name, temporary, user, reason);
         }
     }
 }
