@@ -35,3 +35,15 @@ export interface ArgExample {
     memberMention: ExampleElement;
     time: ExampleElement;
 }
+
+export type HelpElement = string[];
+
+export interface HelpCommand {
+    beginingParagraph: HelpElement;
+    endParagraph: HelpElement;
+    command: HelpElement;
+    category: HelpElement;
+    noCategory: HelpElement;
+    detailedCommand: HelpElement;
+    detailedCategory: HelpElement;
+}

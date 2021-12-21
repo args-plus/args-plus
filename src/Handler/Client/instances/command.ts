@@ -244,7 +244,7 @@ export class CommandManager {
                 this.loadCategories();
 
                 command.categoryName = command.category;
-                command.categoryName = newCategory.id;
+                command.categoryId = newCategory.id;
             }
         } else if (typeof command.category !== "boolean") {
             const categoryName = command.category[0];
@@ -583,30 +583,12 @@ export class CommandManager {
         responses: [string[], string[] | null],
         values: [string, string][] = []
     ): [string, string] {
-        const message = this.client.utils.randomElement(responses[0]);
-
-        const header = responses[1]
-            ? this.client.utils.randomElement(responses[1])
-            : null;
-
-        let newMessage = message;
-        let newHeader = header;
-
-        for (const value of values) {
-            newMessage = newMessage.replace(
-                new RegExp(`%${this.client.utils.generateId(value[0])}`, "g"),
-                value[1]
-            );
-
-            if (newHeader)
-                newHeader = newHeader.replace(
-                    new RegExp(`%${this.client.utils.generateId(value[0])}`, "g"),
-                    value[1]
-                );
-        }
+        const getReturnMessage = this.client.utils.returnMessage(responses, values);
         return [
-            newMessage.replace(/%COMMAND/g, command.name),
-            newHeader ? newHeader.replace(/%COMMAND/g, command.name) : ""
+            getReturnMessage[0].replace(/%COMMAND/g, command.name),
+            getReturnMessage[1]
+                ? getReturnMessage[1].replace(/%COMMAND/g, command.name)
+                : ""
         ];
     }
 
@@ -683,7 +665,7 @@ export class CommandManager {
     public async getArgs(message: Message, prefix?: string | false | null): Promise<string[]> {
         let messagePrefix: string | false | null;
 
-        if(prefix){
+        if(!!prefix){
             messagePrefix = prefix
         } else {
             messagePrefix = await this.getPrefix(message);
@@ -692,6 +674,7 @@ export class CommandManager {
         if (messagePrefix) {
             return message.content.slice(messagePrefix.length).trim().split(/ +/g);
         } else if (prefix === null) {
+            console.log("IM WORKING")
             return message.content.split(/ +/g);
         } else {
             return [];
@@ -704,7 +687,9 @@ export class CommandManager {
             return false;
         }
 
-        const args = await this.getArgs(message);
+        const args = await this.getArgs(message, prefix);
+       
+        console.log(args)
         if (
             !this.client.commands.has(args[0].toLowerCase()) &&
             !this.client.aliases.has(args[0].toLowerCase())
@@ -766,6 +751,8 @@ export class CommandManager {
         if (commandRan instanceof Message) {
             const prefix = (await this.getPrefix(commandRan)) as string;
             const args = await this.getArgs(commandRan, prefix);
+
+            returnCommand.prefixUsed = prefix;
 
             let commandRanName = args[0];
 
@@ -1047,6 +1034,8 @@ export class CommandManager {
                 return [false, "/", commandRan.commandName];
             };
 
+            returnCommand.prefixUsed = "/";
+
             for (const providedArg of commandRan.options.data) {
                 let requiredArg: Argument = command.args.filter((arg) => {
                     return arg.name === providedArg.name;
@@ -1247,12 +1236,11 @@ export class CommandManager {
 
             return returnCommand.sendError(
                 ...this.returnMessage(command, client.config.responses.incorrectArgs, [
-                    ["usage", command.getUsage(returnArgs[1], returnArgs[2])],
-                    ["usage", command.getUsage("ts!", "h")],
+                    ["usage", command.getUsage(returnArgs[2], returnArgs[1])],
                     ["required arg key", "<> = Required"],
                     ["unrequired arg key", "() = Unrequired"],
                     // prettier-ignore
-                    ["examples", command.getExample(returnArgs[1], returnArgs[2], client.config.amountOfExamples)],
+                    ["examples", command.getExample(returnArgs[2], returnArgs[1], client.config.amountOfExamples)],
                     ["client", `@${clientUserName}`]
                 ])
             );

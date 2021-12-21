@@ -144,4 +144,46 @@ export class ClientUtils {
         else if (parseFloat(hours) < 24) return hours + " hours";
         else return days + " days";
     }
+
+    public returnMessage(
+        responses: [string[], string[] | null] | string[],
+        values: [string, string][] = []
+    ): [string, string] | [string, null] {
+        let message = "";
+
+        let header: string | null = "";
+
+        if (typeof responses[0] === "string") {
+            message = this.client.utils.randomElement(responses as string[]);
+        } else {
+            message = this.client.utils.randomElement(responses[0] as string[]);
+        }
+
+        if (typeof responses[0] === "string") {
+            header = null;
+        } else {
+            if (!(responses[1] as string[] | null)) {
+                header = null;
+            } else {
+                header = this.client.utils.randomElement(responses[1] as string[]);
+            }
+        }
+
+        let newMessage = message;
+        let newHeader = header;
+
+        for (const value of values) {
+            newMessage = newMessage.replace(
+                new RegExp(`%${this.client.utils.generateId(value[0])}`, "g"),
+                value[1]
+            );
+
+            if (newHeader)
+                newHeader = newHeader.replace(
+                    new RegExp(`%${this.client.utils.generateId(value[0])}`, "g"),
+                    value[1]
+                );
+        }
+        return [newMessage, newHeader ? newHeader : null];
+    }
 }

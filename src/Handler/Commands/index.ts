@@ -106,19 +106,19 @@ export class Command extends Item {
         this.cooldownNumber = [ms, cooldownKey[1]];
     }
 
-    public getUsage(prefix: string, name: string): string {
-        return `${prefix}${name} ${this.usage.join(" ")}`;
+    public getUsage(name: string, prefix?: string): string {
+        return `${prefix ? prefix : ""}${name} ${this.usage.join(" ")}`;
     }
 
     public getExample(
-        prefix: string,
         name: string,
+        prefix: string,
         amountOfExamples: number = 3
     ): string {
         let examples: string[] = [];
 
         for (let i = 0; i < amountOfExamples; i++) {
-            let currentExample = `${prefix}${name} `;
+            let currentExample = `${prefix ? prefix : ""}${name} `;
             for (const example of this.examples) {
                 if (typeof example[0] === "number") {
                     let exampleKey = example as [number, number, boolean];

@@ -4,6 +4,8 @@ export {
     Response,
     ResponseElement,
     ArgExample,
-    ExampleElement
+    ExampleElement,
+    HelpCommand,
+    HelpElement
 } from "./config";
 export { argType, ReturnTime, TimeEnding } from "./command";
