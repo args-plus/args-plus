@@ -312,12 +312,16 @@ export class CommandManager {
                 // prettier-ignore
                 pushArrayToArray(commandClientChecks, category.clientChecks)
 
-                command.guildOnly = category.guildOnly;
-                command.developerOnly = category.developerOnly;
-                command.hidden = category.hidden;
-                command.overideGuildBlacklist = category.overideGuildBlacklist;
-                command.overideUserBlacklist = category.overideUserBlacklist;
-                command.overideLoadSlashCommand = category.overideLoadSlashCommand;
+                if (category.guildOnly) command.guildOnly = category.guildOnly;
+                if (category.developerOnly)
+                    command.developerOnly = category.developerOnly;
+                if (category.hidden) command.hidden = category.hidden;
+                if (category.overideGuildBlacklist)
+                    command.overideGuildBlacklist = category.overideGuildBlacklist;
+                if (category.overideUserBlacklist)
+                    command.overideUserBlacklist = category.overideUserBlacklist;
+                if (category.overideLoadSlashCommand)
+                    command.overideLoadSlashCommand = category.overideLoadSlashCommand;
             }
         } else {
             // prettier-ignore
