@@ -1,143 +1,291 @@
-import { Client, ClientOptions, Collection } from "discord.js";
-import { Utils } from "../Utils";
-import {
-    Command,
-    PostCommandFunction,
-    PreCommandFunction,
-    CommandManager,
-    DisabledCommandManager
-} from "../Commands";
+import { Client as DJSClient, ClientOptions, Collection } from "discord.js";
+import dotenv from "dotenv";
+import { ClientConfig } from "./utils/config";
+export { ClientConfig } from "./utils/config";
+import { ClientConsole } from "./instances/console";
+import settings from "../../settings";
+import { ClientUtils } from "./utils/utils";
+import { Command } from "../Commands";
+import { ClientLoader } from "./instances/loader";
+import { ClientMongo } from "./utils/mongo";
+import { CommandManager } from "./instances/command";
 import { Event } from "../Events";
-import { ItemLoader } from "./ClientLoader";
-import { Console } from "./Console";
-import { ClientConfig } from "./settings";
-import { Check, CheckManger } from "../Checks";
+import { Category } from "../Commands/category";
+import { ClientConfigurations } from "./utils/configurations";
 import { Configuration } from "../Defaults/Schemas";
-import { MongoManager } from "./MongoHandler";
-import { ConfigurationManager } from "./Configurations";
+import { Check } from "../Checks";
+import { ClientChecks } from "./instances/checks";
+import { SlashCommandManager } from "./instances/slashCommand";
+import { PostCommandFunction, PreCommandFunction } from "../Commands/functions";
 import { Extension } from "../Extensions";
-import mongoose from "mongoose";
-import { Constraint } from "../Interfaces";
+import { DisabledCommandManager } from "./instances/disabledCommands";
+import { ClientBlacklists } from "./instances/blacklist";
 
-export { ClientConfig } from "./settings";
+export class Client extends DJSClient {
+    private readonly clientToken: string;
+    private readonly mongoURI: string;
 
-export class ExtendedClient extends Client {
-    public config: ClientConfig;
+    readonly config: ClientConfig;
 
-    public utils = new Utils(this);
-    public items = new ItemLoader(this);
-    public console: Console = new Console(this);
-    public checks = new CheckManger(this);
+    private connectedToMongo = false;
+
+    public getConnected() {
+        return this.connectedToMongo;
+    }
+
+    public setConnected() {
+        this.connectedToMongo = true;
+    }
+
+    public utils = new ClientUtils(this);
+    public console = new ClientConsole(this);
+    public loader = new ClientLoader(this);
+    public mongo = new ClientMongo(this);
+    public configurations = new ClientConfigurations(this);
+    public checks = new ClientChecks(this);
     public commandManager = new CommandManager(this);
-    public disabledCommandManager = new DisabledCommandManager(this);
-    public mongo = new MongoManager(this);
-    public configurations = new ConfigurationManager(this);
+    public slashCommandManager = new SlashCommandManager(this);
+    public disabledCommands = new DisabledCommandManager(this);
+    public blacklists = new ClientBlacklists(this);
 
-    public connection: typeof mongoose = mongoose;
-    public connectedToMongo: boolean = false;
+    public commands: Collection<string, Command> = new Collection();
+    public aliases: Collection<string, Command> = new Collection();
+    public categories: Collection<string, Category> = new Collection();
+    public events: Event[] = [];
 
     public clientChecks: Collection<string, Check> = new Collection();
     public userChecks: Collection<string, Check> = new Collection();
 
-    public commands: Collection<string, Command> = new Collection();
-    public aliases: Collection<string, Command> = new Collection();
-    public categories: Collection<string, [string, Constraint[]]> =
-        new Collection();
-    public commandCategories: Collection<string, Command[]> = new Collection();
-    // prettier-ignore
-    public cachedConfigurations: Collection<string, Configuration> = new Collection();
-    public emptyCategories: Command[] = [];
-    public events: Event[] = [];
-    public cachedGuildPrefixes: Collection<string, string> = new Collection();
     public preCommandFunctions: PreCommandFunction[] = [];
     public postCommandFunctions: PostCommandFunction[] = [];
-    public disabledCommands: string[] = [];
-
-    public blacklistedGuildIds: string[] = [];
-    public blacklistedUserIds: string[] = [];
 
     public extensions: Extension[] = [];
 
-    constructor(options: ClientOptions) {
+    // prettier-ignore
+    public cachedConfigurations: Collection<string, Configuration> = new Collection();
+
+    public cachedGuildPrefixes: Collection<string, string> = new Collection();
+
+    constructor(options: ClientOptions, token: string | boolean, mongoURI?: string) {
         super(options);
 
-        const config = this.items.loadSettings();
+        if (typeof token === "boolean") {
+            dotenv.config();
 
-        if (config == null) {
-            throw new Error(
-                'Missing environment variables: "token" or "mongoURI" or missing settings'
-            );
+            if (process.env.token && process.env.mongoURI) {
+                this.clientToken = process.env.token;
+                this.mongoURI = process.env.mongoURI;
+            } else {
+                throw new Error(
+                    'Could not find environment variables with "token" or "mongoURI"'
+                );
+            }
+        } else {
+            this.clientToken = token;
+
+            if (!mongoURI) {
+                throw new Error("A mongo URI was not provided");
+            }
+
+            this.mongoURI = mongoURI;
         }
 
-        this.config = config;
+        this.config = settings;
+    }
 
-        for (const blacklistedGuild of config.blacklistedGuilds) {
-            this.blacklistedGuildIds.push(blacklistedGuild.id);
-        }
-        for (const blacklistedUser of config.blacklistedUsers) {
-            this.blacklistedUserIds.push(blacklistedUser.id);
+    public async registerDefaultCommands(
+        autoConnectToMongo?: boolean,
+        mongoURI?: string
+    ) {
+        await this.loader.loadItems(this.categories, Category, ["/Commands"]);
+        this.commandManager.loadCategories();
+
+        await this.loader.loadItems(this.commands, Command, ["/Commands"]);
+        this.commandManager.loadCommands();
+
+        await this.loadSlashCommands();
+        await this.disabledCommands.init(autoConnectToMongo, mongoURI);
+
+        return true;
+    }
+
+    public async registerCommands(
+        dirs: string[] = ["/Commands"],
+        autoConnectToMongo?: boolean,
+        mongoURI?: string
+    ) {
+        await this.loader.loadItems(this.categories, Category, dirs);
+        this.commandManager.loadCategories();
+
+        await this.loader.loadItems(this.commands, Command, dirs);
+        this.commandManager.loadCommands();
+
+        await this.loadSlashCommands();
+        await this.disabledCommands.init(autoConnectToMongo, mongoURI);
+
+        return true;
+    }
+
+    public async loadCommand(command: Command) {
+        command.setRegistered();
+        this.commands.set(command.name, command);
+
+        this.commandManager.loadCommands();
+
+        await this.loadSlashCommands();
+        await this.disabledCommands.init();
+
+        return true;
+    }
+
+    public async loadSlashCommands() {
+        return await this.slashCommandManager.loadSlashCommands();
+    }
+
+    public loadCategory(category: Category) {
+        category.setRegistered();
+        this.categories.set(category.name, category);
+
+        this.commandManager.loadCategories();
+
+        return true;
+    }
+
+    private enableEvents() {
+        for (const event of this.events) {
+            if (!event.getLoaded()) {
+                this.on(event.name, event.run.bind(null, this));
+                event.setLoaded();
+            }
         }
     }
 
-    public async init() {
-        const { items, console, utils } = this;
+    public async registerDefaultEvents() {
+        await this.loader.loadItems(this.events, Event, ["/Handler/Defaults/Events"]);
+        this.enableEvents();
+        return true;
+    }
 
-        console.client = this;
-        console.config = this.config;
-        items.client = this;
-        utils.client = this;
-        this.checks.client = this;
-        this.commandManager.client = this;
-        this.disabledCommandManager.client = this;
-        this.mongo.client = this;
+    public async registerEvents(dirs: string[] = ["/Events"]) {
+        await this.loader.loadItems(this.events, Event, dirs);
+        this.enableEvents();
+        return true;
+    }
 
-        this.login(this.config.token);
+    public loadEvent(event: Event) {
+        this.events.push(event);
+        this.enableEvents();
+        return true;
+    }
 
-        await items.loadItems(this.clientChecks, Check, [
-            "/Handler/Defaults/ClientChecks",
-            "/Checks/UserChecks"
-        ]);
+    public async connectToMongo() {
+        return await this.mongo.connect(this.mongoURI);
+    }
 
-        await items.loadItems(this.userChecks, Check, [
-            "/Handler/Defaults/UserChecks",
-            "/Checks/UserChecks"
-        ]);
+    public async loadConfigurations(autoConnectToMongo = true) {
+        return await this.configurations.init(autoConnectToMongo, this.mongoURI);
+    }
 
-        items.loadChecks();
+    public async loadClientChecks(dirs: string[] = ["/Checks/client"]) {
+        await this.loader.loadItems(this.clientChecks, Check, dirs);
+    }
 
-        await items.loadItems(this.events, Event, [
-            "/Handler/Defaults/Events",
-            "/Events"
-        ]);
+    public async loadUserChecks(dirs: string[] = ["/Checks/user"]) {
+        await this.loader.loadItems(this.userChecks, Check, dirs);
+    }
 
-        items.loadEvents();
+    public async loadChecks(
+        clientDirs: string[] = ["/Checks/client"],
+        userDirs: string[] = ["/Checks/user"]
+    ) {
+        await this.loadClientChecks(clientDirs);
+        await this.loadUserChecks(userDirs);
+    }
 
-        await items.loadItems(this.commands, Command, ["/Commands"]);
+    public async loadPreCommandFunctions(dirs: string[] = ["/CommandUtils/preCommand"]) {
+        await this.loader.loadItems(this.preCommandFunctions, PreCommandFunction, dirs);
+    }
 
-        items.loadCommands();
+    public async loadPostCommandFunctions(
+        dirs: string[] = ["/CommandUtils/postCommand"]
+    ) {
+        await this.loader.loadItems(this.postCommandFunctions, PostCommandFunction, dirs);
+    }
 
-        await items.loadItems(this.preCommandFunctions, PreCommandFunction, [
-            "/CommandUtils/PreCommand"
-        ]);
+    public async loadCommandFunctions(
+        preDirs: string[] = ["/CommandUtils/preCommand"],
+        postDirs: string[] = ["/CommandUtils/postCommand"]
+    ) {
+        await this.loadPreCommandFunctions(preDirs);
+        await this.loadPostCommandFunctions(postDirs);
+    }
 
-        await items.loadItems(this.postCommandFunctions, PostCommandFunction, [
-            "/CommandUtils/PostCommand"
-        ]);
+    public async loadExtensions(dirs: string[] = ["/Extensions"], runExtensions = true) {
+        await this.loader.loadItems(this.extensions, Extension, dirs);
 
-        await this.mongo.connect();
-        await this.configurations.init();
+        if (runExtensions) {
+            await this.runExtensions();
+        }
+    }
 
-        items.loadCateogires();
+    public async runExtensions() {
+        for (const extension of this.extensions) {
+            this.console.log(`Loaded extension: ${extension.name}`);
 
-        await items.registerSlashCommands();
+            await extension.run(this);
+        }
+    }
 
-        await items.loadItems(this.extensions, Extension, [
-            "/Handler/Defaults/Extensions",
-            "/Extensions"
-        ]);
+    public async loadBlacklists(autoConnectToMongo?: boolean, mongoURI?: string) {
+        await this.blacklists.init(autoConnectToMongo, mongoURI);
+    }
 
-        await items.runExtensions();
+    public async init(
+        loadAll = true,
+        loadChecks = true,
+        loadCommandFunctions = true,
+        loadCommands = true,
+        connectToMongo = true,
+        loadConfigurations = true,
+        loadBlacklists = true,
+        loadEvents = true,
+        loadExtensions = true
+    ) {
+        const { clientToken: token } = this;
+
+        await this.login(token);
+
+        if (loadChecks || loadAll) {
+            await this.loadChecks();
+        }
+
+        if (loadCommandFunctions || loadAll) {
+            await this.loadCommandFunctions();
+        }
+
+        if (loadEvents || loadAll) {
+            await this.registerDefaultEvents();
+            await this.registerEvents();
+        }
+
+        if (connectToMongo || loadAll) {
+            await this.connectToMongo();
+        }
+
+        if (loadBlacklists || loadAll) {
+            await this.loadBlacklists();
+        }
+
+        if (loadCommands || loadAll) {
+            await this.registerDefaultCommands();
+        }
+
+        if (loadConfigurations || loadAll) {
+            await this.loadConfigurations();
+        }
+
+        if (loadExtensions || loadAll) {
+            await this.loadExtensions();
+        }
     }
 }
-
-export default ExtendedClient;

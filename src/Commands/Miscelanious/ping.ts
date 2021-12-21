@@ -10,9 +10,7 @@ command.run = async (client, command) => {
     const pingMessage = (timestamp: number) => {
         let pingMessage = `The bot latency is \`\`${
             Date.now() - timestamp
-        }ms\`\`.\nThe discord API latency is \`\`${Math.round(
-            client.ws.ping
-        )}ms\`\`.`;
+        }ms\`\`.\nThe discord API latency is \`\`${Math.round(client.ws.ping)}ms\`\`.`;
 
         if (client.config.indentMessageContent) {
             pingMessage = `> ${client.utils
@@ -26,10 +24,7 @@ command.run = async (client, command) => {
     const pingEmbed = new MessageEmbed().setColor(client.config.mainColor);
 
     if (!message) {
-        if (
-            command.commandRepliedTo &&
-            command.commandRan instanceof CommandInteraction
-        ) {
+        if (command.getRepliedTo() && command.isInteraction(command.commandRan)) {
             const sentMessage = await command.commandRan.fetchReply();
             if (sentMessage instanceof Message) {
                 if (client.config.messagesOrEmbeds === "messages") {
@@ -59,9 +54,7 @@ command.run = async (client, command) => {
         message.edit(pingMessage(message.createdTimestamp));
     } else {
         message.edit({
-            embeds: [
-                pingEmbed.setDescription(pingMessage(message.createdTimestamp))
-            ]
+            embeds: [pingEmbed.setDescription(pingMessage(message.createdTimestamp))]
         });
     }
 };

@@ -1,44 +1,28 @@
-import { Guild, GuildMember } from "discord.js";
-import { Command } from "../../Handler";
-import { Constraint } from "../../Handler/Interfaces";
+import { Collection, Util } from "discord.js";
+import { Argument, Category, Command } from "../../Handler";
 
-const command = new Command("helpme");
-command.description = "Displays the commands you can use";
-command.hiddenAliases = ["helpmepls", "h"];
-command.aliases = ["help"];
-command.overideGuildBlacklist = true;
-command.overideUserBlacklist = true;
-command.args = [
-    {
-        name: "command",
-        displayName: "Command or Category",
-        type: "single",
-        description: "An optional command or category you need help with"
-    }
-];
-command.run = async (client, commandRan) => {
-    const guild: Guild | null = commandRan.getGuild();
-    const author = commandRan.getAuthor();
-    const channel = commandRan.getChannel();
-    const member: GuildMember | null = commandRan.getMember();
-    const { commandClass } = commandRan;
-    const { certainChannelsOnly, certainGuildsOnly, certainRolesOnly } =
-        commandClass;
+const helpCommand = new Command("help");
+helpCommand.description = "Displays the commands you can use";
+helpCommand.aliases = ["h"];
+helpCommand.overideGuildBlacklist = true;
+helpCommand.overideUserBlacklist = true;
 
-    let constraints: Constraint[] = [];
+const command = new Argument("command", "single");
+command.description = "An optional command or category you need help with";
+command.displayName = "Command or Category";
 
-    const setConstraints = (command: Command) => {
-        if (
-            typeof command.category === "string" &&
-            !command.overideConstraints
-        ) {
-            const findCategory = client.categories.get(command.category);
+helpCommand.args = [command];
+helpCommand.run = async (client, command) => {
+    const { commandClass, args, prefixUsed } = command;
+    const { certainChannelsOnly, certainGuildsOnly, certainRolesOnly } = commandClass;
 
-            if (findCategory) {
-                constraints = findCategory[1];
-            }
-        }
-    };
+    const { config, utils } = client;
+    const { helpCommand } = config;
+
+    const guild = command.getGuild();
+    const author = command.getAuthor();
+    const member = command.getMember();
+    const channel = command.getChannel();
 
     const getPrefixes = async (command: Command) => {
         let prefixes = [];
@@ -52,7 +36,6 @@ command.run = async (client, commandRan) => {
         }
         if (
             !command.overideLoadSlashCommand &&
-            !constraints.includes("overideLoadSlashCommand") &&
             (client.config.loadGuildSlashCommands ||
                 client.config.loadGlobalSlashCommands)
         ) {
@@ -60,24 +43,19 @@ command.run = async (client, commandRan) => {
         }
         return prefixes;
     };
-    const canRunCommand = (command: Command): boolean => {
-        if (client.disabledCommandManager.isDisabledCommand(command.name)) {
-            return false;
-        }
 
+    const canRunCommand = async (command: Command) => {
         if (
-            (command.developerOnly || constraints.includes("developerOnly")) &&
-            !client.config.botDevelopers.includes(author.id)
-        ) {
+            client.disabledCommands.isDisabledItem(command.name) ||
+            (command.categoryName &&
+                client.disabledCommands.isDisabledItem(command.categoryName))
+        )
             return false;
-        }
 
-        if (
-            (command.guildOnly || constraints.includes("guildOnly")) &&
-            !guild
-        ) {
+        if (command.developerOnly && !client.config.botDevelopers.includes(author.id))
             return false;
-        }
+
+        if (command.guildOnly && !guild) return false;
 
         const certain = (array: string[], value: string) => {
             return array.length !== 0 && !array.includes(value);
@@ -110,22 +88,18 @@ command.run = async (client, commandRan) => {
 
         if (
             guild &&
-            client.blacklistedGuildIds.includes(guild.id) &&
-            (!command.overideGuildBlacklist ||
-                !constraints.includes("overideGuildBlacklist"))
-        ) {
+            !command.overideGuildBlacklist &&
+            (await client.blacklists.isBlacklisted(guild.id))[0]
+        )
             return false;
-        }
 
         if (
-            client.blacklistedUserIds.includes(author.id) &&
-            (!command.overideUserBlacklist ||
-                !constraints.includes("overideUserBlacklist"))
-        ) {
+            !command.overideUserBlacklist &&
+            (await client.blacklists.isBlacklisted(author.id))[0]
+        )
             return false;
-        }
 
-        if (member && guild && guild.me && channel && channel.type !== "DM") {
+        if (member && channel && guild && guild.me && channel.type !== "DM") {
             let hasPermissions = true;
             for (const permission of command.clientPermissions) {
                 if (!channel.permissionsFor(guild.me).has(permission)) {
@@ -137,223 +111,237 @@ command.run = async (client, commandRan) => {
                     hasPermissions = false;
                 }
             }
-            for (const permission of constraints) {
-                if (
-                    permission !== "overideGuildBlacklist" &&
-                    permission !== "overideUserBlacklist" &&
-                    permission !== "guildOnly" &&
-                    permission !== "developerOnly" &&
-                    permission !== "overideLoadSlashCommand"
-                ) {
-                    if (!channel.permissionsFor(member).has(permission)) {
-                        hasPermissions = false;
-                    }
-                }
-            }
-            if (!hasPermissions) {
-                return false;
-            }
+            if (!hasPermissions) return false;
         }
 
         return true;
     };
 
-    const sendHelpMessage = async () => {
-        let helpText = "";
-        let currentCategoryText = "";
+    const addCommandToText = (command: Command, prefixes: string[]) => {
+        if (command.hidden) return "";
 
-        const addCommandToText = async (
-            command: Command,
-            prefixes: string[]
-        ) => {
-            let commandDescription =
-                command.description.length !== 0 &&
-                client.config.helpCommandCommandDescription
+        let argsMessage = "";
+
+        for (const arg of command.args) {
+            argsMessage += `${arg.displayName ? arg.displayName : arg.name} `;
+        }
+
+        return client.utils.returnMessage(helpCommand.command, [
+            ["prefix", prefixes.join(" or ")],
+            ["name", command.name],
+            ["capitalised name", client.utils.capitaliseString(command.name)],
+            [
+                "aliases",
+                command.aliases.length !== 0 ? `(${command.aliases.join(", ")})` : ""
+            ],
+            ["always aliases", command.aliases.join(", ")],
+            ["usage", command.getUsage(command.name)],
+            ["args", argsMessage],
+            ["description", command.description.length !== 0 ? command.description : ""],
+            [
+                "always description",
+                command.description.length !== 0
                     ? command.description
-                    : false;
-
-            currentCategoryText += `\`\`${prefixes.join(" or ")}\`\`**${
-                command.name
-            }** ${
-                command.aliases.length !== 0 && client.config.helpCommandAliases
-                    ? `(${command.aliases.join(", ")}) ${
-                          commandDescription ? `- ${commandDescription}` : ""
-                      }`
-                    : `${commandDescription ? `- ${commandDescription}` : ""}`
-            }\n`;
-        };
-
-        for (const key of client.commandCategories) {
-            currentCategoryText = "";
-
-            const categoryName = key[0];
-            const commands = key[1];
-
-            for (const command of commands) {
-                setConstraints(command);
-
-                // prettier-ignore
-                if(command.guildOnly && !guild){
-                    continue;
-                }
-
-                if (!canRunCommand(command)) {
-                    continue;
-                }
-
-                let prefixes = await getPrefixes(command);
-                if (prefixes.length === 0) {
-                    continue;
-                }
-
-                if (currentCategoryText.length === 0) {
-                    const categoryDescription =
-                        client.categories.get(categoryName);
-                    if (
-                        categoryDescription &&
-                        client.config.helpCommandCategoryDescription
-                    ) {
-                        currentCategoryText += `**${categoryName}:** __${categoryDescription[0]}__\n`;
-                    } else if (client.config.helpCommandCategoryDescription) {
-                        currentCategoryText += `**${categoryName}:** __Category has no description__\n`;
-                    } else {
-                        currentCategoryText += `**${categoryName}**\n`;
-                    }
-                }
-
-                await addCommandToText(command, prefixes);
-            }
-            if (currentCategoryText.length !== 0) currentCategoryText += `\n`;
-            helpText += currentCategoryText;
-        }
-
-        currentCategoryText = "";
-        for (const command of client.emptyCategories) {
-            // prettier-ignore
-            if(command.guildOnly && !guild){
-                continue;
-            }
-
-            setConstraints(command);
-
-            if (!canRunCommand(command)) {
-                continue;
-            }
-
-            let prefixes = await getPrefixes(command);
-            if (prefixes.length === 0) {
-                continue;
-            }
-
-            if (currentCategoryText.length === 0) {
-                currentCategoryText += `**Commands with no category**\n`;
-            }
-
-            await addCommandToText(command, prefixes);
-        }
-
-        if (currentCategoryText.length !== 0) {
-            currentCategoryText += `\n`;
-            helpText += currentCategoryText;
-        }
-
-        if (client.user) {
-            commandRan.sendMessage(
-                helpText.substring(0, helpText.length - 2),
-                `Showing commands you can use for ${client.user.username}\n`
-            );
-        } else {
-            commandRan.sendMessage(
-                helpText.substring(0, helpText.length - 2),
-                `Showing commands you can use\n`
-            );
-        }
+                    : "This command has no description"
+            ]
+        ])[0];
     };
 
-    const { args } = commandRan;
+    const sendHelpMessage = async () => {
+        const loadedCommandDescriptions: Collection<string, string> = new Collection();
+        let emptyCategoryDescription: string = "";
 
-    if (!args[0] || !args[0].stringValue) {
-        return sendHelpMessage();
-    }
+        for (const commandKey of client.commands) {
+            const command = commandKey[1];
 
-    const sendHelpForCommand = async (command: Command) => {
+            if (command.guildOnly && !guild) continue;
+
+            if (!(await canRunCommand(command))) continue;
+
+            const prefixes = await getPrefixes(command);
+
+            if (prefixes.length === 0) continue;
+
+            if (!command.categoryName) {
+                if (emptyCategoryDescription.length === 0) {
+                    emptyCategoryDescription += utils.randomElement(
+                        helpCommand.noCategory
+                    );
+                }
+                emptyCategoryDescription += addCommandToText(command, prefixes);
+                continue;
+            }
+
+            let getDescription = loadedCommandDescriptions.get(command.categoryName);
+
+            if (!getDescription) {
+                const findCategory = client.categories.get(command.categoryName);
+
+                if (!findCategory) continue;
+                let descriptionParagraph = client.utils.returnMessage(
+                    helpCommand.category,
+                    [
+                        ["name", findCategory.name],
+                        ["description", findCategory.description]
+                    ]
+                )[0];
+                descriptionParagraph += addCommandToText(command, prefixes);
+                loadedCommandDescriptions.set(command.categoryName, descriptionParagraph);
+            } else {
+                getDescription += addCommandToText(command, prefixes);
+                loadedCommandDescriptions.set(command.categoryName, getDescription);
+            }
+        }
+
+        let helpMessage = client.utils.returnMessage(helpCommand.beginingParagraph, [
+            ["prefix used", command.prefixUsed ? command.prefixUsed : ""]
+        ])[0];
+
+        for (const categoryKey of loadedCommandDescriptions) {
+            helpMessage += categoryKey[1];
+        }
+
+        helpMessage += `\n${emptyCategoryDescription}`;
+
+        helpMessage += client.utils.returnMessage(helpCommand.endParagraph, [
+            ["prefix used", command.prefixUsed ? command.prefixUsed : ""]
+        ])[0];
+
+        return command.sendMessage(helpMessage);
+    };
+
+    if (!args[0]) return sendHelpMessage();
+
+    const getHelpForCommand = async (command: Command) => {
         let prefixes = await getPrefixes(command);
 
-        commandRan.sendMessage(
-            `**Usage:**\n**\`\`${prefixes.join("`` or ``")}\`\`** \`\`${
-                command.name
-            }${
-                command.usage.length !== 0
-                    ? ` ${command.usage}\`\`\n*<> = required value*\n*() = unrequired value*`
-                    : "``"
-            }\n\n**Aliases:** ${
-                command.aliases.length !== 0
-                    ? `\`\`"${command.aliases.join('" or "')}"\`\``
-                    : "``None``"
-            }${
-                command.hiddenAliases.length !== 0
-                    ? ` \`\`or "${command.hiddenAliases.join('" or "')}" \`\``
-                    : ""
-            }\n**Description:** ${
+        if (prefixes.length === 0) return false;
+
+        let cooldownMessage = "None";
+
+        const commandCooldown = command.getCooldownNumber();
+
+        if (commandCooldown[0] !== 0 && commandCooldown[1] !== 0) {
+            cooldownMessage = client.utils.returnMessage(
+                client.config.responses.cooldown,
+                [
+                    ["period", client.utils.msToTime(commandCooldown[0])],
+                    ["amount", commandCooldown[1].toString()]
+                ]
+            )[0];
+        }
+
+        let argsMessage = "";
+
+        for (const arg of command.args) {
+            argsMessage += `${arg.displayName ? arg.displayName : arg.name} `;
+        }
+
+        let helpMessage = client.utils.returnMessage(helpCommand.detailedCommand, [
+            ["name", command.name],
+            ["capitalised name", client.utils.capitaliseString(command.name)],
+            [
+                "description",
                 command.description.length !== 0
-                    ? `\`\`${command.description}\`\``
+                    ? command.description
                     : "This command has no description"
-            }\n**Category:** ${
-                command.category && typeof command.category === "string"
-                    ? `\`\`${command.category}\`\``
-                    : "``None``"
-            }\n**Server only:** ${
-                command.guildOnly ? "``Yes``" : "``No``"
-            }\n**Cooldown:** ${
-                command.cooldownNumber !== 0
-                    ? `\`\`${client.utils.msToTime(command.cooldownNumber)}\`\``
-                    : "``None``"
-            }`,
-            `Showing help for ${command.name}\n`
-        );
+            ],
+            [
+                "aliases",
+                command.aliases.length != 0 ? command.aliases.join(", ") : "None"
+            ],
+            [
+                "hidden aliases",
+                command.hiddenAliases.length !== 0
+                    ? command.hiddenAliases.join(", ")
+                    : "None"
+            ],
+            [
+                "all aliases",
+                [...command.aliases, ...command.hiddenAliases].length !== 0
+                    ? [...command.aliases, ...command.hiddenAliases].join(", ")
+                    : "None"
+            ],
+            ["guild only", command.guildOnly ? "yes" : "no"],
+            ["usage", command.getUsage(command.name, prefixUsed)],
+            ["1example", command.getExample(command.name, prefixUsed, 1)],
+            ["2example", command.getExample(command.name, prefixUsed, 2)],
+            ["3example", command.getExample(command.name, prefixUsed, 3)],
+            [
+                "examples",
+                command.getExample(
+                    command.name,
+                    prefixUsed,
+                    client.config.amountOfExamples
+                )
+            ],
+            ["cooldown", cooldownMessage],
+            ["args", argsMessage],
+            ["required arg key", "<> = Required"],
+            ["unrequired arg key", "() = Unrequired"],
+            ["prefix used", prefixUsed],
+            ["category", command.categoryName ? command.categoryName : "None"]
+        ]);
+
+        return helpMessage[0];
     };
 
-    const prompt = args[0].stringValue.toLowerCase();
+    const sendHelpForCommand = async (commandClass: Command) => {
+        const getHelpMessage = await getHelpForCommand(commandClass);
+
+        if (getHelpMessage) {
+            return command.sendMessage(getHelpMessage);
+        }
+    };
+
+    const prompt = args[0].getStringValue().toLowerCase();
 
     const findCommand = client.commands.get(prompt);
 
-    if (findCommand && canRunCommand(findCommand)) {
-        return sendHelpForCommand(findCommand);
+    if (findCommand && (await canRunCommand(findCommand))) {
+        return await sendHelpForCommand(findCommand);
     }
 
     const findAlias = client.aliases.get(prompt);
 
-    if (findAlias && canRunCommand(findAlias)) {
-        return sendHelpForCommand(findAlias);
+    if (findAlias && (await canRunCommand(findAlias))) {
+        return await sendHelpForCommand(findAlias);
     }
 
-    const findCategory = client.categories.get(prompt);
+    const findCategory = client.categories.filter((category) => {
+        return category.name.toLowerCase() === prompt;
+    });
 
-    if (findCategory) {
-        const getCommands = client.commandCategories.get(prompt);
+    const category = findCategory.first();
+    if (!category) return await sendHelpMessage();
 
-        if (getCommands) {
-            let availableCommands = "";
+    const categoryCommands = client.commands.filter((command) => {
+        return command.categoryName === category.name;
+    });
 
-            for (const command of getCommands) {
-                availableCommands += `- ${command.name}${
-                    command.aliases.length !== 0
-                        ? ` \`\`(${command.aliases.join(", ")})\`\``
-                        : ""
-                }\n`;
-            }
+    let avialableCommands = 0;
+    let categoryCommandsText = "";
+    for (const commandKey of categoryCommands) {
+        const command = commandKey[1];
 
-            return commandRan.sendMessage(
-                `**Description: ** \`\`${findCategory}\`\`\n\n**Available commands**\n${availableCommands.substring(
-                    availableCommands.length,
-                    -2
-                )}`,
-                `Showing help for ${prompt}`
-            );
-        }
+        if (!(await canRunCommand(command))) continue;
+        else avialableCommands++;
+
+        const prefixes = await getPrefixes(command);
+        if (prefixes.length === 0) continue;
+
+        categoryCommandsText += addCommandToText(command, prefixes);
     }
 
-    return sendHelpMessage();
+    if (avialableCommands === 0) return sendHelpMessage();
+
+    command.sendMessage(
+        client.utils.returnMessage(helpCommand.detailedCategory, [
+            ["name", category.name],
+            ["description", category.description],
+            ["commands", categoryCommandsText]
+        ])[0]
+    );
 };
 
-export default command;
+export default helpCommand;

@@ -1,5 +1,4 @@
 import { Message } from "discord.js";
-import ExtendedClient from "../../Client";
 import { Event } from "../../Events";
 
 const event = new Event("messageCreate");

@@ -1,14 +1,11 @@
-export { Blacklist, Response } from "./Config";
-export { Permission } from "./Permissions";
+export { Permission } from "./util";
 export {
-    Argument,
-    ReturnArgument,
-    Run as CommandRun,
-    PreCommandRun,
-    PostCommandRun,
-    argType,
-    TimeEnding,
-    ReturnTime,
-    Constraint
-} from "./Command";
-export { Run as CheckRun } from "./Check";
+    Blacklist,
+    Response,
+    ResponseElement,
+    ArgExample,
+    ExampleElement,
+    HelpCommand,
+    HelpElement
+} from "./config";
+export { argType, ReturnTime, TimeEnding } from "./command";
