@@ -93,7 +93,10 @@ export class Client extends DJSClient {
         this.config = settings;
     }
 
-    public async registerDefaultCommands() {
+    public async registerDefaultCommands(
+        autoConnectToMongo?: boolean,
+        mongoURI?: string
+    ) {
         await this.loader.loadItems(this.categories, Category, ["/Commands"]);
         this.commandManager.loadCategories();
 
@@ -101,12 +104,16 @@ export class Client extends DJSClient {
         this.commandManager.loadCommands();
 
         await this.loadSlashCommands();
-        await this.disabledCommands.init();
+        await this.disabledCommands.init(autoConnectToMongo, mongoURI);
 
         return true;
     }
 
-    public async registerCommands(dirs: string[] = ["/Commands"]) {
+    public async registerCommands(
+        dirs: string[] = ["/Commands"],
+        autoConnectToMongo?: boolean,
+        mongoURI?: string
+    ) {
         await this.loader.loadItems(this.categories, Category, dirs);
         this.commandManager.loadCategories();
 
@@ -114,7 +121,7 @@ export class Client extends DJSClient {
         this.commandManager.loadCommands();
 
         await this.loadSlashCommands();
-        await this.disabledCommands.init();
+        await this.disabledCommands.init(autoConnectToMongo, mongoURI);
 
         return true;
     }
