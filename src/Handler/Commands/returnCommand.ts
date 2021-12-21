@@ -27,6 +27,8 @@ export class ReturnCommand {
     private commandRepliedTo: boolean = false;
     private client: Client;
 
+    public prefixUsed: string = "";
+
     constructor(
         commandRan: Message | CommandInteraction,
         commandClass: Command,
@@ -274,7 +276,7 @@ export class ReturnCommand {
             ) {
                 const messages = this.getTextMessage(body, header);
                 let lastMessage: void | Message;
-                for (const message in messages) {
+                for (const message of messages) {
                     lastMessage = await commandRan.channel
                         .send(message)
                         .catch((error: DiscordAPIError) => {
