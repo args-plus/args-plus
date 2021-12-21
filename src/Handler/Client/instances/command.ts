@@ -674,7 +674,6 @@ export class CommandManager {
         if (messagePrefix) {
             return message.content.slice(messagePrefix.length).trim().split(/ +/g);
         } else if (prefix === null) {
-            console.log("IM WORKING")
             return message.content.split(/ +/g);
         } else {
             return [];
@@ -689,7 +688,6 @@ export class CommandManager {
 
         const args = await this.getArgs(message, prefix);
        
-        console.log(args)
         if (
             !this.client.commands.has(args[0].toLowerCase()) &&
             !this.client.aliases.has(args[0].toLowerCase())
