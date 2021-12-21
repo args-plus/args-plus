@@ -1,14 +1,7 @@
 import { User } from "discord.js";
 import { Argument, Command } from "../../Handler";
-import { Blacklist, BlacklistModel } from "../../Handler/Defaults/Schemas/blacklist";
-
-const getDate = (date: Date) => {
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-};
-
-const getFullDate = (date: Date) => {
-    return `\`\`${getDate(date)}\`\` ***(DD/MM/YY)***`;
-};
+import { BlacklistModel } from "../../Handler/Defaults/Schemas/blacklist";
+import { time } from "@discordjs/builders";
 
 const user = new Argument("user", "userMention", true);
 user.description = "The user to blacklist or retrieve information about";
@@ -59,10 +52,8 @@ userBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${getFullDate(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${
-                permanent ? "``never``" : getFullDate(expiery)
-            }\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
+            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -141,7 +132,7 @@ userBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : getFullDate(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)))
         }`,
         `${user.tag} has been blacklisted`
     );
@@ -195,10 +186,8 @@ guildBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${getFullDate(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${
-                permanent ? "``never``" : getFullDate(expiery)
-            }\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
+            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -270,7 +259,7 @@ guildBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : getFullDate(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)))
         }`,
         `${findGuild.name} has been blacklisted`
     );
