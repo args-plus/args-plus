@@ -10,7 +10,7 @@ extension.run = (client) => {
     commandOne.run = (client, command) => {};
     commandOne.category = "Extensions";
     commandOne.description = "it's very nice";
-    client.items.loadCommand(commandOne);
+    client.loadCommand(commandOne);
 
     const commandTwo = new Command("extension2");
     commandTwo.run = (client, command) => {};
@@ -18,7 +18,7 @@ extension.run = (client) => {
         "Extensions",
         "You can also register commands in extensions"
     ];
-    client.items.loadCommand(commandTwo);
+    client.loadCommand(commandTwo);
 };
 
 export default extension;

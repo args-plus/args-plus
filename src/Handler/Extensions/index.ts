@@ -1,6 +1,6 @@
-import ExtendedClient from "../Client";
-import { Item } from "../Client/ClientLoader";
+import { Client } from "..";
+import { Item } from "../Client/instances/loader";
 
 export class Extension extends Item {
-    public run: (client: ExtendedClient) => any = () => {};
+    public run: (client: Client) => any = () => {};
 }

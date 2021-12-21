@@ -9,7 +9,7 @@ export interface Configuration {
 const schema = new Schema<Configuration>({
     _id: { type: String, required: true },
     options: { type: Object, required: true },
-    name: { type: String, required: true },
+    name: { type: String, required: true }
 });
 
 export const ConfigurationsModel = model<Configuration>(
