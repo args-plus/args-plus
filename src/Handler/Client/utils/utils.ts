@@ -89,7 +89,7 @@ export class ClientUtils {
         return string.toUpperCase().replace(/[ +]/g, "_");
     }
 
-    public async getGuildPrefix(guild: Guild | null): Promise<string> {
+    public async getGuildPrefix(guild: Guild | false): Promise<string> {
         if (!guild) {
             return this.getGlobalPrefix();
         }

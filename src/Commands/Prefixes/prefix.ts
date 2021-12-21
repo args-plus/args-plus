@@ -1,59 +1,61 @@
-// import { Command } from "../../Handler";
-// import { GuildPrefixModel } from "../../Handler/Defaults/Schemas";
+import { Argument, Command } from "../../Handler";
+import { GuildPrefixModel } from "../../Handler/Defaults/Schemas";
 
-// const command = new Command("prefix");
-// command.aliases = ["setprefix"];
-// // command.guildOnly = true;
-// command.description = "Get or change the prefix of the bot";
-// command.args = [
-//     {
-//         name: "newprefix",
-//         displayName: "New prefix",
-//         required: false,
-//         description: "The new prefix you want to set it to",
-//         type: "single"
-//     }
-// ];
-// command.run = async (client, command) => {
-//     const guild = command.getGuild();
-//     const member = command.getMember();
+const prefixCommand = new Command("prefix");
 
-//     const currentPrefix = async () => {
-//         const guildPrefix = await client.utils.getGuildPrefix(guild);
-//         const globalPrefix = client.utils.getGlobalPrefix();
+prefixCommand.aliases = ["setprefix"];
+prefixCommand.description = "Get or change the prefix of the bot";
 
-//         if (guildPrefix === globalPrefix) {
-//             return command.sendMessage(
-//                 `The current prefix is: \`\`${globalPrefix}\`\``
-//             );
-//         } else {
-//             return command.sendMessage(
-//                 `The prefix here is: \`\`${guildPrefix}\`\`\nThe global prefix is: \`\`${globalPrefix}\`\``
-//             );
-//         }
-//     };
+const newPrefix = new Argument("newprefix", "single");
+newPrefix.description = "The new prefix you want to set it to";
+newPrefix.displayName = "New prefix";
 
-//     if (!guild || !member || !member.permissions.has("ADMINISTRATOR")) {
-//         return currentPrefix();
-//     }
+prefixCommand.args = [newPrefix];
 
-//     if (!command.args[0]) {
-//         return currentPrefix();
-//     }
+prefixCommand.run = async (client, command) => {
+    const guild = command.getGuild();
+    const member = command.getMember();
 
-//     const newPrefix = command.args[0].stringValue;
-//     if (!newPrefix) {
-//         return currentPrefix();
-//     }
+    const globalPrefix = client.utils.getGlobalPrefix();
 
-//     // prettier-ignore
-//     await GuildPrefixModel.findOneAndUpdate({_id: guild.id}, {guildPrefix: newPrefix}, {upsert: true})
-//     client.cachedGuildPrefixes.set(guild.id, newPrefix);
+    const currentPrefix = async () => {
+        const guildPrefix = await client.utils.getGuildPrefix(guild);
 
-//     command.sendMessage(
-//         `The new prefix is: \`\`${newPrefix}\`\``,
-//         "I succesfully changed the prefix for this server"
-//     );
-// };
+        if (guildPrefix === globalPrefix) {
+            return command.sendMessage(`The current prefix is: \`\`${globalPrefix}\`\``);
+        } else {
+            return command.sendMessage(
+                `The prefix here is: \`\`${guildPrefix}\`\`\nThe global prefix is: \`\`${globalPrefix}\`\``
+            );
+        }
+    };
 
-// export default command;
+    if (
+        !guild ||
+        !member ||
+        !member.permissions.has("ADMINISTRATOR") ||
+        !command.args[0]
+    ) {
+        return await currentPrefix();
+    }
+
+    const newPrefix = command.args[0].getStringValue();
+
+    if (newPrefix !== globalPrefix) {
+        await GuildPrefixModel.findByIdAndUpdate(
+            guild.id,
+            { guildPrefix: newPrefix },
+            { upsert: true }
+        );
+    } else {
+        await GuildPrefixModel.findByIdAndDelete(guild.id);
+    }
+    client.cachedGuildPrefixes.set(guild.id, newPrefix);
+
+    command.sendMessage(
+        `The new prefix is: \`\`${newPrefix}\`\``,
+        "I succesfully changed the prefix for this server"
+    );
+};
+
+export default prefixCommand;
