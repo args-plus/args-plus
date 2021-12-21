@@ -1,45 +1,37 @@
-// import { Command } from "../../Handler/Commands";
+import { Command, Argument } from "../../Handler";
 
-// const command = new Command("globalprefix");
-// command.aliases = ["gprefix", "setgprefix", "setglobalprefix"];
-// command.description = "Get or change the prefix of the bot";
-// command.overideConstraints = true;
-// command.args = [
-//     {
-//         name: "newprefix",
-//         displayName: "New prefix",
-//         required: false,
-//         description: "The new prefix you want to set it to",
-//         type: "single"
-//     }
-// ];
-// command.run = async (client, command) => {
-//     const author = command.getAuthor();
+const globalPrefixCommand = new Command("globalprefix");
+globalPrefixCommand.aliases = ["gprefix", "setgprefix", "setglobalprefix"];
+globalPrefixCommand.description = "Get or change the global prefix of the bot";
 
-//     const currentPrefix = () => {
-//         const globalPrefix = client.utils.getGlobalPrefix();
-//         return command.sendMessage(
-//             `The current global prefix is: \`\`${globalPrefix}\`\``
-//         );
-//     };
+const newPrefix = new Argument("newprefix", "single");
+newPrefix.displayName = "New prefix";
+newPrefix.description = "The prefix you want to set it to";
 
-//     if (
-//         !client.config.botDevelopers.includes(author.id) ||
-//         !command.args[0] ||
-//         !command.args[0].stringValue
-//     ) {
-//         return currentPrefix();
-//     }
+globalPrefixCommand.args = [newPrefix];
 
-//     client.configurations.update(
-//         "global prefix",
-//         { globalPrefix: command.args[0].stringValue },
-//         true
-//     );
-//     return command.sendMessage(
-//         `The new global prefix is: \`\`${command.args[0].stringValue}\`\``,
-//         "I succesfully changed the global prefix"
-//     );
-// };
+globalPrefixCommand.run = async (client, command) => {
+    const author = command.getAuthor();
 
-// export default command;
+    const currentPrefix = () => {
+        const globalPrefix = client.utils.getGlobalPrefix();
+        return command.sendMessage(
+            `The global prefix is currently: \`\`${globalPrefix}\`\``
+        );
+    };
+
+    if (!client.config.botDevelopers.includes(author.id) || !command.args[0]) {
+        return currentPrefix();
+    }
+
+    client.configurations.update("global prefix", {
+        globalPrefix: command.args[0].getStringValue()
+    });
+
+    return command.sendMessage(
+        `The new global prefix is \`\`${command.args[0].getStringValue()}\`\``,
+        "I succesfully changed the global prefix"
+    );
+};
+
+export default globalPrefixCommand;
