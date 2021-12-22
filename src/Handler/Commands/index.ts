@@ -73,17 +73,17 @@ export class Command extends Item {
         return this;
     }
 
-    public setDeveloperOnly(developerOnly = false) {
+    public setDeveloperOnly(developerOnly = true) {
         this.developerOnly = developerOnly;
         return this;
     }
 
-    public setGuildOnly(guildOnly = false) {
+    public setGuildOnly(guildOnly = true) {
         this.guildOnly = guildOnly;
         return this;
     }
 
-    public setDefer(defer = true) {
+    public setNoDefer(defer = true) {
         this.deferResponse = defer;
         return this;
     }
@@ -208,7 +208,7 @@ export class Command extends Item {
         return this;
     }
 
-    public setToggleable(toggleable = false) {
+    public setUntoggleable(toggleable = false) {
         this.toggleable = toggleable;
         return this;
     }

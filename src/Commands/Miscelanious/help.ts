@@ -1,17 +1,17 @@
 import { Collection, Util } from "discord.js";
 import { Argument, Category, Command } from "../../Handler";
 
-const helpCommand = new Command("help");
-helpCommand.description = "Displays the commands you can use";
-helpCommand.aliases = ["h"];
-helpCommand.overideGuildBlacklist = true;
-helpCommand.overideUserBlacklist = true;
-
 const command = new Argument("command", "single");
 command.description = "An optional command or category you need help with";
 command.displayName = "Command or Category";
 
-helpCommand.args = [command];
+const helpCommand = new Command("help")
+    .setDescription("Displays the commands you can use")
+    .setAliases(["h"])
+    .setOverideGuildBlacklist()
+    .setOverideUserBlacklist()
+    .setArgs([command]);
+
 helpCommand.run = async (client, command) => {
     const { commandClass, args, prefixUsed } = command;
     const { certainChannelsOnly, certainGuildsOnly, certainRolesOnly } = commandClass;

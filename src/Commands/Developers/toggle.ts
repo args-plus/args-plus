@@ -1,8 +1,5 @@
 import { Argument, Category, Command } from "../../Handler";
 
-const toggleCommand = new Command("toggle");
-toggleCommand.description = "Toggle a command on or off";
-
 const command = new Argument("command", "single");
 command.displayName = "Command";
 
@@ -14,9 +11,10 @@ toggle.displayName = "State";
 const reason = new Argument("reason", "multiple");
 reason.displayName = "Reason";
 
-toggleCommand.args = [command, toggle, reason];
-
-toggleCommand.toggleable = false;
+const toggleCommand = new Command("toggle")
+    .setDescription("Toggle a command on or off")
+    .setArgs([command, toggle, reason])
+    .setUntoggleable();
 
 toggleCommand.run = async (client, command) => {
     if (!command.args[0]) {

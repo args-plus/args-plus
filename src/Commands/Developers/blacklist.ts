@@ -17,10 +17,10 @@ const reason = new Argument("reason", "multiple", false);
 reason.description = "The reason to blacklist";
 reason.displayName = "Reason";
 
-const userBlacklistCommand = new Command("blacklist");
-userBlacklistCommand.args = [user, duration, reason];
-userBlacklistCommand.description = "Blacklist a user or retrieve information about them";
-userBlacklistCommand.aliases = ["bl"];
+const userBlacklistCommand = new Command("blacklist")
+    .setArgs([user, duration, reason])
+    .setDescription("Blacklist a user or retrieve information about them")
+    .setAliases(["bl"]);
 userBlacklistCommand.run = async (client, command) => {
     const { args } = command;
 

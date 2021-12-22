@@ -1,14 +1,13 @@
 import { Command, Argument } from "../../Handler";
 
-const globalPrefixCommand = new Command("globalprefix");
-globalPrefixCommand.aliases = ["gprefix", "setgprefix", "setglobalprefix"];
-globalPrefixCommand.description = "Get or change the global prefix of the bot";
-
 const newPrefix = new Argument("newprefix", "single");
 newPrefix.displayName = "New prefix";
 newPrefix.description = "The prefix you want to set it to";
 
-globalPrefixCommand.args = [newPrefix];
+const globalPrefixCommand = new Command("globalprefix")
+    .setAliases(["gprefix", "setgprefix", "setglobalprefix"])
+    .setDescription("Get or change the global prefix of the bot")
+    .setArgs([newPrefix]);
 
 globalPrefixCommand.run = async (client, command) => {
     const author = command.getAuthor();
