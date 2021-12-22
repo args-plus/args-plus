@@ -52,6 +52,11 @@ export class Command extends Item {
         return this;
     }
 
+    public setArgs(args: Argument[] = []) {
+        this.args = args;
+        return this;
+    }
+
     public setAliases(aliases: string[] = []) {
         this.aliases = aliases;
         return this;
