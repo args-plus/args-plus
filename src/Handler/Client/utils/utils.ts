@@ -361,7 +361,7 @@ export class ClientUtils {
         return await client.channels.fetch(id).catch((error: DiscordAPIError) => {
             if (
                 error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
-                error.code !== Constants.APIErrors.UNKNOWN_GUILD
+                error.code !== Constants.APIErrors.UNKNOWN_CHANNEL
             ) {
                 client.console.error(error.message);
             }
