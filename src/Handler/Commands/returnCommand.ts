@@ -7,11 +7,9 @@ import {
     Guild,
     GuildMember,
     Message,
-    MessageEmbed,
     MessageMentions,
     TextBasedChannels,
-    User,
-    Util
+    User
 } from "discord.js";
 import { Command } from ".";
 import { Client } from "..";
@@ -144,114 +142,114 @@ export class ReturnCommand {
         }
     }
 
-    private getTextMessage(body: string, header?: string) {
-        const { client } = this;
-        const { config } = client;
+    // private getTextMessage(body: string, header?: string) {
+    //     const { client } = this;
+    //     const { config } = client;
 
-        if (config.indentMessageContent) {
-            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
-        }
+    //     if (config.indentMessageContent) {
+    //         body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+    //     }
 
-        const splitMessage = Util.splitMessage(
-            `${header ? `**${header}**` : ""}\n${body}`
-        );
+    //     const splitMessage = Util.splitMessage(
+    //         `${header ? `**${header}**` : ""}\n${body}`
+    //     );
 
-        return splitMessage;
-    }
+    //     return splitMessage;
+    // }
 
-    private splitMessageEmbedDescription(embed: MessageEmbed) {
-        if (!embed.description) {
-            return [embed];
-        }
+    // private splitMessageEmbedDescription(embed: MessageEmbed) {
+    //     if (!embed.description) {
+    //         return [embed];
+    //     }
 
-        if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
-            return [embed];
-        }
+    //     if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
+    //         return [embed];
+    //     }
 
-        const returnEmbeds: MessageEmbed[] = [];
+    //     const returnEmbeds: MessageEmbed[] = [];
 
-        const embedFooter = embed.footer;
+    //     const embedFooter = embed.footer;
 
-        const splitEmbeds = Util.splitMessage(embed.description, {
-            maxLength: 4096
-        });
+    //     const splitEmbeds = Util.splitMessage(embed.description, {
+    //         maxLength: 4096
+    //     });
 
-        let index = 0;
-        for (const embedDescription of splitEmbeds) {
-            if (index === 0) {
-                returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
-            } else if (index === splitEmbeds.length - 1) {
-                const newEmbed = new MessageEmbed()
-                    .setColor(embed.color !== null ? embed.color : "#000000")
-                    .setDescription(embedDescription);
-                if (embedFooter) {
-                    if (embedFooter.text && !embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.text);
-                    } else if (embedFooter.text && embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
-                    } else if (embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.iconURL);
-                    }
-                }
+    //     let index = 0;
+    //     for (const embedDescription of splitEmbeds) {
+    //         if (index === 0) {
+    //             returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
+    //         } else if (index === splitEmbeds.length - 1) {
+    //             const newEmbed = new MessageEmbed()
+    //                 .setColor(embed.color !== null ? embed.color : "#000000")
+    //                 .setDescription(embedDescription);
+    //             if (embedFooter) {
+    //                 if (embedFooter.text && !embedFooter.iconURL) {
+    //                     newEmbed.setFooter(embedFooter.text);
+    //                 } else if (embedFooter.text && embedFooter.iconURL) {
+    //                     newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
+    //                 } else if (embedFooter.iconURL) {
+    //                     newEmbed.setFooter(embedFooter.iconURL);
+    //                 }
+    //             }
 
-                returnEmbeds.push(newEmbed);
-            } else {
-                returnEmbeds.push(
-                    new MessageEmbed()
-                        .setColor(embed.color !== null ? embed.color : "#000000")
-                        .setDescription(embedDescription)
-                );
-            }
+    //             returnEmbeds.push(newEmbed);
+    //         } else {
+    //             returnEmbeds.push(
+    //                 new MessageEmbed()
+    //                     .setColor(embed.color !== null ? embed.color : "#000000")
+    //                     .setDescription(embedDescription)
+    //             );
+    //         }
 
-            index++;
-        }
+    //         index++;
+    //     }
 
-        return returnEmbeds;
-    }
+    //     return returnEmbeds;
+    // }
 
-    private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
-        const { client } = this;
-        const { config } = client;
+    // private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
+    //     const { client } = this;
+    //     const { config } = client;
 
-        if (config.indentMessageContent) {
-            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
-        }
+    //     if (config.indentMessageContent) {
+    //         body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+    //     }
 
-        const embed = new MessageEmbed().setColor(color).setDescription(body);
+    //     const embed = new MessageEmbed().setColor(color).setDescription(body);
 
-        const getIcon = (): string => {
-            if (config.embedIcon) {
-                if (config.embedIcon === "botAvatar" && client.user) {
-                    return client.user.displayAvatarURL();
-                } else {
-                    return config.embedIcon;
-                }
-            }
-            return "";
-        };
+    //     const getIcon = (): string => {
+    //         if (config.embedIcon) {
+    //             if (config.embedIcon === "botAvatar" && client.user) {
+    //                 return client.user.displayAvatarURL();
+    //             } else {
+    //                 return config.embedIcon;
+    //             }
+    //         }
+    //         return "";
+    //     };
 
-        const getFooter = (): string => {
-            if (config.embedFooter) {
-                return config.embedFooter;
-            } else {
-                return "";
-            }
-        };
+    //     const getFooter = (): string => {
+    //         if (config.embedFooter) {
+    //             return config.embedFooter;
+    //         } else {
+    //             return "";
+    //         }
+    //     };
 
-        embed.setFooter(getFooter(), getIcon());
+    //     embed.setFooter(getFooter(), getIcon());
 
-        if (header) {
-            embed.setAuthor(header, getIcon());
-        }
+    //     if (header) {
+    //         embed.setAuthor(header, getIcon());
+    //     }
 
-        if (config.sendTimestamp) {
-            embed.setTimestamp(Date.now());
-        }
+    //     if (config.sendTimestamp) {
+    //         embed.setTimestamp(Date.now());
+    //     }
 
-        const splitEmbeds = this.splitMessageEmbedDescription(embed);
+    //     const splitEmbeds = this.splitMessageEmbedDescription(embed);
 
-        return splitEmbeds;
-    }
+    //     return splitEmbeds;
+    // }
 
     private async sendMessageMethod(
         body: string,
@@ -276,7 +274,11 @@ export class ReturnCommand {
                         .permissionsFor(commandRan.guild.me)
                         .has("EMBED_LINKS"))
             ) {
-                const messages = this.getTextMessage(body, header);
+                const messages = this.client.utils.constructMessages(
+                    "messages",
+                    body,
+                    header
+                )[1];
                 let lastMessage: void | Message;
                 for (const message of messages) {
                     lastMessage = await commandRan.channel
@@ -287,7 +289,12 @@ export class ReturnCommand {
                 }
                 return lastMessage;
             } else {
-                const embeds = this.getEmbedMessages(body, color, header);
+                const embeds = this.client.utils.constructMessages(
+                    "embeds",
+                    body,
+                    header,
+                    color
+                )[1];
                 let lastMessage: void | Message;
                 for (const embed of embeds) {
                     lastMessage = await commandRan.channel
@@ -311,7 +318,11 @@ export class ReturnCommand {
                         .permissionsFor(commandRan.guild.me)
                         .has("EMBED_LINKS"))
             ) {
-                const messages = this.getTextMessage(body, header);
+                const messages = this.client.utils.constructMessages(
+                    "messages",
+                    body,
+                    header
+                )[1];
 
                 let lastMessage: Message | APIMessage | void;
 
@@ -333,7 +344,12 @@ export class ReturnCommand {
                 }
                 return lastMessage;
             } else {
-                const embeds = this.getEmbedMessages(body, color, header);
+                const embeds = this.client.utils.constructMessages(
+                    "embeds",
+                    body,
+                    header,
+                    color
+                )[1];
 
                 let lastMessage: Message | APIMessage | void;
                 for (const embed of embeds) {

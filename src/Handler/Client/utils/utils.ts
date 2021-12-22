@@ -2,7 +2,7 @@ import { Client } from "..";
 import fs from "fs";
 import path from "path";
 import { GuildPrefixModel } from "../../Defaults/Schemas";
-import { Guild } from "discord.js";
+import { Util, ColorResolvable, Guild, MessageEmbed } from "discord.js";
 
 export class ClientUtils {
     public client: Client;
@@ -194,4 +194,140 @@ export class ClientUtils {
     public capitaliseString(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
+
+    private getTextMessage(body: string, header?: string) {
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+        }
+
+        const splitMessage = Util.splitMessage(
+            `${header ? `**${header}**` : ""}\n${body}`
+        );
+
+        return splitMessage;
+    }
+
+    private splitMessageEmbedDescription(embed: MessageEmbed) {
+        if (!embed.description) {
+            return [embed];
+        }
+
+        if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
+            return [embed];
+        }
+
+        const returnEmbeds: MessageEmbed[] = [];
+
+        const embedFooter = embed.footer;
+
+        const splitEmbeds = Util.splitMessage(embed.description, {
+            maxLength: 4096
+        });
+
+        let index = 0;
+        for (const embedDescription of splitEmbeds) {
+            if (index === 0) {
+                returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
+            } else if (index === splitEmbeds.length - 1) {
+                const newEmbed = new MessageEmbed()
+                    .setColor(embed.color !== null ? embed.color : "#000000")
+                    .setDescription(embedDescription);
+                if (embedFooter) {
+                    if (embedFooter.text && !embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.text);
+                    } else if (embedFooter.text && embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
+                    } else if (embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.iconURL);
+                    }
+                }
+
+                returnEmbeds.push(newEmbed);
+            } else {
+                returnEmbeds.push(
+                    new MessageEmbed()
+                        .setColor(embed.color !== null ? embed.color : "#000000")
+                        .setDescription(embedDescription)
+                );
+            }
+
+            index++;
+        }
+
+        return returnEmbeds;
+    }
+
+    private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+        }
+
+        const embed = new MessageEmbed().setColor(color).setDescription(body);
+
+        const getIcon = (): string => {
+            if (config.embedIcon) {
+                if (config.embedIcon === "botAvatar" && client.user) {
+                    return client.user.displayAvatarURL();
+                } else {
+                    return config.embedIcon;
+                }
+            }
+            return "";
+        };
+
+        const getFooter = (): string => {
+            if (config.embedFooter) {
+                return config.embedFooter;
+            } else {
+                return "";
+            }
+        };
+
+        embed.setFooter(getFooter(), getIcon());
+
+        if (header) {
+            embed.setAuthor(header, getIcon());
+        }
+
+        if (config.sendTimestamp) {
+            embed.setTimestamp(Date.now());
+        }
+
+        const splitEmbeds = this.splitMessageEmbedDescription(embed);
+
+        return splitEmbeds;
+    }
+
+    public constructMessages<T extends messageOrEmbed>(
+        messageOrEmbed: T,
+        body: string,
+        header = "",
+        color: ColorResolvable = "#000000"
+    ): MessageConstructorType<T> {
+        if (messageOrEmbed === "messages") {
+            return [
+                messageOrEmbed,
+                this.getTextMessage(body, header)
+            ] as MessageConstructorType<T>;
+        } else {
+            return [
+                "embeds",
+                this.getEmbedMessages(body, color, header)
+            ] as MessageConstructorType<T>;
+        }
+    }
 }
+
+type messageOrEmbed = "messages" | "embeds";
+
+type MessageConstructorType<T> = T extends "messages"
+    ? ["messages", string[]]
+    : T extends "embeds"
+    ? ["embeds", MessageEmbed[]]
+    : never;
