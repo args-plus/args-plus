@@ -28,6 +28,11 @@ export class Argument {
         return this;
     }
 
+    public setDiplayName(name = "") {
+        this.displayName = name;
+        return this;
+    }
+
     private text: string = "";
     private channelMention: Channel | null = null;
     private guildMemberMention: GuildMember | null = null;
