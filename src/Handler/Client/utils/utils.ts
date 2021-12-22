@@ -2,7 +2,16 @@ import { Client } from "..";
 import fs from "fs";
 import path from "path";
 import { GuildPrefixModel } from "../../Defaults/Schemas";
-import { Util, ColorResolvable, Guild, MessageEmbed } from "discord.js";
+import {
+    Util,
+    ColorResolvable,
+    Guild,
+    MessageEmbed,
+    DiscordAPIError,
+    Constants,
+    GuildMemberManager,
+    GuildChannelManager
+} from "discord.js";
 
 export class ClientUtils {
     public client: Client;
@@ -321,6 +330,50 @@ export class ClientUtils {
                 this.getEmbedMessages(body, color, header)
             ] as MessageConstructorType<T>;
         }
+    }
+
+    public async fetchUser(id: string) {
+        const { client } = this;
+        return await client.users.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_USER
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchGuild(id: string) {
+        const { client } = this;
+        return await client.guilds.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_GUILD
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchChannel(id: string) {
+        const { client } = this;
+        return await client.channels.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_GUILD
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchMember(members: GuildMemberManager, id: string) {
+        return (await members.fetch()).get(id);
+    }
+
+    public async fetchGuildChannel(channels: GuildChannelManager, id: string) {
+        return (await channels.fetch()).get(id);
     }
 }
 

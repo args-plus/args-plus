@@ -126,7 +126,7 @@ export class SlashCommandManager {
             this.client.application.commands.set([]);
 
             for (const guildID of config.slashCommandGuilds) {
-                const guild = this.client.guilds.cache.get(guildID);
+                const guild = await client.utils.fetchGuild(guildID);
                 if (!guild) {
                     console.warn(
                         `Couldnt register slash command's to guild ID: ${guildID}`
@@ -138,7 +138,7 @@ export class SlashCommandManager {
             }
         } else if (config.loadGlobalSlashCommands && this.client.application) {
             for (const guildID of config.slashCommandGuilds) {
-                const findGuild = this.client.guilds.cache.get(guildID);
+                const findGuild = await client.utils.fetchGuild(guildID);
                 if (!findGuild) {
                     continue;
                 }

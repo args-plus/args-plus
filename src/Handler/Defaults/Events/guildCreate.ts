@@ -8,7 +8,7 @@ event.run = async (client, guild: Guild) => {
     if (!client.config.sendNewGuildMessage) return false;
     if (!guild.me) return;
 
-    const channel = guild.channels.cache.find(
+    const channel = (await guild.channels.fetch()).find(
         (channel) =>
             guild.me !== null &&
             channel instanceof TextChannel &&

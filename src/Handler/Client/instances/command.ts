@@ -862,7 +862,7 @@ export class CommandManager {
                         }
                         return requiredArg;
                     } else if (mentionToLookFor === "users") {
-                        const findUser = this.client.users.cache.get(text);
+                        const findUser = await this.client.utils.fetchUser(text);
 
                         if (!findUser) {
                             return false;
