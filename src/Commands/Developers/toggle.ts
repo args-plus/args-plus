@@ -1,12 +1,13 @@
 import { Argument, Category, Command } from "../../Handler";
 
-const command = new Argument("command", "single");
-command.displayName = "Command";
+const command = new Argument("command", "single")
+    .setDisplayName("Command")
+    .setDescription("The command/categoy to toggle");
 
-const toggle = new Argument("state", "customValue");
-toggle.customValues = ["on", "off"];
-toggle.allowLowerCaseCustomValues = true;
-toggle.displayName = "State";
+const toggle = new Argument("state", "customValue")
+    .setCustomValues(["on", "off"])
+    .setAllowLowerCaseValues()
+    .setDisplayName("State");
 
 const reason = new Argument("reason", "multiple");
 reason.displayName = "Reason";

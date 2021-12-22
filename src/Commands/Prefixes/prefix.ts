@@ -1,9 +1,9 @@
 import { Argument, Command } from "../../Handler";
 import { GuildPrefixModel } from "../../Handler/Defaults/Schemas";
 
-const newPrefix = new Argument("newprefix", "single");
-newPrefix.description = "The new prefix you want to set it to";
-newPrefix.displayName = "New prefix";
+const newPrefix = new Argument("newprefix", "single")
+    .setDescription("The new prefix you want to set it to")
+    .setDisplayName("New prefix");
 
 const prefixCommand = new Command("prefix")
     .setAliases(["setprefix"])

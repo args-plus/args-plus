@@ -10,7 +10,7 @@ export class Argument {
 
     public description = "";
     public customValues: string[] = [];
-    public allowLowerCaseCustomValues: boolean = true;
+    public allowLowerCaseCustomValues: boolean = false;
     public displayName = "";
 
     public setDescription(description = "") {
@@ -23,12 +23,12 @@ export class Argument {
         return this;
     }
 
-    public setNoAllowLowerCaseValues(allow = false) {
+    public setAllowLowerCaseValues(allow = true) {
         this.allowLowerCaseCustomValues = allow;
         return this;
     }
 
-    public setDiplayName(name = "") {
+    public setDisplayName(name = "") {
         this.displayName = name;
         return this;
     }

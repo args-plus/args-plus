@@ -1,8 +1,8 @@
 import { Command, Argument } from "../../Handler";
 
-const newPrefix = new Argument("newprefix", "single");
-newPrefix.displayName = "New prefix";
-newPrefix.description = "The prefix you want to set it to";
+const newPrefix = new Argument("newprefix", "single")
+    .setDisplayName("New prefix")
+    .setDescription("The prefix you want to set it to");
 
 const globalPrefixCommand = new Command("globalprefix")
     .setAliases(["gprefix", "setgprefix", "setglobalprefix"])

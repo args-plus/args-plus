@@ -1,9 +1,9 @@
 import { Collection, Util } from "discord.js";
 import { Argument, Category, Command } from "../../Handler";
 
-const command = new Argument("command", "single");
-command.description = "An optional command or category you need help with";
-command.displayName = "Command or Category";
+const command = new Argument("command", "single")
+    .setDescription("An optional command or category you need help with")
+    .setDisplayName("Command or category");
 
 const helpCommand = new Command("help")
     .setDescription("Displays the commands you can use")
