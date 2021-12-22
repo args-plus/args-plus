@@ -23,6 +23,13 @@ settings.loadGuildSlashCommands = false;
 settings.slashCommandGuilds = [];
 settings.loadGlobalSlashCommands = false;
 
+// New guild message
+settings.sendNewGuildMessage = true;
+// Avaialable values: %GUILD, %PREFIX and %CLIENT
+settings.newGuildMessage = [
+    "**Hello %GUILD,**\nMy name is %CLIENT, I am a very cool discord bot.\nTo view my available commands run ``%PREFIXhelp``!"
+];
+
 // Checks and permissions
 settings.defaultClientChecks = [];
 settings.defaultUserChecks = [];

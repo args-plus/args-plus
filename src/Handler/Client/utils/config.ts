@@ -1,10 +1,5 @@
 import { ColorResolvable } from "discord.js";
-import {
-    ArgExample,
-    HelpCommand,
-    Permission,
-    Response
-} from "../../Interfaces";
+import { ArgExample, HelpCommand, Permission, Response } from "../../Interfaces";
 
 export class ClientConfig {
     public prefix: string;
@@ -28,6 +23,10 @@ export class ClientConfig {
     public embedIcon: string | false = false;
     public embedFooter: string | false = false;
     public sendMessageWithoutPermissions = true;
+
+    // New guild messages
+    public sendNewGuildMessage = false;
+    public newGuildMessage: string[] = [];
 
     // Slash commands
     public loadGuildSlashCommands = false;
