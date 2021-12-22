@@ -873,7 +873,6 @@ export class CommandManager {
                     }
                     requiredArg.setStringValue(argNumber.toString());
                     requiredArg.setNumberValue(argNumber);
-                    requiredArg.setWritten();
                     returnArgs.push(requiredArg);
                 } else if (requiredArg.type === "number") {
                     const argNumber = parseFloat(providedArg);
@@ -882,7 +881,6 @@ export class CommandManager {
                     }
                     requiredArg.setStringValue(argNumber.toString());
                     requiredArg.setNumberValue(argNumber);
-                    requiredArg.setWritten();
                     returnArgs.push(requiredArg);
                 } else if (requiredArg.type === "channelMention") {
                     const findChannel = await lookForMention(providedArg, "channels");
@@ -904,7 +902,6 @@ export class CommandManager {
                         return incorrectUsage();
                     }
                     requiredArg.setStringValue(argToLookFor);
-                    requiredArg.setWritten();
                     returnArgs.push(requiredArg);
                 } else if (requiredArg.type === "time") {
                     if (requiredArg.customValues) {
