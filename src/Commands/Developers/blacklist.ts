@@ -53,9 +53,12 @@ userBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}(${time(
+                blacklistedOn,
+                "R"
+            )})\n`;
             blacklistsMessage += `Expires: ${
-                permanent ? "``never``" : time(expiery, "D")
+                permanent ? "``never``" : `${time(expiery, "d")}(${time(expiery, "R")})`
             }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
@@ -135,7 +138,10 @@ userBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)), "d")
+                : `${time(new Date(Date.now() + (amountOfTime as number)), "d")}(${time(
+                      new Date(Date.now() + (amountOfTime as number)),
+                      "R"
+                  )})`
         }`,
         `${user.tag} has been blacklisted`
     );
@@ -189,9 +195,12 @@ guildBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}(${time(
+                blacklistedOn,
+                "R"
+            )})\n`;
             blacklistsMessage += `Expires: ${
-                permanent ? "``never``" : time(expiery, "d")
+                permanent ? "``never``" : `${time(expiery, "d")}(${time(expiery, "R")})`
             }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
@@ -264,7 +273,10 @@ guildBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)), "d")
+                : `${time(new Date(Date.now() + (amountOfTime as number)), "d")}(${time(
+                      new Date(Date.now() + (amountOfTime as number)),
+                      "R"
+                  )})`
         }`,
         `${findGuild.name} has been blacklisted`
     );
