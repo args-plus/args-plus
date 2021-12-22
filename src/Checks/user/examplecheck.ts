@@ -2,7 +2,7 @@ import { Check } from "../../Handler";
 
 const check = new Check("example");
 
-check.run = (options) => {
+check.run = () => {
     return true;
 };
 

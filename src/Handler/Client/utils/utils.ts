@@ -25,24 +25,22 @@ export class ClientUtils {
 
     public async loadFiles(
         parentDir: string,
-        enonentError: string = "Could not load folder %FOLDER"
+        enonentError = "Could not load folder %FOLDER"
     ) {
-        let filePaths: string[] = [];
+        const filePaths: string[] = [];
         const readCommands = async (dir: string) => {
             let files: string[];
             try {
                 files = fs.readdirSync(dir);
-            } catch (error) {
-                if (error instanceof Error) {
-                    // @ts-ignore
-                    if (error.code === "ENOENT") {
-                        this.client.console.error(
-                            enonentError.replace(/%FOLDER/g, parentDir),
-                            false
-                        );
-                    } else {
-                        throw error;
-                    }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                if (error && error.code && error.code === "ENOENT") {
+                    this.client.console.error(
+                        enonentError.replace(/%FOLDER/g, parentDir),
+                        false
+                    );
+                } else {
+                    throw error;
                 }
                 return false;
             }
@@ -70,12 +68,14 @@ export class ClientUtils {
         return string.split(/\r?\n/);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public randomElement<array extends any[]>(array: array): typeof array[0] {
         const element = array[Math.floor(Math.random() * array.length)];
         return element;
     }
 
     // prettier-ignore
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public static randomElement<array extends any[]>(array: array): typeof array[0] {
         const element = array[Math.floor(Math.random() * array.length)];
         return element;
@@ -124,10 +124,10 @@ export class ClientUtils {
     // (Second answer)
 
     public msToTime(ms: number) {
-        let seconds = (ms / 1000).toFixed(1);
-        let minutes = (ms / (1000 * 60)).toFixed(1);
-        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+        const seconds = (ms / 1000).toFixed(1);
+        const minutes = (ms / (1000 * 60)).toFixed(1);
+        const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+        const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
         if (parseFloat(seconds) < 60) return seconds + " seconds";
         else if (parseFloat(minutes) < 60) return minutes + " minutes";
         else if (parseFloat(hours) < 24) return hours + " hours";
@@ -135,10 +135,10 @@ export class ClientUtils {
     }
 
     public static msToTime(ms: number) {
-        let seconds = (ms / 1000).toFixed(1);
-        let minutes = (ms / (1000 * 60)).toFixed(1);
-        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+        const seconds = (ms / 1000).toFixed(1);
+        const minutes = (ms / (1000 * 60)).toFixed(1);
+        const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+        const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
         if (parseFloat(seconds) < 60) return seconds + " seconds";
         else if (parseFloat(minutes) < 60) return minutes + " minutes";
         else if (parseFloat(hours) < 24) return hours + " hours";

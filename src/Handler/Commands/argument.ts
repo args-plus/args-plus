@@ -10,7 +10,7 @@ export class Argument {
 
     public description = "";
     public customValues: string[] = [];
-    public allowLowerCaseCustomValues: boolean = false;
+    public allowLowerCaseCustomValues = false;
     public displayName = "";
     public useDefaultExamples = true;
     public customExamples: string[] = [];
@@ -45,12 +45,12 @@ export class Argument {
         return this;
     }
 
-    private text: string = "";
+    private text = "";
     private channelMention: Channel | null = null;
     private guildMemberMention: GuildMember | null = null;
     private userMention: User | null = null;
-    private stringValue: string = "";
-    private numbervalue: number = 0;
+    private stringValue = "";
+    private numbervalue = 0;
     private stringArrayValue: string[] = [];
 
     private checkType(args: argType[]) {
@@ -70,7 +70,7 @@ export class Argument {
         return checkType;
     }
 
-    constructor(name: string, type: argType, required: boolean = false) {
+    constructor(name: string, type: argType, required = false) {
         this.name = name;
         this.id = ClientUtils.generateId(name);
         this.type = type;

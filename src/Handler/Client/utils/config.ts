@@ -1,7 +1,6 @@
 import { ColorResolvable } from "discord.js";
 import {
     ArgExample,
-    Blacklist,
     HelpCommand,
     Permission,
     Response
@@ -15,25 +14,25 @@ export class ClientConfig {
     }
 
     // General configs
-    public useChatCommands: boolean = true;
+    public useChatCommands = true;
     public botDevelopers: string[] = [];
-    public autoRemoveCommands: boolean = true;
-    public amountOfExamples: number = 2;
+    public autoRemoveCommands = true;
+    public amountOfExamples = 2;
 
     // Message configs
     public messagesOrEmbeds: "messages" | "embeds" = "embeds";
-    public indentMessageContent: boolean = false;
+    public indentMessageContent = false;
     public mainColor: ColorResolvable = "BLUE";
     public errorColor: ColorResolvable = "RED";
-    public sendTimestamp: boolean = false;
+    public sendTimestamp = false;
     public embedIcon: string | false = false;
     public embedFooter: string | false = false;
-    public sendMessageWithoutPermissions: boolean = true;
+    public sendMessageWithoutPermissions = true;
 
     // Slash commands
-    public loadGuildSlashCommands: boolean = false;
+    public loadGuildSlashCommands = false;
     public slashCommandGuilds: string[] = [];
-    public loadGlobalSlashCommands: boolean = false;
+    public loadGlobalSlashCommands = false;
 
     // Checks and permissions
     public defaultClientChecks: string[] = [];
@@ -45,10 +44,10 @@ export class ClientConfig {
     public unBlacklistableUsers: string[] = ["DEVELOPERS"];
 
     // Logs and errors
-    public logWarnings: boolean = true;
-    public logMessages: boolean = true;
-    public logDebugs: boolean = true;
-    public logErrors: boolean = true;
+    public logWarnings = true;
+    public logMessages = true;
+    public logDebugs = true;
+    public logErrors = true;
 
     private incorrectPermissions = [
         "You do not have the permissions to run this command"

@@ -1,5 +1,5 @@
 import { Client } from "..";
-import { Check, checkOptions } from "../../Checks";
+import { checkOptions } from "../../Checks";
 
 export class ClientChecks {
     readonly client: Client;
@@ -52,9 +52,10 @@ export class ClientChecks {
         name: string,
         checkOptions: checkOptions,
         type?: "client" | "user",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...options: any[]
     ) {
-        let findCheck = this.getCheck(name, type);
+        const findCheck = this.getCheck(name, type);
 
         if (!findCheck) {
             // prettier-ignore
@@ -63,23 +64,19 @@ export class ClientChecks {
         }
 
         const incorrectArgs = (property: string) => {
-            this.client.console.error(
-                `Check: ${name} requires a ${property} option`
-            );
+            this.client.console.error(`Check: ${name} requires a ${property} option`);
             return false;
         };
 
         if (findCheck.requireChannel && !checkOptions.channel)
             return incorrectArgs("channel");
 
-        if (findCheck.requireGuild && !checkOptions.guild)
-            return incorrectArgs("guild");
+        if (findCheck.requireGuild && !checkOptions.guild) return incorrectArgs("guild");
 
         if (findCheck.requireMember && !checkOptions.member)
             return incorrectArgs("guild member");
 
-        if (findCheck.requireUser && !checkOptions.user)
-            return incorrectArgs("user");
+        if (findCheck.requireUser && !checkOptions.user) return incorrectArgs("user");
 
         const check = findCheck.run(checkOptions, options);
 

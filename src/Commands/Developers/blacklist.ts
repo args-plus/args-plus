@@ -59,7 +59,7 @@ userBlacklistCommand.run = async (client, command) => {
             }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
-            if (!!blacklistedBy) {
+            if (blacklistedBy) {
                 const findBlacklister = client.users.cache.get(blacklistedBy);
 
                 if (findBlacklister)
@@ -195,7 +195,7 @@ guildBlacklistCommand.run = async (client, command) => {
             }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
-            if (!!blacklistedBy) {
+            if (blacklistedBy) {
                 const findBlacklister = client.users.cache.get(blacklistedBy);
 
                 if (findBlacklister)

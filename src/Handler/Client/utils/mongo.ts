@@ -1,5 +1,5 @@
 import { Client } from "..";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 export class ClientMongo {
     readonly client: Client;
@@ -17,8 +17,6 @@ export class ClientMongo {
         });
 
         client.setConnected();
-        console.log(
-            `Connected to mongo databse: ${connection.connection.name}`
-        );
+        console.log(`Connected to mongo databse: ${connection.connection.name}`);
     }
 }

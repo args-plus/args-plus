@@ -87,7 +87,7 @@ export class CommandManager {
         }
 
         let argTypeMultiple = false;
-        let argIds: string[] = [];
+        const argIds: string[] = [];
         let argRequired = true;
 
         for (const arg of command.args) {
@@ -136,7 +136,7 @@ export class CommandManager {
                     examples = arg.customExamples;
                 }
                 if (arg.allowLowerCaseCustomValues) {
-                    let lowerCaseArray: string[] = [];
+                    const lowerCaseArray: string[] = [];
                     // prettier-ignore
                     for (let index = 0; index < arg.customValues.length; index++){
                         lowerCaseArray.push(arg.customValues[index].toLowerCase())
@@ -290,8 +290,9 @@ export class CommandManager {
         let commandUserPermissions: Permission[] = [];
 
         let commandClientChecks: string[] = [];
-        let commandUserChecks: string[] = [];
+        const commandUserChecks: string[] = [];
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pushArrayToArray = (array: any[], arrayToPush: any[]): typeof array[0] => {
             for (const element of arrayToPush) {
                 array.push(element);
@@ -537,7 +538,7 @@ export class CommandManager {
             }
 
             // prettier-ignore
-            let doCheck = await client.checks.runCheck( checkID , checkOptions, type );
+            const doCheck = await client.checks.runCheck( checkID , checkOptions, type );
 
             return doCheck;
         };
@@ -681,7 +682,7 @@ export class CommandManager {
     public async getArgs(message: Message, prefix?: string | false | null): Promise<string[]> {
         let messagePrefix: string | false | null;
 
-        if(!!prefix){
+        if(prefix){
             messagePrefix = prefix
         } else {
             messagePrefix = await this.getPrefix(message);
@@ -758,7 +759,7 @@ export class CommandManager {
     public async getArguments(
         returnCommand: ReturnCommand
     ): Promise<[true, Argument[]] | [false, string, string]> {
-        let returnArgs: Argument[] = [];
+        const returnArgs: Argument[] = [];
 
         const { commandRan, commandClass: command } = returnCommand;
 
@@ -768,7 +769,7 @@ export class CommandManager {
 
             returnCommand.prefixUsed = prefix;
 
-            let commandRanName = args[0];
+            const commandRanName = args[0];
 
             const incorrectUsage = (): [false, string, string] => {
                 return [false, prefix, commandRanName];
@@ -912,7 +913,7 @@ export class CommandManager {
                     returnArgs.push(findUser);
                 } else if (requiredArg.type === "customValue") {
                     // prettier-ignore
-                    let argToLookFor = requiredArg.allowLowerCaseCustomValues ? providedArg.toLowerCase() : providedArg;
+                    const argToLookFor = requiredArg.allowLowerCaseCustomValues ? providedArg.toLowerCase() : providedArg;
 
                     if (!requiredArg.customValues.includes(argToLookFor)) {
                         return incorrectUsage();
@@ -920,7 +921,7 @@ export class CommandManager {
                     returnArgs.push(requiredArg.setStringValue(argToLookFor));
                 } else if (requiredArg.type === "time") {
                     if (requiredArg.customValues) {
-                        let argToLookFor = requiredArg.allowLowerCaseCustomValues
+                        const argToLookFor = requiredArg.allowLowerCaseCustomValues
                             ? providedArg.toLowerCase()
                             : providedArg;
 
@@ -958,7 +959,7 @@ export class CommandManager {
                         const timeEndingArg = endsWithTimeEnding(arg);
                         let timeEndingNextArg: false | TimeEnding = false;
 
-                        if (!!nextArg) {
+                        if (nextArg) {
                             timeEndingNextArg = endsWithTimeEnding(nextArg, true);
                         }
 
@@ -983,7 +984,7 @@ export class CommandManager {
                         }
                     };
 
-                    let timeMentions: [string, ReturnTime][] = [];
+                    const timeMentions: [string, ReturnTime][] = [];
                     for (let i = 0; i < remainingArgs.length; i++) {
                         const remainingArg = remainingArgs[i].toLowerCase();
                         const endsWithEnding = endsWithOrNextArg(i);
@@ -1011,7 +1012,7 @@ export class CommandManager {
                     }
 
                     for (let j = 0; j < timeMentions.length - 1; j++) {
-                        let tmp = args.shift();
+                        const tmp = args.shift();
                         args[j] = tmp ? tmp : "";
                     }
 
@@ -1049,7 +1050,7 @@ export class CommandManager {
             returnCommand.prefixUsed = "/";
 
             for (const providedArg of commandRan.options.data) {
-                let requiredArg: Argument = command.args.filter((arg) => {
+                const requiredArg: Argument = command.args.filter((arg) => {
                     return arg.name === providedArg.name;
                 })[0];
 
@@ -1163,7 +1164,7 @@ export class CommandManager {
                             const timeEndingArg = endsWithTimeEnding(arg);
                             let timeEndingNextArg: false | TimeEnding = false;
 
-                            if (!!nextArg) {
+                            if (nextArg) {
                                 timeEndingNextArg = endsWithTimeEnding(nextArg);
                             }
 
@@ -1188,7 +1189,7 @@ export class CommandManager {
                             }
                         };
 
-                        let timeMentions: [string, ReturnTime][] = [];
+                        const timeMentions: [string, ReturnTime][] = [];
 
                         for (let i = 0; i < timeMentionArray.length; i++) {
                             const remainingArg = timeMentionArray[i].toLowerCase();
@@ -1235,14 +1236,14 @@ export class CommandManager {
     public async runCommand(command: Command, commandRan: Message | CommandInteraction) {
         const { client } = this;
 
-        let returnCommand = new ReturnCommand(commandRan, command, client);
+        const returnCommand = new ReturnCommand(commandRan, command, client);
 
         if (returnCommand.isInteraction(commandRan) && command.deferResponse) {
             await commandRan.deferReply();
             returnCommand.setRepliedTo();
         }
 
-        let commandChecks = await this.runCommandChecks(returnCommand);
+        const commandChecks = await this.runCommandChecks(returnCommand);
 
         if (typeof commandChecks !== "boolean") {
             return returnCommand.sendError(commandChecks[0], commandChecks[1]);
@@ -1250,7 +1251,7 @@ export class CommandManager {
             return;
         }
 
-        let returnArgs = await this.getArguments(returnCommand);
+        const returnArgs = await this.getArguments(returnCommand);
 
         if (returnArgs[0] === false) {
             let clientUserName = "";
@@ -1291,6 +1292,7 @@ export class CommandManager {
 
         try {
             await command.run(this.client, returnCommand);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             this.client.console.error(error);
 

@@ -43,12 +43,12 @@ export class SlashCommandManager {
                 return failedtoLoadSlashCommand("it has no description");
             }
 
-            let slashCommandConstructor: ApplicationCommandData = {
+            const slashCommandConstructor: ApplicationCommandData = {
                 name: name,
                 description: command.description
             };
 
-            let argsArray: ApplicationCommandOptionData[] = [];
+            const argsArray: ApplicationCommandOptionData[] = [];
 
             for (const arg of command.args) {
                 if (!arg.description) {

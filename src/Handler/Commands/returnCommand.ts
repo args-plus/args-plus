@@ -22,12 +22,13 @@ export class ReturnCommand {
     public commandClass: Command;
     public args: Argument[];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public returnValues: any[] = [];
 
-    private commandRepliedTo: boolean = false;
+    private commandRepliedTo = false;
     private client: Client;
 
-    public prefixUsed: string = "";
+    public prefixUsed = "";
 
     constructor(
         commandRan: Message | CommandInteraction,
@@ -167,9 +168,9 @@ export class ReturnCommand {
             return [embed];
         }
 
-        let returnEmbeds: MessageEmbed[] = [];
+        const returnEmbeds: MessageEmbed[] = [];
 
-        let embedFooter = embed.footer;
+        const embedFooter = embed.footer;
 
         const splitEmbeds = Util.splitMessage(embed.description, {
             maxLength: 4096
@@ -359,7 +360,7 @@ export class ReturnCommand {
         body: string | string[],
         color: ColorResolvable,
         header?: string | string[] | null,
-        overideEmbed: boolean = false
+        overideEmbed = false
     ) {
         let messageBody: string;
         let messageHeader: string;

@@ -5,7 +5,7 @@ import { ClientUtils } from "../utils/utils";
 
 export abstract class Item {
     public name: string;
-    public dir: string = "";
+    public dir = "";
     public readonly id: string;
 
     private registered = false;
@@ -35,6 +35,7 @@ export abstract class Item {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type loadItemCollection = Collection<any, any> | any[];
 
 export class ClientLoader {
@@ -63,8 +64,7 @@ export class ClientLoader {
                 `Skipping loading files from %FOLDER, as there is no files there`
             );
             for (const file of files) {
-                // type isItem = { default: typeof item };
-                // const requireFolder = require(file) as isItem;
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
                 const requireFolder = require(file);
 
                 for (const propertyKey in requireFolder) {
