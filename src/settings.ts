@@ -4,7 +4,7 @@ const settings = new ClientConfig("ts!");
 
 // General configs
 settings.useChatCommands = true;
-settings.botDevelopers = ["468128787884670986"];
+settings.botDevelopers = [];
 settings.autoRemoveCommands = true;
 settings.amountOfExamples = 2;
 
