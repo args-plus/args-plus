@@ -12,7 +12,7 @@ export class Argument {
     public customValues: string[] = [];
     public allowLowerCaseCustomValues = false;
     public displayName = "";
-    public useDefaultExamples = true;
+    public useDefaultExamples = false;
     public customExamples: string[] = [];
 
     public setDescription(description = "") {

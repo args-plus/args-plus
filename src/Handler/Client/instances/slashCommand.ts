@@ -67,25 +67,29 @@ export class SlashCommandManager {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "STRING",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "channelMention") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "CHANNEL",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "interger" || arg.type === "number") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "NUMBER",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "memberMention" || arg.type === "userMention") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "USER",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 }
             }

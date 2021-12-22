@@ -112,12 +112,11 @@ export class CommandManager {
                 argRequired = false;
             }
 
+            let examples: string[] | [number, number, boolean] = [];
             let usage = "";
 
-            let examples: string[] | [number, number, boolean] = [];
-
             if (arg.type !== "customValue" && arg.customValues.length === 0) {
-                if (arg.customExamples.length !== 0 && arg.useDefaultExamples) {
+                if (arg.customExamples.length === 0 && !arg.useDefaultExamples) {
                     examples = client.config.argExamples[arg.type];
                 } else {
                     examples = arg.customExamples;
@@ -254,13 +253,19 @@ export class CommandManager {
                     }
                 }
             } else {
-                const newCategory = new Category(command.category);
-                newCategory.setRegistered();
-                client.categories.set(command.category, newCategory);
-                this.loadCategories();
+                const findCategory = client.categories.get(command.category);
 
-                command.categoryName = command.category;
-                command.categoryId = newCategory.id;
+                if (!findCategory) {
+                    const newCategory = new Category(command.category);
+                    newCategory.setRegistered();
+                    client.categories.set(command.category, newCategory);
+                    this.loadCategories();
+                    command.categoryName = command.category;
+                    command.categoryId = newCategory.id;
+                } else {
+                    command.categoryName = command.category;
+                    command.categoryId = client.utils.generateId(command.category);
+                }
             }
         } else if (typeof command.category !== "boolean") {
             const categoryName = command.category[0];
@@ -1027,8 +1032,6 @@ export class CommandManager {
                     let totalTime = 0;
                     for (const time of timeMentions) {
                         const duration: string = time[0].replace(/\D/g, "");
-
-                        console.log(time);
 
                         const timeOptions = time[1];
                         if (duration.length === 0) {
