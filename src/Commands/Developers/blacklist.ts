@@ -52,8 +52,10 @@ userBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Expires: ${
+                permanent ? "``never``" : time(expiery, "D")
+            }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -132,7 +134,7 @@ userBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)), "d")
         }`,
         `${user.tag} has been blacklisted`
     );
@@ -186,8 +188,10 @@ guildBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Expires: ${
+                permanent ? "``never``" : time(expiery, "d")
+            }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -259,7 +263,7 @@ guildBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)), "d")
         }`,
         `${findGuild.name} has been blacklisted`
     );
