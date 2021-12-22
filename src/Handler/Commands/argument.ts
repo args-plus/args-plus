@@ -12,6 +12,8 @@ export class Argument {
     public customValues: string[] = [];
     public allowLowerCaseCustomValues: boolean = false;
     public displayName = "";
+    public useDefaultExamples = true;
+    public customExamples: string[] = [];
 
     public setDescription(description = "") {
         this.description = description;
@@ -30,6 +32,16 @@ export class Argument {
 
     public setDisplayName(name = "") {
         this.displayName = name;
+        return this;
+    }
+
+    public setNoUseDefaultExamples(use = false) {
+        this.useDefaultExamples = use;
+        return this;
+    }
+
+    public setCustomExamples(examples: string[] = []) {
+        this.customExamples = examples;
         return this;
     }
 

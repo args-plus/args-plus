@@ -117,7 +117,11 @@ export class CommandManager {
             let examples: string[] | [number, number, boolean] = [];
 
             if (arg.type !== "customValue" && arg.customValues.length === 0) {
-                examples = client.config.argExamples[arg.type];
+                if (arg.customExamples.length !== 0 && arg.useDefaultExamples) {
+                    examples = client.config.argExamples[arg.type];
+                } else {
+                    examples = arg.customExamples;
+                }
                 // prettier-ignore
                 usage = arg.displayName.length !== 0 ? arg.displayName : arg.name;
             } else {
@@ -126,7 +130,11 @@ export class CommandManager {
                         `if an arg type is of "custom value", then there must be custom values provided`
                     );
                 }
-                examples = arg.customValues;
+                if (arg.customExamples.length !== 0 && arg.useDefaultExamples) {
+                    examples = arg.customValues;
+                } else {
+                    examples = arg.customExamples;
+                }
                 if (arg.allowLowerCaseCustomValues) {
                     let lowerCaseArray: string[] = [];
                     // prettier-ignore
@@ -145,7 +153,11 @@ export class CommandManager {
                         .join('", "')
                         .slice(0, lastWordLength * -1 - 3)} or "${lastWord}"`;
                 }
-                if (arg.type !== "customValue") {
+                if (
+                    arg.type !== "customValue" &&
+                    arg.customExamples.length !== 0 &&
+                    arg.useDefaultExamples
+                ) {
                     options = `${arg.type} or ${options}`;
 
                     for (const normalExample of client.config.argExamples[arg.type]) {
