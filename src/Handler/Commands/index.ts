@@ -296,10 +296,19 @@ export class Command extends Item {
     ): string {
         let examples: string[] = [];
 
+        let argWithUsage = false;
         for (let i = 0; i < amountOfExamples; i++) {
             let currentExample = `${prefix ? prefix : ""}${name} `;
-            for (const example of this.examples) {
+            let canHaveUsageless = true;
+
+            if (!argWithUsage && i === amountOfExamples - i) canHaveUsageless = false;
+            for (let j = 0; j < this.examples.length; j++) {
+                const example = this.examples[j];
+                const arg = this.args[j];
+
+                if (!arg.required && Math.random() > 0.5 && canHaveUsageless) continue;
                 if (typeof example[0] === "number") {
+                    argWithUsage = true;
                     let exampleKey = example as [number, number, boolean];
                     const minNumber = exampleKey[0];
                     const maxNumber = exampleKey[1];
