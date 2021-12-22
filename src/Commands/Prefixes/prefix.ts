@@ -1,16 +1,14 @@
 import { Argument, Command } from "../../Handler";
 import { GuildPrefixModel } from "../../Handler/Defaults/Schemas";
 
-const prefixCommand = new Command("prefix");
+const newPrefix = new Argument("newprefix", "single")
+    .setDescription("The new prefix you want to set it to")
+    .setDisplayName("New prefix");
 
-prefixCommand.aliases = ["setprefix"];
-prefixCommand.description = "Get or change the prefix of the bot";
-
-const newPrefix = new Argument("newprefix", "single");
-newPrefix.description = "The new prefix you want to set it to";
-newPrefix.displayName = "New prefix";
-
-prefixCommand.args = [newPrefix];
+const prefixCommand = new Command("prefix")
+    .setAliases(["setprefix"])
+    .setDescription("Get or change the prefix of the bot")
+    .setArgs([newPrefix]);
 
 prefixCommand.run = async (client, command) => {
     const guild = command.getGuild();

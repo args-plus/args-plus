@@ -54,6 +54,10 @@ export class ClientConfig {
         "You do not have the permissions to run this command"
     ];
 
+    // Arg keys
+    public requiredArgKeys: [string, string] = ["<", ">"];
+    public unrequiredArgKeys: [string, string] = ["(", ")"];
+
     // Responses
     // All have %COMMAND available
     public responses: Response = {

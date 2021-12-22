@@ -1,8 +1,8 @@
 import { Category } from "../../Handler";
 
-const category = new Category("Developers");
-category.description = "Commands that can only be ran by bot developers";
-category.developerOnly = true;
-category.overideLoadSlashCommand = true;
+const category = new Category("Developers")
+    .setDescription("Commands that can only be ran by developers")
+    .setDeveloperOnly()
+    .setOverideLoadSlashCommand();
 
 export default category;

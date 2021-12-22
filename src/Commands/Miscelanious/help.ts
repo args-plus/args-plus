@@ -1,17 +1,26 @@
 import { Collection, Util } from "discord.js";
 import { Argument, Category, Command } from "../../Handler";
 
-const helpCommand = new Command("help");
-helpCommand.description = "Displays the commands you can use";
-helpCommand.aliases = ["h"];
-helpCommand.overideGuildBlacklist = true;
-helpCommand.overideUserBlacklist = true;
+const command = new Argument("command", "single")
+    .setDescription("An optional command or category you need help with")
+    .setDisplayName("Command or category")
+    .setNoUseDefaultExamples()
+    .setCustomExamples([
+        "help",
+        "miscelanious",
+        "prefix",
+        "gprefix",
+        "latency",
+        "prefixes"
+    ]);
 
-const command = new Argument("command", "single");
-command.description = "An optional command or category you need help with";
-command.displayName = "Command or Category";
+const helpCommand = new Command("help")
+    .setDescription("Displays the commands you can use")
+    .setAliases(["h"])
+    .setOverideGuildBlacklist()
+    .setOverideUserBlacklist()
+    .setArgs([command]);
 
-helpCommand.args = [command];
 helpCommand.run = async (client, command) => {
     const { commandClass, args, prefixUsed } = command;
     const { certainChannelsOnly, certainGuildsOnly, certainRolesOnly } = commandClass;
@@ -277,8 +286,8 @@ helpCommand.run = async (client, command) => {
             ],
             ["cooldown", cooldownMessage],
             ["args", argsMessage],
-            ["required arg key", "<> = Required"],
-            ["unrequired arg key", "() = Unrequired"],
+            ["required arg key", `${config.requiredArgKeys.join("")} = Required`],
+            ["unrequired arg key", `${config.unrequiredArgKeys.join("")} = Unrequired`],
             ["prefix used", prefixUsed],
             ["category", command.categoryName ? command.categoryName : "None"]
         ]);

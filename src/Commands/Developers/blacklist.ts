@@ -3,24 +3,25 @@ import { Argument, Command } from "../../Handler";
 import { BlacklistModel } from "../../Handler/Defaults/Schemas/blacklist";
 import { time } from "@discordjs/builders";
 
-const user = new Argument("user", "userMention", true);
-user.description = "The user to blacklist or retrieve information about";
-user.displayName = "User";
+const user = new Argument("user", "userMention", true)
+    .setDescription("The user to blacklist or retrieve information about")
+    .setDisplayName("User");
 
-const duration = new Argument("duration", "time");
-duration.description = "The amount of time to blacklist for";
-duration.allowLowerCaseCustomValues = true;
-duration.customValues = ["perm", "permanent", "off"];
-duration.displayName = "Duration";
+const duration = new Argument("duration", "time")
+    .setDescription("The amount of time to blacklist someone for")
+    .setAllowLowerCaseValues()
+    .setCustomValues(["perm", "permanent", "off"])
+    .setDisplayName("Duration");
 
-const reason = new Argument("reason", "multiple", false);
-reason.description = "The reason to blacklist";
-reason.displayName = "Reason";
+const reason = new Argument("reason", "multiple", false)
+    .setDescription("The reason to blacklist")
+    .setDisplayName("Reason");
 
-const userBlacklistCommand = new Command("blacklist");
-userBlacklistCommand.args = [user, duration, reason];
-userBlacklistCommand.description = "Blacklist a user or retrieve information about them";
-userBlacklistCommand.aliases = ["bl"];
+const userBlacklistCommand = new Command("blacklist")
+    .setArgs([user, duration, reason])
+    .setDescription("Blacklist a user or retrieve information about them")
+    .setAliases(["bl"]);
+
 userBlacklistCommand.run = async (client, command) => {
     const { args } = command;
 
@@ -52,8 +53,10 @@ userBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Expires: ${
+                permanent ? "``never``" : time(expiery, "D")
+            }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -132,15 +135,15 @@ userBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)), "d")
         }`,
         `${user.tag} has been blacklisted`
     );
 };
 
-const guild = new Argument("guild", "single", true);
-guild.description = "The server to blacklist";
-guild.displayName = "Guild";
+const guild = new Argument("guild", "single", true)
+    .setDescription("The server to blacklist")
+    .setDisplayName("Guild");
 
 const guildBlacklistCommand = new Command("blacklistserver");
 guildBlacklistCommand.aliases = ["blgl"];
@@ -186,8 +189,10 @@ guildBlacklistCommand.run = async (client, command) => {
                 unblacklistedBy
             } = blacklist;
 
-            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn)}\n`;
-            blacklistsMessage += `Expires: ${permanent ? "``never``" : time(expiery)}\n`;
+            blacklistsMessage += `Blacklisted on: ${time(blacklistedOn, "d")}\n`;
+            blacklistsMessage += `Expires: ${
+                permanent ? "``never``" : time(expiery, "d")
+            }\n`;
             blacklistsMessage += `Enabled: \`\`${enabled ? "yes" : "no"}\`\`\n`;
 
             if (!!blacklistedBy) {
@@ -259,7 +264,7 @@ guildBlacklistCommand.run = async (client, command) => {
         }\`\`\nIt will expire:  ${
             permanent
                 ? "``never``"
-                : time(new Date(Date.now() + (amountOfTime as number)))
+                : time(new Date(Date.now() + (amountOfTime as number)), "d")
         }`,
         `${findGuild.name} has been blacklisted`
     );

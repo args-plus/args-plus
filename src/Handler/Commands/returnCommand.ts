@@ -42,6 +42,7 @@ export class ReturnCommand {
 
     public setRepliedTo() {
         this.commandRepliedTo = true;
+        return this;
     }
 
     public getRepliedTo() {

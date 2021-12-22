@@ -1,22 +1,29 @@
 import { Argument, Category, Command } from "../../Handler";
 
-const toggleCommand = new Command("toggle");
-toggleCommand.description = "Toggle a command on or off";
-
-const command = new Argument("command", "single");
-command.displayName = "Command";
-
-const toggle = new Argument("state", "customValue");
-toggle.customValues = ["on", "off"];
-toggle.allowLowerCaseCustomValues = true;
-toggle.displayName = "State";
+const command = new Argument("command", "single")
+    .setDisplayName("Command")
+    .setDescription("The command/categoy to toggle")
+    .setNoUseDefaultExamples()
+    .setCustomExamples([
+        "help",
+        "miscelanious",
+        "prefix",
+        "gprefix",
+        "latency",
+        "prefixes"
+    ]);
+const toggle = new Argument("state", "customValue")
+    .setCustomValues(["on", "off"])
+    .setAllowLowerCaseValues()
+    .setDisplayName("State");
 
 const reason = new Argument("reason", "multiple");
 reason.displayName = "Reason";
 
-toggleCommand.args = [command, toggle, reason];
-
-toggleCommand.toggleable = false;
+const toggleCommand = new Command("toggle")
+    .setDescription("Toggle a command on or off")
+    .setArgs([command, toggle, reason])
+    .setUntoggleable();
 
 toggleCommand.run = async (client, command) => {
     if (!command.args[0]) {

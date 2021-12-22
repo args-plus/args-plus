@@ -1,9 +1,9 @@
-import { CommandInteraction, Message, MessageEmbed } from "discord.js";
+import { Message, MessageEmbed } from "discord.js";
 import { Command } from "../../Handler";
 
-const command = new Command("ping");
-command.aliases = ["latency"];
-command.description = "Shows the latency of the bot and the discord API";
+const command = new Command("ping")
+    .setAliases(["latency"])
+    .setDescription("Shows the latency of teh bot and the discord API");
 command.run = async (client, command) => {
     const message = await command.sendMessage("Checking...");
 

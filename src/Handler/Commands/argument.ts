@@ -10,8 +10,40 @@ export class Argument {
 
     public description = "";
     public customValues: string[] = [];
-    public allowLowerCaseCustomValues: boolean = true;
+    public allowLowerCaseCustomValues: boolean = false;
     public displayName = "";
+    public useDefaultExamples = true;
+    public customExamples: string[] = [];
+
+    public setDescription(description = "") {
+        this.description = description;
+        return this;
+    }
+
+    public setCustomValues(customValues: string[] = []) {
+        this.customValues = customValues;
+        return this;
+    }
+
+    public setAllowLowerCaseValues(allow = true) {
+        this.allowLowerCaseCustomValues = allow;
+        return this;
+    }
+
+    public setDisplayName(name = "") {
+        this.displayName = name;
+        return this;
+    }
+
+    public setNoUseDefaultExamples(use = false) {
+        this.useDefaultExamples = use;
+        return this;
+    }
+
+    public setCustomExamples(examples: string[] = []) {
+        this.customExamples = examples;
+        return this;
+    }
 
     private text: string = "";
     private channelMention: Channel | null = null;
@@ -20,24 +52,6 @@ export class Argument {
     private stringValue: string = "";
     private numbervalue: number = 0;
     private stringArrayValue: string[] = [];
-
-    private written = false;
-
-    public setWritten() {
-        this.written = false;
-    }
-
-    private checkWritten() {
-        if (this.written) {
-            console.error(
-                new Error(
-                    `Argument: ${this.name} has been already written to and so cannot be modified`
-                ).stack
-            );
-            return false;
-        }
-        return true;
-    }
 
     private checkType(args: argType[]) {
         return args.includes(this.type);
@@ -48,9 +62,8 @@ export class Argument {
 
         if (!checkType) {
             console.error(
-                new Error(
-                    `There is no method to ${method} on arg type of ${this.type}`
-                ).stack
+                new Error(`There is no method to ${method} on arg type of ${this.type}`)
+                    .stack
             );
         }
 
@@ -65,10 +78,8 @@ export class Argument {
     }
 
     public setTextValue(text: string) {
-        if (!this.checkWritten()) return false;
-
         this.text = text;
-        return true;
+        return this;
     }
 
     public getText() {
@@ -76,10 +87,8 @@ export class Argument {
     }
 
     public setStringValue(string: string) {
-        if (!this.checkWritten()) return false;
-
         this.stringValue = string;
-        return true;
+        return this;
     }
 
     public getStringValue() {
@@ -87,13 +96,11 @@ export class Argument {
     }
 
     public setNumberValue(number: number) {
-        if (!this.checkWritten()) return false;
-
         if (!this.isType("set a number value", ["interger", "number", "time"]))
-            return false;
+            return this;
 
         this.numbervalue = number;
-        return true;
+        return this;
     }
 
     public getNumberValue() {
@@ -104,12 +111,10 @@ export class Argument {
     }
 
     public setStringArrayValue(stringArray: string[]) {
-        if (!this.checkWritten()) return false;
-
-        if (!this.isType("set a string array", ["multiple"])) return false;
+        if (!this.isType("set a string array", ["multiple"])) return this;
 
         this.stringArrayValue = stringArray;
-        return true;
+        return this;
     }
 
     public getStringArrayValue() {
@@ -119,12 +124,10 @@ export class Argument {
     }
 
     public setUserMention(user: User) {
-        if (!this.checkWritten()) return false;
-
-        if (!this.isType("set a user value", ["userMention"])) return false;
+        if (!this.isType("set a user value", ["userMention"])) return this;
 
         this.userMention = user;
-        return true;
+        return this;
     }
 
     public getUserMention() {
@@ -138,46 +141,36 @@ export class Argument {
     }
 
     public setMemberMention(member: GuildMember) {
-        if (!this.checkWritten()) return false;
-
-        if (!this.isType("set a member value", ["memberMention"])) return false;
+        if (!this.isType("set a member value", ["memberMention"])) return this;
 
         this.guildMemberMention = member;
-        return true;
+        return this;
     }
 
     public getGuildMemberMention() {
         if (!this.isType("get a member value", ["memberMention"])) return false;
 
         if (!this.guildMemberMention) {
-            console.error(
-                new Error("The guild member mention has not been set").stack
-            );
-            return false;
+            console.error(new Error("The guild member mention has not been set").stack);
+            return this;
         }
 
         return this.guildMemberMention;
     }
 
     public setChannelMention(channel: Channel) {
-        if (!this.checkWritten()) return false;
-
-        if (!this.isType("set a channel value", ["channelMention"]))
-            return false;
+        if (!this.isType("set a channel value", ["channelMention"])) return this;
 
         this.channelMention = channel;
-        return true;
+        return this;
     }
 
     public getChannelMention() {
-        if (!this.isType("get a channel value", ["channelMention"]))
-            return false;
+        if (!this.isType("get a channel value", ["channelMention"])) return false;
 
         if (!this.channelMention) {
-            console.error(
-                new Error("The guild member mention has not been set").stack
-            );
-            return false;
+            console.error(new Error("The guild member mention has not been set").stack);
+            return this;
         }
 
         return this.channelMention;

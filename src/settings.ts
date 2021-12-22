@@ -4,7 +4,7 @@ const settings = new ClientConfig("ts!");
 
 // General configs
 settings.useChatCommands = true;
-settings.botDevelopers = ["468128787884670986"];
+settings.botDevelopers = [];
 settings.autoRemoveCommands = true;
 settings.amountOfExamples = 2;
 
@@ -38,6 +38,10 @@ settings.logErrors = true;
 settings.logWarnings = true;
 settings.logMessages = true;
 settings.logDebugs = true;
+
+// Arg keys
+settings.requiredArgKeys = ["<", ">"];
+settings.unrequiredArgKeys = ["(", ")"];
 
 const incorrectPermissions = ["You do not have the permissions to run this command"];
 
