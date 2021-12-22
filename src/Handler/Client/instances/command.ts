@@ -777,9 +777,11 @@ export class CommandManager {
                             return incorrectUsage();
                         }
                     } else {
-                        requiredArg.setStringArrayValue(wantedArgs);
-                        requiredArg.setTextValue(wantedArgs.join(" "));
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setStringArrayValue(wantedArgs)
+                                .setTextValue(wantedArgs.join(" "))
+                        );
                     }
 
                     continue;
@@ -853,10 +855,9 @@ export class CommandManager {
                             return false;
                         }
 
-                        requiredArg.setStringValue(findUser.id);
-                        requiredArg.setUserMention(findUser);
-
-                        return requiredArg;
+                        return requiredArg
+                            .setStringValue(findUser.id)
+                            .setUserMention(findUser);
                     }
                     return false;
                 };
@@ -864,24 +865,27 @@ export class CommandManager {
                 requiredArg.setStringValue(providedArg);
 
                 if (requiredArg.type === "single") {
-                    requiredArg.setStringValue(providedArg);
-                    returnArgs.push(requiredArg);
+                    returnArgs.push(requiredArg.setStringValue(providedArg));
                 } else if (requiredArg.type === "interger") {
                     const argNumber = parseInt(providedArg);
                     if (isNaN(argNumber) && requiredArg.required) {
                         return incorrectUsage();
                     }
-                    requiredArg.setStringValue(argNumber.toString());
-                    requiredArg.setNumberValue(argNumber);
-                    returnArgs.push(requiredArg);
+                    returnArgs.push(
+                        requiredArg
+                            .setStringValue(argNumber.toString())
+                            .setNumberValue(argNumber)
+                    );
                 } else if (requiredArg.type === "number") {
                     const argNumber = parseFloat(providedArg);
                     if (isNaN(argNumber) && requiredArg.required) {
                         return incorrectUsage();
                     }
-                    requiredArg.setStringValue(argNumber.toString());
-                    requiredArg.setNumberValue(argNumber);
-                    returnArgs.push(requiredArg);
+                    returnArgs.push(
+                        requiredArg
+                            .setStringValue(argNumber.toString())
+                            .setNumberValue(argNumber)
+                    );
                 } else if (requiredArg.type === "channelMention") {
                     const findChannel = await lookForMention(providedArg, "channels");
                     if (!findChannel) return incorrectUsage();
@@ -901,8 +905,7 @@ export class CommandManager {
                     if (!requiredArg.customValues.includes(argToLookFor)) {
                         return incorrectUsage();
                     }
-                    requiredArg.setStringValue(argToLookFor);
-                    returnArgs.push(requiredArg);
+                    returnArgs.push(requiredArg.setStringValue(argToLookFor));
                 } else if (requiredArg.type === "time") {
                     if (requiredArg.customValues) {
                         let argToLookFor = requiredArg.allowLowerCaseCustomValues
@@ -1002,8 +1005,7 @@ export class CommandManager {
 
                     args[index] = timeArg;
 
-                    requiredArg.setTextValue(timeArg);
-                    requiredArg.setStringValue(timeArg);
+                    requiredArg.setTextValue(timeArg).setStringValue(timeArg);
 
                     if (timeMentions.length === 0) {
                         return incorrectUsage();
@@ -1024,8 +1026,7 @@ export class CommandManager {
                         totalTime += durationNumber * timeOptions[3];
                     }
 
-                    requiredArg.setNumberValue(totalTime);
-                    returnArgs.push(requiredArg);
+                    returnArgs.push(requiredArg.setNumberValue(totalTime));
                 }
             }
         } else {
@@ -1044,10 +1045,9 @@ export class CommandManager {
                     if (requiredArg.type === "single") {
                         const value = providedArg.value.toString().split(/ +/)[0];
 
-                        requiredArg.setTextValue(value);
-                        requiredArg.setStringValue(value);
-
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg.setTextValue(value).setStringValue(value)
+                        );
                     } else if (requiredArg.type === "multiple") {
                         requiredArg.setTextValue(providedArg.value.toString());
                         requiredArg.setStringArrayValue(
@@ -1060,32 +1060,42 @@ export class CommandManager {
                     ) {
                         if (!(providedArg.channel instanceof Channel)) continue;
 
-                        requiredArg.setChannelMention(providedArg.channel);
-                        requiredArg.setTextValue(providedArg.channel.id);
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setChannelMention(providedArg.channel)
+                                .setTextValue(providedArg.channel.id)
+                        );
                     } else if (requiredArg.type === "number") {
                         if (typeof providedArg.value !== "number") continue;
 
-                        requiredArg.setNumberValue(providedArg.value);
-                        requiredArg.setTextValue(providedArg.value.toString());
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setNumberValue(providedArg.value)
+                                .setTextValue(providedArg.value.toString())
+                        );
                     } else if (requiredArg.type === "interger") {
                         if (typeof providedArg.value !== "number") continue;
 
-                        requiredArg.setTextValue(providedArg.value.toString());
-                        requiredArg.setNumberValue(Math.floor(providedArg.value));
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setTextValue(providedArg.value.toString())
+                                .setNumberValue(Math.floor(providedArg.value))
+                        );
                     } else if (requiredArg.type === "memberMention") {
                         if (!(providedArg.member instanceof GuildMember)) continue;
 
-                        requiredArg.setTextValue(providedArg.value.toString());
-                        requiredArg.setMemberMention(providedArg.member);
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setTextValue(providedArg.value.toString())
+                                .setMemberMention(providedArg.member)
+                        );
                     } else if (requiredArg.type === "userMention") {
                         if (!providedArg.user) continue;
-                        requiredArg.setTextValue(providedArg.value.toString());
-                        requiredArg.setUserMention(providedArg.user);
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setTextValue(providedArg.value.toString())
+                                .setUserMention(providedArg.user)
+                        );
                     } else if (requiredArg.type === "customValue") {
                         if (
                             !requiredArg.customValues ||
@@ -1098,17 +1108,21 @@ export class CommandManager {
                             if(!requiredArg.customValues.includes(providedArg.value.toLowerCase())){
                                 return incorrectUsage()
                             }
-                            requiredArg.setTextValue(providedArg.value.toLowerCase());
-                            requiredArg.setStringValue(providedArg.value.toLowerCase());
-                            returnArgs.push(requiredArg);
+                            returnArgs.push(
+                                requiredArg
+                                    .setTextValue(providedArg.value.toLowerCase())
+                                    .setStringValue(providedArg.value.toLowerCase())
+                            );
                         } else {
                             // prettier-ignore
                             if(!requiredArg.customValues.includes(providedArg.value)){
                                 return incorrectUsage()
                             }
-                            requiredArg.setTextValue(providedArg.value);
-                            requiredArg.setStringValue(providedArg.value);
-                            returnArgs.push(requiredArg);
+                            returnArgs.push(
+                                requiredArg
+                                    .setTextValue(providedArg.value)
+                                    .setStringValue(providedArg.value)
+                            );
                         }
                     } else {
                         const timeMentionArray = providedArg.value.toString().split(/ +/);
@@ -1193,9 +1207,11 @@ export class CommandManager {
                             const durationNumber = parseFloat(duration);
                             totalTime += durationNumber * timeOptions[3];
                         }
-                        requiredArg.setTextValue(providedArg.value.toString());
-                        requiredArg.setNumberValue(totalTime);
-                        returnArgs.push(requiredArg);
+                        returnArgs.push(
+                            requiredArg
+                                .setTextValue(providedArg.value.toString())
+                                .setNumberValue(totalTime)
+                        );
                     }
                 }
             }
