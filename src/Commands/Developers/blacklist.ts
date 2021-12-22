@@ -1,4 +1,4 @@
-import { Constants, DiscordAPIError, Guild, User } from "discord.js";
+import { Guild, User } from "discord.js";
 import { Argument, Command } from "../../Handler";
 import { BlacklistModel } from "../../Handler/Defaults/Schemas/blacklist";
 import { time } from "@discordjs/builders";
