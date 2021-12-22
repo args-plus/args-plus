@@ -128,7 +128,7 @@ settings.argExamples = {
 settings.helpCommand = {
     // Available values: %PREFIX_USED
     beginingParagraph: [
-        "**Help**\nUse ``%PREFIX_USEDhelp`` to view all the available commands. \nUse ``%PREFIX_USEDhelp (command name)`` to view help for a specific command and ``%PREFIX_USEDhelp (category name)`` to view help for a scpeific category.\n\n__**Showing the commands you can use**__"
+        "**Help**\nUse ``%PREFIX_USEDhelp`` to view all the available commands. \nUse ``%PREFIX_USEDhelp (command name)`` to view help for a specific command and ``%PREFIX_USEDhelp (category name)`` to view help for a specific category.\n\n__**Showing the commands you can use**__"
     ],
     // Available values: %PREFIX_USED
     endParagraph: [""],
