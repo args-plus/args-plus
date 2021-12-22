@@ -2,8 +2,16 @@ import { Argument, Category, Command } from "../../Handler";
 
 const command = new Argument("command", "single")
     .setDisplayName("Command")
-    .setDescription("The command/categoy to toggle");
-
+    .setDescription("The command/categoy to toggle")
+    .setNoUseDefaultExamples()
+    .setCustomExamples([
+        "help",
+        "miscelanious",
+        "prefix",
+        "gprefix",
+        "latency",
+        "prefixes"
+    ]);
 const toggle = new Argument("state", "customValue")
     .setCustomValues(["on", "off"])
     .setAllowLowerCaseValues()

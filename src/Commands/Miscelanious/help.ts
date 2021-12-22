@@ -3,7 +3,16 @@ import { Argument, Category, Command } from "../../Handler";
 
 const command = new Argument("command", "single")
     .setDescription("An optional command or category you need help with")
-    .setDisplayName("Command or category");
+    .setDisplayName("Command or category")
+    .setNoUseDefaultExamples()
+    .setCustomExamples([
+        "help",
+        "miscelanious",
+        "prefix",
+        "gprefix",
+        "latency",
+        "prefixes"
+    ]);
 
 const helpCommand = new Command("help")
     .setDescription("Displays the commands you can use")
