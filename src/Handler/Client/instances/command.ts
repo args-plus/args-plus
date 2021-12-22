@@ -161,9 +161,13 @@ export class CommandManager {
             }
 
             if (arg.required) {
-                command.usage.push(`<${usage}>`);
+                command.usage.push(
+                    `${client.config.requiredArgKeys[0]}${usage}${client.config.requiredArgKeys[1]}`
+                );
             } else {
-                command.usage.push(`(${usage})`);
+                command.usage.push(
+                    `${client.config.unrequiredArgKeys[0]}${usage}${client.config.unrequiredArgKeys[1]}`
+                );
             }
 
             command.examples.push(examples);
@@ -1235,8 +1239,14 @@ export class CommandManager {
             return returnCommand.sendError(
                 ...this.returnMessage(command, client.config.responses.incorrectArgs, [
                     ["usage", command.getUsage(returnArgs[2], returnArgs[1])],
-                    ["required arg key", "<> = Required"],
-                    ["unrequired arg key", "() = Unrequired"],
+                    [
+                        "required arg key",
+                        `${client.config.requiredArgKeys.join("")} = Required`
+                    ],
+                    [
+                        "unrequired arg key",
+                        `${client.config.requiredArgKeys.join("")} = Unrequired`
+                    ],
                     // prettier-ignore
                     ["examples", command.getExample(returnArgs[2], returnArgs[1], client.config.amountOfExamples)],
                     ["client", `@${clientUserName}`]

@@ -277,8 +277,8 @@ helpCommand.run = async (client, command) => {
             ],
             ["cooldown", cooldownMessage],
             ["args", argsMessage],
-            ["required arg key", "<> = Required"],
-            ["unrequired arg key", "() = Unrequired"],
+            ["required arg key", `${config.requiredArgKeys.join("")} = Required`],
+            ["unrequired arg key", `${config.unrequiredArgKeys.join("")} = Unrequired`],
             ["prefix used", prefixUsed],
             ["category", command.categoryName ? command.categoryName : "None"]
         ]);

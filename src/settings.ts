@@ -39,6 +39,10 @@ settings.logWarnings = true;
 settings.logMessages = true;
 settings.logDebugs = true;
 
+// Arg keys
+settings.requiredArgKeys = ["<", ">"];
+settings.unrequiredArgKeys = ["(", ")"];
+
 const incorrectPermissions = ["You do not have the permissions to run this command"];
 
 // Responses
