@@ -64,8 +64,7 @@ export class ClientLoader {
                 `Skipping loading files from %FOLDER, as there is no files there`
             );
             for (const file of files) {
-                // eslint-disable-next-line @typescript-eslint/no-var-requires
-                const requireFolder = require(file);
+                const requireFolder = await import(file);
 
                 for (const propertyKey in requireFolder) {
                     const property = requireFolder[propertyKey];
@@ -79,19 +78,6 @@ export class ClientLoader {
 
                     this.loadItem(collection, property);
                 }
-
-                // if (!(requireFolder.default instanceof item)) {
-                //     continue;
-                // }
-                // requireFolder.default.dir = file;
-
-                // if (requireFolder.default.getRegistered()) {
-                //     continue;
-                // }
-
-                // requireFolder.default.setRegistered();
-
-                // this.loadItem(collection, requireFolder.default);
             }
         }
     }
