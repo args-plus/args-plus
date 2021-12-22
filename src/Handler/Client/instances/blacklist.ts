@@ -81,7 +81,7 @@ export class ClientBlacklists {
     public async blacklistUser(
         id: string,
         duration: true | Date = true,
-        reason: string = "No reason provided",
+        reason = "No reason provided",
         blacklistedBy?: User
     ) {
         const blacklistConstructor: Blacklist = {
@@ -116,7 +116,7 @@ export class ClientBlacklists {
     public async deleteBlacklist(
         id: string,
         unblacklistedBy: string | "CLIENT" = "CLIENT",
-        reason: string = "No reason provided"
+        reason = "No reason provided"
     ) {
         const findBlacklist = this.cachedBlacklists.get(id);
 

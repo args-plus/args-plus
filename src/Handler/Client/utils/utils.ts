@@ -2,7 +2,16 @@ import { Client } from "..";
 import fs from "fs";
 import path from "path";
 import { GuildPrefixModel } from "../../Defaults/Schemas";
-import { Guild } from "discord.js";
+import {
+    Util,
+    ColorResolvable,
+    Guild,
+    MessageEmbed,
+    DiscordAPIError,
+    Constants,
+    GuildMemberManager,
+    GuildChannelManager
+} from "discord.js";
 
 export class ClientUtils {
     public client: Client;
@@ -25,24 +34,22 @@ export class ClientUtils {
 
     public async loadFiles(
         parentDir: string,
-        enonentError: string = "Could not load folder %FOLDER"
+        enonentError = "Could not load folder %FOLDER"
     ) {
-        let filePaths: string[] = [];
+        const filePaths: string[] = [];
         const readCommands = async (dir: string) => {
             let files: string[];
             try {
                 files = fs.readdirSync(dir);
-            } catch (error) {
-                if (error instanceof Error) {
-                    // @ts-ignore
-                    if (error.code === "ENOENT") {
-                        this.client.console.error(
-                            enonentError.replace(/%FOLDER/g, parentDir),
-                            false
-                        );
-                    } else {
-                        throw error;
-                    }
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                if (error && error.code && error.code === "ENOENT") {
+                    this.client.console.error(
+                        enonentError.replace(/%FOLDER/g, parentDir),
+                        false
+                    );
+                } else {
+                    throw error;
                 }
                 return false;
             }
@@ -70,12 +77,14 @@ export class ClientUtils {
         return string.split(/\r?\n/);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public randomElement<array extends any[]>(array: array): typeof array[0] {
         const element = array[Math.floor(Math.random() * array.length)];
         return element;
     }
 
     // prettier-ignore
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public static randomElement<array extends any[]>(array: array): typeof array[0] {
         const element = array[Math.floor(Math.random() * array.length)];
         return element;
@@ -124,10 +133,10 @@ export class ClientUtils {
     // (Second answer)
 
     public msToTime(ms: number) {
-        let seconds = (ms / 1000).toFixed(1);
-        let minutes = (ms / (1000 * 60)).toFixed(1);
-        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+        const seconds = (ms / 1000).toFixed(1);
+        const minutes = (ms / (1000 * 60)).toFixed(1);
+        const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+        const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
         if (parseFloat(seconds) < 60) return seconds + " seconds";
         else if (parseFloat(minutes) < 60) return minutes + " minutes";
         else if (parseFloat(hours) < 24) return hours + " hours";
@@ -135,10 +144,10 @@ export class ClientUtils {
     }
 
     public static msToTime(ms: number) {
-        let seconds = (ms / 1000).toFixed(1);
-        let minutes = (ms / (1000 * 60)).toFixed(1);
-        let hours = (ms / (1000 * 60 * 60)).toFixed(1);
-        let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+        const seconds = (ms / 1000).toFixed(1);
+        const minutes = (ms / (1000 * 60)).toFixed(1);
+        const hours = (ms / (1000 * 60 * 60)).toFixed(1);
+        const days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
         if (parseFloat(seconds) < 60) return seconds + " seconds";
         else if (parseFloat(minutes) < 60) return minutes + " minutes";
         else if (parseFloat(hours) < 24) return hours + " hours";
@@ -194,4 +203,184 @@ export class ClientUtils {
     public capitaliseString(string: string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
+
+    private getTextMessage(body: string, header?: string) {
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+        }
+
+        const splitMessage = Util.splitMessage(
+            `${header ? `**${header}**` : ""}\n${body}`
+        );
+
+        return splitMessage;
+    }
+
+    private splitMessageEmbedDescription(embed: MessageEmbed) {
+        if (!embed.description) {
+            return [embed];
+        }
+
+        if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
+            return [embed];
+        }
+
+        const returnEmbeds: MessageEmbed[] = [];
+
+        const embedFooter = embed.footer;
+
+        const splitEmbeds = Util.splitMessage(embed.description, {
+            maxLength: 4096
+        });
+
+        let index = 0;
+        for (const embedDescription of splitEmbeds) {
+            if (index === 0) {
+                returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
+            } else if (index === splitEmbeds.length - 1) {
+                const newEmbed = new MessageEmbed()
+                    .setColor(embed.color !== null ? embed.color : "#000000")
+                    .setDescription(embedDescription);
+                if (embedFooter) {
+                    if (embedFooter.text && !embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.text);
+                    } else if (embedFooter.text && embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
+                    } else if (embedFooter.iconURL) {
+                        newEmbed.setFooter(embedFooter.iconURL);
+                    }
+                }
+
+                returnEmbeds.push(newEmbed);
+            } else {
+                returnEmbeds.push(
+                    new MessageEmbed()
+                        .setColor(embed.color !== null ? embed.color : "#000000")
+                        .setDescription(embedDescription)
+                );
+            }
+
+            index++;
+        }
+
+        return returnEmbeds;
+    }
+
+    private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
+        const { client } = this;
+        const { config } = client;
+
+        if (config.indentMessageContent) {
+            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
+        }
+
+        const embed = new MessageEmbed().setColor(color).setDescription(body);
+
+        const getIcon = (): string => {
+            if (config.embedIcon) {
+                if (config.embedIcon === "botAvatar" && client.user) {
+                    return client.user.displayAvatarURL();
+                } else {
+                    return config.embedIcon;
+                }
+            }
+            return "";
+        };
+
+        const getFooter = (): string => {
+            if (config.embedFooter) {
+                return config.embedFooter;
+            } else {
+                return "";
+            }
+        };
+
+        embed.setFooter(getFooter(), getIcon());
+
+        if (header) {
+            embed.setAuthor(header, getIcon());
+        }
+
+        if (config.sendTimestamp) {
+            embed.setTimestamp(Date.now());
+        }
+
+        const splitEmbeds = this.splitMessageEmbedDescription(embed);
+
+        return splitEmbeds;
+    }
+
+    public constructMessages<T extends messageOrEmbed>(
+        messageOrEmbed: T,
+        body: string,
+        header = "",
+        color: ColorResolvable = "#000000"
+    ): MessageConstructorType<T> {
+        if (messageOrEmbed === "messages") {
+            return [
+                messageOrEmbed,
+                this.getTextMessage(body, header)
+            ] as MessageConstructorType<T>;
+        } else {
+            return [
+                "embeds",
+                this.getEmbedMessages(body, color, header)
+            ] as MessageConstructorType<T>;
+        }
+    }
+
+    public async fetchUser(id: string) {
+        const { client } = this;
+        return await client.users.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_USER
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchGuild(id: string) {
+        const { client } = this;
+        return await client.guilds.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_GUILD
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchChannel(id: string) {
+        const { client } = this;
+        return await client.channels.fetch(id).catch((error: DiscordAPIError) => {
+            if (
+                error.code !== Constants.APIErrors.INVALID_FORM_BODY &&
+                error.code !== Constants.APIErrors.UNKNOWN_CHANNEL
+            ) {
+                client.console.error(error.message);
+            }
+        });
+    }
+
+    public async fetchMember(members: GuildMemberManager, id: string) {
+        return (await members.fetch()).get(id);
+    }
+
+    public async fetchGuildChannel(channels: GuildChannelManager, id: string) {
+        return (await channels.fetch()).get(id);
+    }
 }
+
+type messageOrEmbed = "messages" | "embeds";
+
+type MessageConstructorType<T> = T extends "messages"
+    ? ["messages", string[]]
+    : T extends "embeds"
+    ? ["embeds", MessageEmbed[]]
+    : never;

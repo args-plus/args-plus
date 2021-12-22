@@ -43,12 +43,12 @@ export class SlashCommandManager {
                 return failedtoLoadSlashCommand("it has no description");
             }
 
-            let slashCommandConstructor: ApplicationCommandData = {
+            const slashCommandConstructor: ApplicationCommandData = {
                 name: name,
                 description: command.description
             };
 
-            let argsArray: ApplicationCommandOptionData[] = [];
+            const argsArray: ApplicationCommandOptionData[] = [];
 
             for (const arg of command.args) {
                 if (!arg.description) {
@@ -67,25 +67,29 @@ export class SlashCommandManager {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "STRING",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "channelMention") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "CHANNEL",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "interger" || arg.type === "number") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "NUMBER",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 } else if (arg.type === "memberMention" || arg.type === "userMention") {
                     argsArray.push({
                         ...slashCommandConstructor,
                         type: "USER",
-                        required: arg.required
+                        required: arg.required,
+                        name: arg.name
                     });
                 }
             }
@@ -126,7 +130,7 @@ export class SlashCommandManager {
             this.client.application.commands.set([]);
 
             for (const guildID of config.slashCommandGuilds) {
-                const guild = this.client.guilds.cache.get(guildID);
+                const guild = await client.utils.fetchGuild(guildID);
                 if (!guild) {
                     console.warn(
                         `Couldnt register slash command's to guild ID: ${guildID}`
@@ -138,7 +142,7 @@ export class SlashCommandManager {
             }
         } else if (config.loadGlobalSlashCommands && this.client.application) {
             for (const guildID of config.slashCommandGuilds) {
-                const findGuild = this.client.guilds.cache.get(guildID);
+                const findGuild = await client.utils.fetchGuild(guildID);
                 if (!findGuild) {
                     continue;
                 }

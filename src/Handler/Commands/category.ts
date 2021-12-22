@@ -1,9 +1,8 @@
-import { WebhookClient } from "discord.js";
 import { Item } from "../Client/instances/loader";
 import { Permission } from "../Interfaces";
 
 export class Category extends Item {
-    public description: string = "";
+    public description = "";
 
     public guildOnly = false;
     public developerOnly = false;

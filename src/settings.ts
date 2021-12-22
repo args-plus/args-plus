@@ -23,6 +23,13 @@ settings.loadGuildSlashCommands = false;
 settings.slashCommandGuilds = [];
 settings.loadGlobalSlashCommands = false;
 
+// New guild message
+settings.sendNewGuildMessage = true;
+// Avaialable values: %GUILD, %PREFIX and %CLIENT
+settings.newGuildMessage = [
+    "**Hello %GUILD,**\nMy name is %CLIENT, I am a very cool discord bot.\nTo view my available commands run ``%PREFIXhelp``!"
+];
+
 // Checks and permissions
 settings.defaultClientChecks = [];
 settings.defaultUserChecks = [];
@@ -121,7 +128,7 @@ settings.argExamples = {
 settings.helpCommand = {
     // Available values: %PREFIX_USED
     beginingParagraph: [
-        "**Help**\nUse ``%PREFIX_USEDhelp`` to view all the available commands. \nUse ``%PREFIX_USEDhelp (command name)`` to view help for a specific command and ``%PREFIX_USEDhelp (category name)`` to view help for a scpeific category.\n\n__**Showing the commands you can use**__"
+        "**Help**\nUse ``%PREFIX_USEDhelp`` to view all the available commands. \nUse ``%PREFIX_USEDhelp (command name)`` to view help for a specific command and ``%PREFIX_USEDhelp (category name)`` to view help for a specific category.\n\n__**Showing the commands you can use**__"
     ],
     // Available values: %PREFIX_USED
     endParagraph: [""],

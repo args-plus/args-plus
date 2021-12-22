@@ -1,5 +1,5 @@
-import { Collection, Util } from "discord.js";
-import { Argument, Category, Command } from "../../Handler";
+import { Collection } from "discord.js";
+import { Argument, Command } from "../../Handler";
 
 const command = new Argument("command", "single")
     .setDescription("An optional command or category you need help with")
@@ -34,7 +34,7 @@ helpCommand.run = async (client, command) => {
     const channel = command.getChannel();
 
     const getPrefixes = async (command: Command) => {
-        let prefixes = [];
+        const prefixes = [];
 
         if (client.config.useChatCommands) {
             if (guild && client.cachedGuildPrefixes.has(guild.id)) {
@@ -158,7 +158,7 @@ helpCommand.run = async (client, command) => {
 
     const sendHelpMessage = async () => {
         const loadedCommandDescriptions: Collection<string, string> = new Collection();
-        let emptyCategoryDescription: string = "";
+        let emptyCategoryDescription = "";
 
         for (const commandKey of client.commands) {
             const command = commandKey[1];
@@ -222,7 +222,7 @@ helpCommand.run = async (client, command) => {
     if (!args[0]) return sendHelpMessage();
 
     const getHelpForCommand = async (command: Command) => {
-        let prefixes = await getPrefixes(command);
+        const prefixes = await getPrefixes(command);
 
         if (prefixes.length === 0) return false;
 
@@ -246,7 +246,7 @@ helpCommand.run = async (client, command) => {
             argsMessage += `${arg.displayName ? arg.displayName : arg.name} `;
         }
 
-        let helpMessage = client.utils.returnMessage(helpCommand.detailedCommand, [
+        const helpMessage = client.utils.returnMessage(helpCommand.detailedCommand, [
             ["name", command.name],
             ["capitalised name", client.utils.capitaliseString(command.name)],
             [

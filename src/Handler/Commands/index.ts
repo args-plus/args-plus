@@ -1,4 +1,3 @@
-import { Utils } from "discord-api-types";
 import { Collection } from "discord.js";
 import { Client } from "..";
 import { Item } from "../Client/instances/loader";
@@ -47,7 +46,7 @@ export class Command extends Item {
 
     private loadedSlashCommand = false;
 
-    public setDescription(description: string = "This command has no description") {
+    public setDescription(description = "This command has no description") {
         this.description = description;
         return this;
     }
@@ -225,7 +224,10 @@ export class Command extends Item {
         return this.cooldownNumber;
     }
 
-    public run: (client: Client, returnCommand: ReturnCommand) => any = () => {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public run: (client: Client, returnCommand: ReturnCommand) => any = () => {
+        console.log(`Change your run method for comamnd: ${this.name}`);
+    };
 
     public setCooldown(
         cooldownKey: [
@@ -289,12 +291,8 @@ export class Command extends Item {
         }`;
     }
 
-    public getExample(
-        name: string,
-        prefix: string,
-        amountOfExamples: number = 3
-    ): string {
-        let examples: string[] = [];
+    public getExample(name: string, prefix: string, amountOfExamples = 3): string {
+        const examples: string[] = [];
 
         let argWithUsage = false;
         for (let i = 0; i < amountOfExamples; i++) {
@@ -309,11 +307,11 @@ export class Command extends Item {
                 if (!arg.required && Math.random() > 0.5 && canHaveUsageless) continue;
                 if (typeof example[0] === "number") {
                     argWithUsage = true;
-                    let exampleKey = example as [number, number, boolean];
+                    const exampleKey = example as [number, number, boolean];
                     const minNumber = exampleKey[0];
                     const maxNumber = exampleKey[1];
 
-                    let randomNumber =
+                    const randomNumber =
                         Math.random() * (maxNumber - minNumber) + minNumber;
 
                     if (!exampleKey[2]) {

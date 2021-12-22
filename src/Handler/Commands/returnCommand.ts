@@ -7,11 +7,9 @@ import {
     Guild,
     GuildMember,
     Message,
-    MessageEmbed,
     MessageMentions,
     TextBasedChannels,
-    User,
-    Util
+    User
 } from "discord.js";
 import { Command } from ".";
 import { Client } from "..";
@@ -22,12 +20,13 @@ export class ReturnCommand {
     public commandClass: Command;
     public args: Argument[];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public returnValues: any[] = [];
 
-    private commandRepliedTo: boolean = false;
+    private commandRepliedTo = false;
     private client: Client;
 
-    public prefixUsed: string = "";
+    public prefixUsed = "";
 
     constructor(
         commandRan: Message | CommandInteraction,
@@ -143,115 +142,6 @@ export class ReturnCommand {
         }
     }
 
-    private getTextMessage(body: string, header?: string) {
-        const { client } = this;
-        const { config } = client;
-
-        if (config.indentMessageContent) {
-            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
-        }
-
-        const splitMessage = Util.splitMessage(
-            `${header ? `**${header}**` : ""}\n${body}`
-        );
-
-        return splitMessage;
-    }
-
-    private splitMessageEmbedDescription(embed: MessageEmbed) {
-        if (!embed.description) {
-            return [embed];
-        }
-
-        if (embed.length < 6000 && embed.description && embed.description.length < 4096) {
-            return [embed];
-        }
-
-        let returnEmbeds: MessageEmbed[] = [];
-
-        let embedFooter = embed.footer;
-
-        const splitEmbeds = Util.splitMessage(embed.description, {
-            maxLength: 4096
-        });
-
-        let index = 0;
-        for (const embedDescription of splitEmbeds) {
-            if (index === 0) {
-                returnEmbeds.push(embed.setDescription(embedDescription).setFooter(""));
-            } else if (index === splitEmbeds.length - 1) {
-                const newEmbed = new MessageEmbed()
-                    .setColor(embed.color !== null ? embed.color : "#000000")
-                    .setDescription(embedDescription);
-                if (embedFooter) {
-                    if (embedFooter.text && !embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.text);
-                    } else if (embedFooter.text && embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.text, embedFooter.iconURL);
-                    } else if (embedFooter.iconURL) {
-                        newEmbed.setFooter(embedFooter.iconURL);
-                    }
-                }
-
-                returnEmbeds.push(newEmbed);
-            } else {
-                returnEmbeds.push(
-                    new MessageEmbed()
-                        .setColor(embed.color !== null ? embed.color : "#000000")
-                        .setDescription(embedDescription)
-                );
-            }
-
-            index++;
-        }
-
-        return returnEmbeds;
-    }
-
-    private getEmbedMessages(body: string, color: ColorResolvable, header?: string) {
-        const { client } = this;
-        const { config } = client;
-
-        if (config.indentMessageContent) {
-            body = `> ${client.utils.splitStringByNewLine(body).join(`\n> `)}`;
-        }
-
-        const embed = new MessageEmbed().setColor(color).setDescription(body);
-
-        const getIcon = (): string => {
-            if (config.embedIcon) {
-                if (config.embedIcon === "botAvatar" && client.user) {
-                    return client.user.displayAvatarURL();
-                } else {
-                    return config.embedIcon;
-                }
-            }
-            return "";
-        };
-
-        const getFooter = (): string => {
-            if (config.embedFooter) {
-                return config.embedFooter;
-            } else {
-                return "";
-            }
-        };
-
-        embed.setFooter(getFooter(), getIcon());
-
-        if (header) {
-            embed.setAuthor(header, getIcon());
-        }
-
-        if (config.sendTimestamp) {
-            embed.setTimestamp(Date.now());
-        }
-
-        const splitEmbeds = this.splitMessageEmbedDescription(embed);
-
-        return splitEmbeds;
-    }
-
     private async sendMessageMethod(
         body: string,
         color: ColorResolvable,
@@ -275,7 +165,11 @@ export class ReturnCommand {
                         .permissionsFor(commandRan.guild.me)
                         .has("EMBED_LINKS"))
             ) {
-                const messages = this.getTextMessage(body, header);
+                const messages = this.client.utils.constructMessages(
+                    "messages",
+                    body,
+                    header
+                )[1];
                 let lastMessage: void | Message;
                 for (const message of messages) {
                     lastMessage = await commandRan.channel
@@ -286,7 +180,12 @@ export class ReturnCommand {
                 }
                 return lastMessage;
             } else {
-                const embeds = this.getEmbedMessages(body, color, header);
+                const embeds = this.client.utils.constructMessages(
+                    "embeds",
+                    body,
+                    header,
+                    color
+                )[1];
                 let lastMessage: void | Message;
                 for (const embed of embeds) {
                     lastMessage = await commandRan.channel
@@ -310,7 +209,11 @@ export class ReturnCommand {
                         .permissionsFor(commandRan.guild.me)
                         .has("EMBED_LINKS"))
             ) {
-                const messages = this.getTextMessage(body, header);
+                const messages = this.client.utils.constructMessages(
+                    "messages",
+                    body,
+                    header
+                )[1];
 
                 let lastMessage: Message | APIMessage | void;
 
@@ -332,7 +235,12 @@ export class ReturnCommand {
                 }
                 return lastMessage;
             } else {
-                const embeds = this.getEmbedMessages(body, color, header);
+                const embeds = this.client.utils.constructMessages(
+                    "embeds",
+                    body,
+                    header,
+                    color
+                )[1];
 
                 let lastMessage: Message | APIMessage | void;
                 for (const embed of embeds) {
@@ -359,7 +267,7 @@ export class ReturnCommand {
         body: string | string[],
         color: ColorResolvable,
         header?: string | string[] | null,
-        overideEmbed: boolean = false
+        overideEmbed = false
     ) {
         let messageBody: string;
         let messageHeader: string;

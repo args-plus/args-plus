@@ -1,6 +1,5 @@
 import { Channel, Guild, GuildMember, User } from "discord.js";
 import { Item } from "../Client/instances/loader";
-import { ClientUtils } from "../Client/utils/utils";
 
 export type checkOptions = {
     member?: GuildMember;
@@ -15,5 +14,6 @@ export class Check extends Item {
     public requireChannel = false;
     public requireGuild = false;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public run: (checkOptions: checkOptions, ...options: any[]) => boolean = () => true;
 }

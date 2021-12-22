@@ -41,7 +41,7 @@ export class ClientConsole {
         }
     }
 
-    public error(error: string, stack: boolean = true) {
+    public error(error: string, stack = true) {
         const { config } = this.client;
 
         if (config.logErrors) {

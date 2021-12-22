@@ -43,7 +43,7 @@ toggleCommand.run = async (client, command) => {
             let disabler = "``Auto disable``";
 
             if (disabledItem.disablerId) {
-                const getDisabler = client.users.cache.get(disabledItem.disablerId);
+                const getDisabler = await client.utils.fetchUser(disabledItem.disablerId);
                 if (getDisabler) {
                     disabler = `\`\`${getDisabler.tag}\`\` (${getDisabler.id})`;
                 }
