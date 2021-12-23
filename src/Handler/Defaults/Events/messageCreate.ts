@@ -3,7 +3,7 @@ import { Event } from "../../Events";
 
 const event = new Event("messageCreate");
 event.run = async (client, message: Message) => {
-    if (!client.config.useChatCommands) {
+    if (!client.config.useChatCommands || message.author.bot) {
         return false;
     }
 
