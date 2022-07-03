@@ -1,9 +1,12 @@
 import { Event } from "../Handler";
+import path from "path";
 
-const event = new Event("ready");
+const ReadyEvent = new Event("ready");
 
-event.run = () => {
-    console.log("This is an example event");
+ReadyEvent.run = (client) => {
+    client.console.info(
+        `This is a ready event, edit this file in ${path.resolve(__filename)}`
+    );
 };
 
-export default event;
+export default ReadyEvent;

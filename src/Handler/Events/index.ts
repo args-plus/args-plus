@@ -1,6 +1,5 @@
 import { ClientEvents } from "discord.js";
-import { Client } from "../Client";
-import { Item } from "../Client/instances/loader";
+import Client, { Item } from "../Client";
 
 interface Run {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,7 +8,7 @@ interface Run {
 
 export class Event extends Item {
     public run: Run = () => {
-        console.log(`Cange your run method for the event: ${this.name}`);
+        console.log(`Cahnge your run method for the event: ${this.name}`);
     };
 
     constructor(name: keyof ClientEvents) {

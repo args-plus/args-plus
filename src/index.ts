@@ -1,16 +1,11 @@
-import { Client } from "./Handler";
+import ArgsPlusClient from "./Handler";
+import ClientConfig from "./ClientConfig";
+import ClientSecrets from "./ClientSecrets";
+import { config as loadEnv } from "dotenv";
 
-const client = new Client(
-    {
-        intents: [
-            "GUILDS",
-            "GUILD_MESSAGES",
-            "GUILD_MEMBERS",
-            "DIRECT_MESSAGES"
-        ],
-        partials: ["CHANNEL"]
-    },
-    true
-);
+loadEnv();
 
-client.init(true);
+const client = new ArgsPlusClient(ClientConfig, ClientSecrets);
+
+client.init();
+client.registerEvents();
